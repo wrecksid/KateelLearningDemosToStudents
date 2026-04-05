@@ -1,0 +1,58 @@
+
+================================================================================
+LIQUIDITY MANAGEMENT MONTE CARLO SIMULATION REPORT
+================================================================================
+
+EXECUTIVE SUMMARY
+----------------------------------------
+This report presents the results of Monte Carlo simulation analysis for liquidity 
+management. The analysis is based on historical transaction data and provides 
+insights into future cash flow patterns and liquidity risk.
+
+HISTORICAL ANALYSIS
+----------------------------------------
+• Average Daily Cash Flow: ₹675,821.24
+• Daily Cash Flow Volatility: ₹1,969,758.31
+• Minimum Daily Flow: ₹-5,949,461.65
+• Maximum Daily Flow: ₹6,636,661.50
+• Total Inflows: ₹2,697,959,482.12
+• Total Outflows: ₹2,203,934,156.62
+• Net Position: ₹494,025,325.50
+
+RISK METRICS
+----------------------------------------
+• Mean Final Cash Position: ₹30,001,660.27
+• Standard Deviation: ₹10,902,384.77
+• Probability of Liquidity Shortfall: 0.50%
+• Expected Shortfall: ₹7,619,764.20
+
+VALUE AT RISK (VAR)
+----------------------------------------
+• VaR_95%: ₹12,129,764.21
+• VaR_99%: ₹5,546,508.58
+
+MANAGEMENT RECOMMENDATIONS
+----------------------------------------
+1. LIQUIDITY BUFFER: Maintain a minimum cash buffer of ₹11,429,646
+   to cover potential shortfalls with adequate safety margin.
+
+2. MONITORING: Implement daily cash position monitoring with alert thresholds at
+   95% and 99% confidence levels.
+
+3. CONTINGENCY PLANNING: Develop contingency funding plans for scenarios where
+   cash position falls below critical thresholds.
+
+4. STRESS TESTING: Conduct regular stress tests using different market scenarios
+   to validate liquidity adequacy.
+
+BUSINESS APPLICATIONS
+----------------------------------------
+• Treasury Management: Optimize cash allocation and investment decisions
+• Risk Management: Set appropriate liquidity risk limits and controls
+• Regulatory Compliance: Meet Basel III liquidity coverage ratio requirements
+• Strategic Planning: Inform business growth and expansion decisions
+
+================================================================================
+Report Generated: 2026-02-10 12:37:46
+================================================================================
+            

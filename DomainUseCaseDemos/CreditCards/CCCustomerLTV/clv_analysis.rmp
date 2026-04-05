@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="12.0.005">
+  <context>
+    <input/>
+    <output/>
+    <macros>
+      <macro>
+        <key>discount_rate</key>
+        <value>0.1</value>
+      </macro>
+      <macro>
+        <key>prediction_months</key>
+        <value>36</value>
+      </macro>
+    </macros>
+  </context>
+  <operator activated="true" class="process" compatibility="12.0.005" expanded="true" name="Process">
+    <process expanded="true">
+      <operator activated="true" class="read_csv" compatibility="12.0.005" expanded="true" name="Read CSV">
+        <parameter key="csv_file" value="syntheticdata.csv"/>
+        <parameter key="column_separators" value=","/>
+        <parameter key="first_row_as_names" value="true"/>
+      </operator>
+      <operator activated="true" class="generate_attributes" compatibility="12.0.005" expanded="true" name="Financial Metrics">
+        <list key="function_descriptions">
+          <parameter key="monthly_profit" value="if(is_missing(monthly_revenue-monthly_cost), 0, monthly_revenue-monthly_cost)"/>
+          <parameter key="base_churn" value="0.1"/>
+          <parameter key="churn_probability" value="cut(base_churn + (if(utilization_rate &gt; 0.9, 0.3, 0)), 0.01, 0.95)"/>
+        </list>
+      </operator>
+      <operator activated="true" class="generate_attributes" compatibility="12.0.005" expanded="true" name="NPV Calculation">
+        <list key="function_descriptions">
+          <parameter key="monthly_discount" value="%{discount_rate} / 12.0"/>
+          <parameter key="alpha" value="(1 - churn_probability) / (1 + monthly_discount)"/>
+          <parameter key="npv_clv" value="monthly_profit * (alpha * (1 - pow(alpha, %{prediction_months}))) / (1 - alpha)"/>
+          <parameter key="predictive_target" value="monthly_profit * 24"/>
+        </list>
+      </operator>
+      <operator activated="true" class="nominal_to_numerical" compatibility="12.0.005" expanded="true" name="One-Hot Encoding">
+        <parameter key="attribute_filter_type" value="single"/>
+        <parameter key="attribute" value="card_type"/>
+        <parameter key="coding_type" value="dummy coding"/>
+      </operator>
+      <operator activated="true" class="random_forest" compatibility="12.0.005" expanded="true" name="Predictive Model">
+        <parameter key="number_of_trees" value="100"/>
+        <parameter key="label_attribute" value="predictive_target"/>
+      </operator>
+      <operator activated="true" class="normalize" compatibility="12.0.005" expanded="true" name="Normalize Features"/>
+      <operator activated="true" class="k_means" compatibility="12.0.005" expanded="true" name="Clustering">
+        <parameter key="k" value="5"/>
+        <parameter key="max_runs" value="10"/>
+      </operator>
+      <connect from_op="Read CSV" from_port="output" to_op="Financial Metrics" to_port="example set input"/>
+      <connect from_op="Financial Metrics" from_port="example set output" to_op="NPV Calculation" to_port="example set input"/>
+      <connect from_op="NPV Calculation" from_port="example set output" to_op="One-Hot Encoding" to_port="example set input"/>
+      <connect from_op="One-Hot Encoding" from_port="example set output" to_op="Predictive Model" to_port="training set"/>
+      <connect from_op="Predictive Model" from_port="exampleSet" to_op="Normalize Features" to_port="example set input"/>
+      <connect from_op="Normalize Features" from_port="example set output" to_op="Clustering" to_port="example set input"/>
+      <connect from_op="Clustering" from_port="cluster set" to_port="result 1"/>
+      <connect from_op="Clustering" from_port="clustered set" to_port="result 2"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+    </process>
+  </operator>
+</process>

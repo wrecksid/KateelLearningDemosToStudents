@@ -1,0 +1,17 @@
+# Credit Card Fraud Detection Requirements
+# Author: Vinaya Sathyanarayana
+
+# Core Data Science Libraries
+pandas>=1.5.0
+numpy>=1.21.0
+scikit-learn>=1.1.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# Data Generation
+Faker>=15.0.0
+
+# Model Persistence
+joblib>=1.2.0
+
+# Additional

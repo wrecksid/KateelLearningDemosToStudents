@@ -1,0 +1,5 @@
+pandas
+faker
+matplotlib
+mlxtend
+numpy

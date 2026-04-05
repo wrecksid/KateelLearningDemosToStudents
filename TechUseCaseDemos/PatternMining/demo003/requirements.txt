@@ -1,0 +1,7 @@
+pandas>=1.0
+numpy>=1.20
+mlxtend
+prefixspan
+matplotlib
+Faker
+sequence-mining

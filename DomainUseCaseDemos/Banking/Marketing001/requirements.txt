@@ -1,0 +1,7 @@
+pandas
+faker
+mlxtend
+matplotlib
+seaborn
+networkx
+numpy
