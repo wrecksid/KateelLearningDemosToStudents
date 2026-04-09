@@ -17,14 +17,14 @@ This file maps the repository to the BITS Financial AI / ML course so students c
 | 03 | Supervised Learning for Credit Risk / Underwriting | `DomainUseCaseDemos\CreditCards\CCUnderWriting` | Strong direct fit. Can be expanded with calibration, reject inference, and explainability. |
 | 04 | Fraud Detection in Financial Transactions | `DomainUseCaseDemos\CreditCards\CreditCardFraud`, `DomainUseCaseDemos\CreditCards\CreditCardTxnFraud`, `DomainUseCaseDemos\Insurance\ClaimFraud001` | Strong fit across classification and pattern-based fraud detection. |
 | 05 | Unsupervised Learning and Segmentation | `DomainUseCaseDemos\Banking\CustSeg`, `DomainUseCaseDemos\Banking\OldBankCustomerSegmentation` | Strong fit for clustering and customer profiling. |
-| 06 | NLP in Finance | No direct demo yet | Recommended addition: sentiment, complaint classification, document summarization, or policy Q&A. |
-| 07 | Chatbots and Virtual Assistants in BFSI | No direct demo yet | Recommended addition: retrieval + FAQ assistant over product or policy documents. |
+| 06 | NLP in Finance | `DomainUseCaseDemos\FinanceNLP\ComplaintAndSentiment001` | Good starter demo for complaint classification and sentiment workflows. |
+| 07 | Chatbots and Virtual Assistants in BFSI | `DomainUseCaseDemos\BFSIChatbot\ProductFAQ001` | Lightweight retrieval demo that can be extended into a fuller assistant. |
 | 08 | AI in Payments and Digital Transactions | `DomainUseCaseDemos\CreditCards\CreditCardTxnFraud` | Useful starting point, but a payments-specific transaction monitoring demo would improve coverage. |
 | 09 | Mid-Term Case Discussion | `DomainUseCaseDemos\LearningExercise001.md`, `DomainUseCaseDemos\LearningExercise002.md` | Good seeds for assignment-style work. |
 | 10 | AI in Wealth Management / Robo Advisory | `DomainUseCaseDemos\WealthMgmt\NIFTYOpt`, `DomainUseCaseDemos\WealthMgmt\PortfolioOptSynSharpeRation` | Strong fit for portfolio construction and advisory framing. |
 | 11 | AI in Insurance | `DomainUseCaseDemos\Insurance\ClaimFraud001` | Good start; can be expanded into pricing, claims triage, or underwriting. |
 | 12 | Algorithmic / High-Frequency Trading | No direct demo yet | Recommended addition: market microstructure, signal simulation, backtesting, and risk controls. |
-| 13 | Regulatory Compliance and Model Governance | `DomainUseCaseDemos\Banking\LiquidityMgmt`, `DomainUseCaseDemos\Banking\IntRateRisk` | Partial fit from a regulated-risk perspective; a model monitoring demo would be better. |
+| 13 | Regulatory Compliance and Model Governance | `DomainUseCaseDemos\ModelGovernance\DriftAndThresholds001`, `DomainUseCaseDemos\Banking\LiquidityMgmt`, `DomainUseCaseDemos\Banking\IntRateRisk` | Stronger coverage now includes a direct drift and threshold monitoring demo. |
 | 14 | Ethics and Fairness in Financial AI | No direct demo yet | Recommended addition: bias checks, threshold trade-offs, subgroup metrics, explainability. |
 | 15 | Future Trends: AutoML, RL, and Disruption | No direct demo yet | Recommended addition: simple AutoML comparison and toy RL allocation or pricing example. |
 | 16 | Final Case Study: AI Strategy in FinTech | `ecomm001`, `DomainUseCaseDemos\LearningExercise001.md`, `DomainUseCaseDemos\LearningExercise002.md` | Good for combining analytics, business framing, and communication. |
@@ -35,9 +35,12 @@ This file maps the repository to the BITS Financial AI / ML course so students c
 - card fraud classification: `DomainUseCaseDemos\CreditCards\CreditCardFraud`
 - card transaction fraud: `DomainUseCaseDemos\CreditCards\CreditCardTxnFraud`
 - insurance claim fraud: `DomainUseCaseDemos\Insurance\ClaimFraud001`
+- finance NLP: `DomainUseCaseDemos\FinanceNLP\ComplaintAndSentiment001`
+- chatbot retrieval: `DomainUseCaseDemos\BFSIChatbot\ProductFAQ001`
 - customer segmentation: `DomainUseCaseDemos\Banking\CustSeg`
 - queue analytics: `DomainUseCaseDemos\Banking\BankQ`
 - liquidity management: `DomainUseCaseDemos\Banking\LiquidityMgmt`
+- model governance: `DomainUseCaseDemos\ModelGovernance\DriftAndThresholds001`
 - interest rate risk: `DomainUseCaseDemos\Banking\IntRateRisk`
 - wealth optimization: `DomainUseCaseDemos\WealthMgmt\NIFTYOpt`
 - pattern mining: `TechUseCaseDemos\PatternMining\demo002`
@@ -46,12 +49,12 @@ This file maps the repository to the BITS Financial AI / ML course so students c
 
 The following additions would most improve the repo as a super companion repo:
 
-1. `DomainUseCaseDemos\FinanceNLP\...`
-2. `DomainUseCaseDemos\BFSIChatbot\...`
-3. `DomainUseCaseDemos\ModelGovernance\...`
-4. `DomainUseCaseDemos\ResponsibleAI\...`
-5. `DomainUseCaseDemos\Payments\...`
-6. `DomainUseCaseDemos\Trading\...`
+1. `DomainUseCaseDemos\ResponsibleAI\...`
+2. `DomainUseCaseDemos\Payments\...`
+3. `DomainUseCaseDemos\Trading\...`
+4. `TechUseCaseDemos\AutoML\...`
+5. `TechUseCaseDemos\RL\...`
+6. `DomainUseCaseDemos\AIStrategy\...`
 7. `Assignments\SessionXX\...`
 
 ## Suggested Demo Contract
