@@ -2,7 +2,7 @@
 
 This repository is a companion workspace for applied AI, machine learning, analytics, and BFSI domain learning. It is designed to help students move from classroom concepts to runnable demos, synthetic data generation, analysis notebooks, and small end-to-end mini projects.
 
-The strongest current coverage is in banking, credit cards, insurance, wealth management, segmentation, fraud, underwriting, portfolio optimization, and pattern mining. The repo is especially useful as a practical companion for the BITS Financial AI / ML course materials.
+The strongest current coverage is in banking, credit cards, insurance, wealth management, segmentation, fraud, underwriting, portfolio optimization, and pattern mining. It is especially useful as a practical companion for the BITS Financial AI / ML course materials.
 
 ## What This Repo Should Help Students Do
 
@@ -145,3 +145,7 @@ See [CONTRIBUTING.md](D:\Todel\nodeapps\KateelLearningDemosToStudents\CONTRIBUTI
 - This repository contains student-facing educational material and experiments at different maturity levels.
 - Some folders are more polished than others; the intent is to improve consistency over time.
 - If a demo folder is missing documentation, treat it as a good candidate for cleanup and standardization.
+
+## Copyright
+
+Copyright Professor Vinaya Sathyanarayana. All rights reserved.
