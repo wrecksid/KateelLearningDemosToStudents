@@ -25,7 +25,7 @@ This file maps the repository to the BITS Financial AI / ML course so students c
 | 11 | AI in Insurance | `DomainUseCaseDemos\Insurance\ClaimFraud001` | Good start; can be expanded into pricing, claims triage, or underwriting. |
 | 12 | Algorithmic / High-Frequency Trading | No direct demo yet | Recommended addition: market microstructure, signal simulation, backtesting, and risk controls. |
 | 13 | Regulatory Compliance and Model Governance | `DomainUseCaseDemos\ModelGovernance\DriftAndThresholds001`, `DomainUseCaseDemos\Banking\LiquidityMgmt`, `DomainUseCaseDemos\Banking\IntRateRisk` | Stronger coverage now includes a direct drift and threshold monitoring demo. |
-| 14 | Ethics and Fairness in Financial AI | No direct demo yet | Recommended addition: bias checks, threshold trade-offs, subgroup metrics, explainability. |
+| 14 | Ethics and Fairness in Financial AI | `DomainUseCaseDemos\ResponsibleAI\CreditFairness001` | Direct starter demo for subgroup metrics and fairness trade-offs in lending. |
 | 15 | Future Trends: AutoML, RL, and Disruption | No direct demo yet | Recommended addition: simple AutoML comparison and toy RL allocation or pricing example. |
 | 16 | Final Case Study: AI Strategy in FinTech | `ecomm001`, `DomainUseCaseDemos\LearningExercise001.md`, `DomainUseCaseDemos\LearningExercise002.md` | Good for combining analytics, business framing, and communication. |
 
@@ -41,6 +41,7 @@ This file maps the repository to the BITS Financial AI / ML course so students c
 - queue analytics: `DomainUseCaseDemos\Banking\BankQ`
 - liquidity management: `DomainUseCaseDemos\Banking\LiquidityMgmt`
 - model governance: `DomainUseCaseDemos\ModelGovernance\DriftAndThresholds001`
+- responsible AI: `DomainUseCaseDemos\ResponsibleAI\CreditFairness001`
 - interest rate risk: `DomainUseCaseDemos\Banking\IntRateRisk`
 - wealth optimization: `DomainUseCaseDemos\WealthMgmt\NIFTYOpt`
 - pattern mining: `TechUseCaseDemos\PatternMining\demo002`
@@ -49,12 +50,12 @@ This file maps the repository to the BITS Financial AI / ML course so students c
 
 The following additions would most improve the repo as a super companion repo:
 
-1. `DomainUseCaseDemos\ResponsibleAI\...`
-2. `DomainUseCaseDemos\Payments\...`
-3. `DomainUseCaseDemos\Trading\...`
-4. `TechUseCaseDemos\AutoML\...`
-5. `TechUseCaseDemos\RL\...`
-6. `DomainUseCaseDemos\AIStrategy\...`
+1. `DomainUseCaseDemos\Payments\...`
+2. `DomainUseCaseDemos\Trading\...`
+3. `TechUseCaseDemos\AutoML\...`
+4. `TechUseCaseDemos\RL\...`
+5. `DomainUseCaseDemos\AIStrategy\...`
+6. `DomainUseCaseDemos\Compliance\...`
 7. `Assignments\SessionXX\...`
 
 ## Suggested Demo Contract

@@ -53,6 +53,12 @@ Where practical, add at least a smoke test that verifies:
 - write for students who may be seeing the topic for the first time
 - keep setup instructions explicit
 
+## Attribution Expectations
+
+- faculty who reuse or adapt this repository in course delivery should acknowledge and attribute Professor Vinaya Sathyanarayana in their course material, including slides
+- students and external builders who extend this work should add attribution in their reports, presentations, and downstream repositories
+- if you add a new demo, keep the attribution expectation clear in any derived notebooks, reports, or teaching-facing documentation
+
 ## Safe Data Practices
 
 - do not commit sensitive or private real-world data

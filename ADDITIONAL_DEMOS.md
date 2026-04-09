@@ -7,29 +7,13 @@ This file tracks the next additions that would most improve the repo as a super 
 - `DomainUseCaseDemos\FinanceNLP\ComplaintAndSentiment001`
 - `DomainUseCaseDemos\BFSIChatbot\ProductFAQ001`
 - `DomainUseCaseDemos\ModelGovernance\DriftAndThresholds001`
+- `DomainUseCaseDemos\ResponsibleAI\CreditFairness001`
 
 These additions now cover three of the earlier high-priority course gaps.
 
 ## Highest Priority Remaining Additions
 
-### 1. Responsible AI / Fairness Demo
-
-Suggested folder:
-
-- `DomainUseCaseDemos\ResponsibleAI\CreditFairness001`
-
-Suggested scope:
-
-- subgroup metrics
-- fairness trade-offs
-- approval threshold comparisons
-- explainability notes
-
-Why it matters:
-
-- fills the ethics and fairness gap in a finance-relevant way
-
-### 2. Payments Analytics Demo
+### 1. Payments Analytics Demo
 
 Suggested folder:
 
@@ -47,32 +31,32 @@ Why it matters:
 
 ## Next Wave Additions
 
-### 3. Trading / Backtesting Demo
+### 2. Trading / Backtesting Demo
 
 - `DomainUseCaseDemos\Trading\SignalBacktest001`
 
-### 4. AutoML Comparison Demo
+### 3. AutoML Comparison Demo
 
 - `TechUseCaseDemos\AutoML\demo001`
 
-### 5. Reinforcement Learning Toy Demo
+### 4. Reinforcement Learning Toy Demo
 
 - `TechUseCaseDemos\RL\demo001`
 
-### 6. AI Strategy Case Demo
+### 5. AI Strategy Case Demo
 
 - `DomainUseCaseDemos\AIStrategy\FinTechRoadmap001`
 
-### 7. Regulatory Compliance Demo
+### 6. Regulatory Compliance Demo
 
 - `DomainUseCaseDemos\Compliance\AlertTriage001`
 
 ## Suggested Build Order
 
-1. Responsible AI / Fairness
-2. Payments Analytics
-3. Trading / Backtesting
-4. AutoML Comparison
-5. Reinforcement Learning Toy
+1. Payments Analytics
+2. Trading / Backtesting
+3. AutoML Comparison
+4. Reinforcement Learning Toy
+5. AI Strategy Case
 
-These next five additions would close most of the remaining course gaps.
+These next additions would close most of the remaining course gaps.

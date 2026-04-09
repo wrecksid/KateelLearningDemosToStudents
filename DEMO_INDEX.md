@@ -12,6 +12,7 @@ This file is a curated index of the most useful demos in the repository.
 | Customer segmentation | `DomainUseCaseDemos\Banking\CustSeg` | Strong unsupervised learning example. |
 | Insurance claim fraud | `DomainUseCaseDemos\Insurance\ClaimFraud001` | Good pattern-mining use case in insurance. |
 | Wealth management optimization | `DomainUseCaseDemos\WealthMgmt\NIFTYOpt` | Strong wealth / portfolio optimization demo. |
+| Responsible AI and fairness | `DomainUseCaseDemos\ResponsibleAI\CreditFairness001` | Direct fairness and subgroup-metrics starter for lending. |
 | Queue analytics | `DomainUseCaseDemos\Banking\BankQ` | Easy entry point for analytics and operations thinking. |
 | Pattern mining | `TechUseCaseDemos\PatternMining\demo002` | Good technique-first demo with tests. |
 
@@ -39,6 +40,10 @@ This file is a curated index of the most useful demos in the repository.
 ### Insurance
 
 - `DomainUseCaseDemos\Insurance\ClaimFraud001`
+
+### Responsible AI
+
+- `DomainUseCaseDemos\ResponsibleAI\CreditFairness001`
 
 ### Wealth Management
 

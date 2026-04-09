@@ -114,10 +114,9 @@ Suggested starting demos by topic:
 
 To become a stronger super companion repo for the course, the next additions should include:
 
-- NLP for financial text
-- chatbot / assistant demos for BFSI
-- model governance and monitoring
-- explainability and fairness
+- payments analytics
+- trading and backtesting
+- AutoML and reinforcement learning examples
 - AI strategy and operating model case demos
 - course-wise assignments and rubrics
 
@@ -126,6 +125,16 @@ The recommended additions are listed in more detail in [ADDITIONAL_DEMOS.md](D:\
 ## Assignments
 
 A starter assignment structure now lives under [Assignments](D:\Todel\nodeapps\KateelLearningDemosToStudents\Assignments). This is intended to help convert demos into guided coursework, labs, mini-projects, and evaluation tasks.
+
+## Attribution Requirement
+
+Faculty members who use code, demos, notebooks, assignments, or derived teaching material from this repository should acknowledge and attribute Professor Vinaya Sathyanarayana in their course material, including presentation slides, notes, handouts, and related teaching assets.
+
+Students and other contributors who build on this repository should also provide attribution in their reports, presentations, submissions, and code repositories when they reuse, extend, or adapt the material.
+
+A short attribution note can be added in a README, report footer, acknowledgements section, or presentation slide such as:
+
+`Adapted from material in KateelLearningDemosToStudents by Professor Vinaya Sathyanarayana.`
 
 ## Contribution Style
 
