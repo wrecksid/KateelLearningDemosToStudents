@@ -68,6 +68,7 @@ This file is a curated index of the most useful demos in the repository.
 ### Forecasting
 
 - `TechUseCaseDemos\Forecast\tflow001`
+- `TechUseCaseDemos\Forecast\tsdemo001`
 
 ### Pattern Mining
 
