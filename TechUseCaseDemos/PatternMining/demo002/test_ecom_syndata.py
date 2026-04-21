@@ -1,19 +1,19 @@
 """
-Simple smoke test for ecom_syndata.py
-Run it manually: python test_ecom_syndata.py
+Tests for ecom_syndata.
 """
-from ecom_syndata import EcommerceSyntheticGenerator
 
+import numpy as np
+import pandas as pd
 
-def run_smoke():
-    gen = EcommerceSyntheticGenerator(orders=5, seed=123, fraud_rate=0.0)
-    df = gen.generate()
-    assert not df.empty, "Generated DataFrame is empty"
-    expected = {'CustomerID', 'Age', 'Gender', 'Income', 'TransactionAmount', 'TransactionDate',
-                'MerchantCategory', 'TransactionType', 'CardType', 'FraudFlag', 'RewardPoints'}
-    assert expected.issubset(set(df.columns)), f"Missing columns: {expected - set(df.columns)}"
-    print('Smoke test passed: generated', len(df), 'rows')
+np.random.seed(42)
 
+def test_syndata():
+    from ecom_syndata import generate
+    df = generate(400)
+    assert len(df) > 0, "Syndata should not be empty"
+    assert "transaction_id" in df.columns
+    assert "product" in df.columns
+    print(f"Test passed: {len(df)} rows generated")
 
-if __name__ == '__main__':
-    run_smoke()
+if __name__ == "__main__":
+    test_syndata()

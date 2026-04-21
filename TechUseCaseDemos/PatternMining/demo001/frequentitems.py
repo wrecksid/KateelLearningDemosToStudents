@@ -1,55 +1,47 @@
-from collections import defaultdict
+"""
+Frequent item mining demo (market basket analysis).
+"""
 
-def apriori(transactions, min_support=0.01):
-    """
-    Find frequent itemsets using simplified Apriori algorithm.
-    :param transactions: List of transactions (each as list of items)
-    :param min_support: Minimum support threshold as a fraction
-    :return: Dictionary of frequent itemsets and their support counts
-    """
-    item_counts = defaultdict(int)
-    num_transactions = len(transactions)
+import numpy as np
+import pandas as pd
+from itertools import combinations
+from collections import Counter
 
-    # Count support for individual items
-    for transaction in transactions:
-        for item in transaction:
-            item_counts[frozenset([item])] += 1
+np.random.seed(42)
 
-    # Filter items by minimum support
-    frequent_itemsets = {itemset: count for itemset, count in item_counts.items() if count / num_transactions >= min_support}
-    current_frequent_itemsets = frequent_itemsets.copy()
-    k = 2
+def generate_transactions(n=1000, n_items=20):
+    items = [f"item_{i}" for i in range(n_items)]
+    probs = np.random.dirichlet(np.ones(n_items))  # random item popularity
+    transactions = []
+    for _ in range(n):
+        basket_size = np.random.choice([1, 2, 3, 4, 5], p=[0.4, 0.3, 0.2, 0.07, 0.03])
+        basket = list(np.random.choice(items, size=basket_size, replace=False, p=probs))
+        transactions.append(basket)
+    return transactions
 
-    while current_frequent_itemsets:
-        candidates = set()
-        itemsets_list = list(current_frequent_itemsets.keys())
-        for i in range(len(itemsets_list)):
-            for j in range(i + 1, len(itemsets_list)):
-                union_set = itemsets_list[i].union(itemsets_list[j])
-                if len(union_set) == k:
-                    candidates.add(union_set)
+def mine_frequent_items(transactions, min_support=0.02):
+    counter = Counter()
+    n = len(transactions)
+    for t in transactions:
+        for item in set(t):
+            counter[item] += 1
+    freq = {item: cnt / n for item, cnt in counter.items() if cnt / n >= min_support}
+    pairs_counter = Counter()
+    for t in transactions:
+        for p in combinations(sorted(t), 2):
+            pairs_counter[p] += 1
+    pairs = {p: cnt / n for p, cnt in pairs_counter.items() if cnt / n >= min_support}
+    return freq, pairs
 
-        candidate_counts = defaultdict(int)
-        for transaction in transactions:
-            transaction_set = set(transaction)
-            for candidate in candidates:
-                if candidate.issubset(transaction_set):
-                    candidate_counts[candidate] += 1
+def demo():
+    transactions = generate_transactions(1000)
+    freq, pairs = mine_frequent_items(transactions, min_support=0.01)
+    print(f"Frequent items: {len(freq)}")
+    print(f"Frequent pairs: {len(pairs)}")
+    if freq:
+        top = sorted(freq.items(), key=lambda x: -x[1])[:5]
+        print("Top items:", top)
+    print("Frequent items demo complete.")
 
-        current_frequent_itemsets = {itemset: count for itemset, count in candidate_counts.items() if count / num_transactions >= min_support}
-        frequent_itemsets.update(current_frequent_itemsets)
-        k += 1
-
-    return frequent_itemsets
-
-# Assuming 'transactions' variable contains generated data from Part 1
-
-# Run Apriori algorithm on generated data with min_support of 1%
-frequent_itemsets = apriori(transactions, min_support=0.01)
-
-# Display some frequent itemsets
-print("\nFrequent Itemsets and Support Counts (showing first 20):")
-for i, (itemset, count) in enumerate(frequent_itemsets.items()):
-    print(f"{set(itemset)}: {count}")
-    if i == 19:
-        break
+if __name__ == "__main__":
+    demo()
