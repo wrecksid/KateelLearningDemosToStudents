@@ -71,14 +71,14 @@ def preprocess_data(df):
     try:
         df_enc = df.copy()
         label_encoders = {}
-        for col in ['Gender', 'Occupation', 'State']:
+        for col in ['Gender', 'State']:
             le = LabelEncoder()
             df_enc[col] = le.fit_transform(df_enc[col])
             label_encoders[col] = le
 
         # Features and target
-        X = df_enc.drop(columns=['Default'])
-        y = df_enc['Default']
+        X = df_enc.drop(columns=["IsFraud"])
+        y = df_enc["IsFraud"]
 
         # Scale continuous variables (Age, Annual_Income)
         scaler = StandardScaler()
