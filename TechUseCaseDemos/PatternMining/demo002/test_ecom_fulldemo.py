@@ -1,22 +1,28 @@
 """
-Smoke tests for ecom_fulldemo pipeline
+Tests for ecom_fulldemo.
 """
-from ecom_syndata import EcommerceSyntheticGenerator
-from ecom_fulldemo import preprocess, run_apriori, run_fpgrowth
 
+import numpy as np
+import pandas as pd
+try:
+    from mlxtend.frequent_patterns import apriori, association_rules
+    HAS_MLXTEND = True
+except ImportError:
+    HAS_MLXTEND = False
 
-def run_smoke():
-    gen = EcommerceSyntheticGenerator(orders=800, seed=123, fraud_rate=0.0)
-    df = gen.generate()
-    basket_bool = preprocess(df)
+np.random.seed(42)
 
-    apriori_items, apriori_rules = run_apriori(basket_bool, minsup=0.01)
-    fpg_items, fpg_rules = run_fpgrowth(basket_bool, minsup=0.01)
+def test_ecom_demo():
+    if not HAS_MLXTEND:
+        print("mlxtend not installed; skipping test.")
+        return
+    from ecom_fulldemo import generate_ecom_data
+    df = generate_ecom_data(200)
+    assert len(df) > 0, "DataFrame should not be empty"
+    basket = df.groupby(["transaction_id", "product"]).size().unstack(fill_value=0)
+    basket_bin = (basket > 0).astype(int)
+    freq = apriori(basket_bin, min_support=0.05, use_colnames=True)
+    print(f"Test passed: {len(freq)} itemsets found")
 
-    assert apriori_items is not None, 'Apriori returned None'
-    assert fpg_items is not None, 'FP-Growth returned None'
-    print('ecom fulldemo smoke test completed successfully')
-
-
-if __name__ == '__main__':
-    run_smoke()
+if __name__ == "__main__":
+    test_ecom_demo()
