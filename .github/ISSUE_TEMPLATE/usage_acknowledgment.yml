@@ -1,0 +1,154 @@
+name: "📋 Usage Acknowledgment"
+description: >
+  Notify Professor Vinaya Sathyanarayana that you are using this repository
+  in a course, workshop, project, or research activity. Required for all users.
+title: "[Usage] <Your Name> — <Institution / Course>"
+labels: ["usage-acknowledgment"]
+assignees: ["VinayaSharada"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thank you for acknowledging your use of this repository!
+
+        This form fulfils the **mandatory usage notification** requirement described in
+        [ATTRIBUTION.md](https://github.com/VinayaSharada/KateelLearningDemosToStudents/blob/main/ATTRIBUTION.md).
+
+        Please complete all fields honestly. This record is public and helps the community
+        see the global reach of this educational work.
+
+        ---
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: "Prerequisites — complete these before submitting"
+      description: Both actions are mandatory before or at the point of first use.
+      options:
+        - label: >
+            I have **starred the repository** at
+            https://github.com/VinayaSharada/KateelLearningDemosToStudents ⭐
+          required: true
+        - label: >
+            I have **read the Attribution & Usage Policy** at
+            https://github.com/VinayaSharada/KateelLearningDemosToStudents/blob/main/ATTRIBUTION.md
+          required: true
+
+  - type: input
+    id: full_name
+    attributes:
+      label: Full Name
+      placeholder: "e.g. Dr. Jane Smith"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: role
+    attributes:
+      label: Role
+      options:
+        - Faculty / Lecturer / Professor
+        - Student (Undergraduate)
+        - Student (Postgraduate / Masters)
+        - Student (PhD / Doctoral)
+        - Researcher
+        - Industry Practitioner
+        - Self-learner
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: institution
+    attributes:
+      label: Institution or Organisation
+      placeholder: "e.g. Indian Institute of Management, Bangalore"
+    validations:
+      required: true
+
+  - type: input
+    id: course_or_project
+    attributes:
+      label: Course Name, Event, or Project
+      placeholder: "e.g. AI/ML in Finance — MBA Elective, Cohort 2026"
+    validations:
+      required: true
+
+  - type: input
+    id: start_date
+    attributes:
+      label: Approximate Start Date
+      placeholder: "e.g. June 2026"
+    validations:
+      required: true
+
+  - type: input
+    id: public_link
+    attributes:
+      label: Public Link (optional)
+      description: Course page, syllabus, project repo, or slide deck — if publicly available.
+      placeholder: "https://..."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: demos_used
+    attributes:
+      label: Which sections of the repository are you using?
+      multiple: true
+      options:
+        - "🤖 Browser-AI-Demos (in-browser SLM demos)"
+        - "DomainUseCaseDemos / Banking"
+        - "DomainUseCaseDemos / Credit Cards"
+        - "DomainUseCaseDemos / Cyber Security"
+        - "DomainUseCaseDemos / Finance NLP"
+        - "DomainUseCaseDemos / Insurance"
+        - "DomainUseCaseDemos / Model Governance"
+        - "DomainUseCaseDemos / Responsible AI"
+        - "DomainUseCaseDemos / Wealth Management"
+        - "DomainUseCaseDemos / BFSI Chatbot"
+        - "TechUseCaseDemos / Blockchain"
+        - "TechUseCaseDemos / Classification"
+        - "TechUseCaseDemos / Clustering"
+        - "TechUseCaseDemos / Forecasting"
+        - "TechUseCaseDemos / Outlier Detection"
+        - "TechUseCaseDemos / Pattern Mining"
+        - "Assignments"
+        - "ecomm001"
+    validations:
+      required: true
+
+  - type: textarea
+    id: how_used
+    attributes:
+      label: How are you using this material?
+      description: A sentence or two — for example, which demos you are running, how they fit into your curriculum, or what you are building.
+      placeholder: "e.g. Running the credit card underwriting and fraud detection demos as hands-on labs for our Masters in Financial Analytics cohort."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: attribution_commitment
+    attributes:
+      label: Attribution Commitment
+      description: Required for all users. See ATTRIBUTION.md for the exact wording.
+      options:
+        - label: >
+            I will include the mandatory attribution statement
+            (*"Demos and course material adapted from the KateelLearningDemosToStudents repository
+            by Professor Vinaya Sathyanarayana (GitHub: VinayaSharada)..."*)
+            on **every** slide deck, handout, lab sheet, or published resource that uses this material.
+          required: true
+        - label: >
+            I have sent or will send a usage notification email to **vinallcontact@gmail.com**
+            with subject `[KateelLearningDemos] Usage Notification — <My Name / Institution>`.
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **After submitting this issue**, please also add yourself to the
+        [Usage Registry wiki page](https://github.com/VinayaSharada/KateelLearningDemosToStudents/wiki/Usage-Registry)
+        — it takes under a minute and shows the global reach of this work.
