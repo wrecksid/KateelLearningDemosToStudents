@@ -235,6 +235,39 @@
 </head>
 <body>
 
+<!-- file:// protocol warning — hidden by default, shown via JS if needed -->
+<div id="file-protocol-warning" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9999;
+  background:#1a0a00; border-bottom:2px solid #f59e0b; padding:14px 20px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; font-size:13.5px; color:#fde68a;
+  display:none; align-items:flex-start; gap:14px;">
+  <span style="font-size:22px; flex-shrink:0;">⚠️</span>
+  <div>
+    <strong style="color:#fbbf24; font-size:14px;">These demos cannot run when opened as a file:// URL.</strong><br>
+    Chrome blocks ES module imports and HuggingFace CDN fetches from the <code style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:4px;font-size:12px;">file://</code> protocol.<br><br>
+    <strong>Fix — choose one option:</strong>
+    <ol style="margin:6px 0 0 18px; line-height:1.8;">
+      <li><strong>Double-click <code style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:4px;">start_demos.bat</code></strong> in this folder (Windows) — launches Python server &amp; opens browser automatically.</li>
+      <li>Open a terminal in this folder and run: <code style="background:rgba(255,255,255,.1);padding:2px 8px;border-radius:4px;">python -m http.server 8080</code> then visit <a href="http://localhost:8080" style="color:#60a5fa;">http://localhost:8080</a></li>
+      <li>Use <strong>VS Code Live Server</strong> extension — right-click <code style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:4px;">index.html</code> → "Open with Live Server".</li>
+    </ol>
+  </div>
+  <button onclick="document.getElementById('file-protocol-warning').style.display='none'"
+    style="margin-left:auto; flex-shrink:0; background:transparent; border:1px solid #78350f;
+    color:#fbbf24; border-radius:6px; padding:4px 10px; cursor:pointer; font-size:12px;">✕ Dismiss</button>
+</div>
+
+<script>
+  // Show banner only when loaded as file://
+  if (location.protocol === 'file:') {
+    const w = document.getElementById('file-protocol-warning');
+    w.style.display = 'flex';
+    // push the rest of the page down so the banner doesn't cover content
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.style.paddingTop = w.offsetHeight + 'px';
+    });
+  }
+</script>
+
 <header>
   <div class="hero-badge">
     <span>🧠</span> Edge AI · Runs 100% In Your Browser
