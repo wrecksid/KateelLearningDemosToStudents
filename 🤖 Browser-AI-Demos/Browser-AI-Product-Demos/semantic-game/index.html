@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SYNAPSE — Semantic Word Game</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #07070e;
+      --panel:    #0d0d1c;
+      --border:   #1a1a32;
+      --accent:   #a855f7;
+      --text:     #e2e2f0;
+      --muted:    #60608a;
+      --mono:     'Fira Code', 'Cascadia Code', 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ════════════════════════════════════════
+       DIAGNOSTIC PANEL
+       ════════════════════════════════════════ */
+    #diag-panel {
+      background: #040410;
+      border-bottom: 1px solid #0c0c22;
+      flex-shrink: 0;
+    }
+
+    #diag-title {
+      padding: 5px 16px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #28284a;
+      border-bottom: 1px solid #0c0c22;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    #diag-title .led {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      flex-shrink: 0;
+    }
+    #diag-title .led.loading { animation: led-pulse 1.1s ease-in-out infinite; }
+    #diag-title .led.ready   { background: #22c55e; box-shadow: 0 0 8px #22c55e88; animation: none; }
+
+    #diag-log {
+      padding: 6px 16px 8px;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      line-height: 1.75;
+      max-height: 168px;
+      overflow-y: auto;
+    }
+
+    .dline {
+      display: flex;
+      gap: 0;
+      animation: d-in .1s ease;
+      white-space: nowrap;
+    }
+
+    /* column widths — everything fixed-width for tabular alignment */
+    .d-ts   { color: #252545; width: 96px; flex-shrink: 0; }
+    .d-lvl  { width: 52px; flex-shrink: 0; font-weight: 700; }
+    .d-msg  { color: #7070a8; flex: 1; overflow: hidden; text-overflow: ellipsis; }
+    .d-msg em { color: #b0b0d0; font-style: normal; }
+    .d-bar  { color: var(--accent); width: 148px; flex-shrink: 0; letter-spacing: -.05em; }
+    .d-pct  { color: #c8c8e8; width: 60px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; }
+    .d-size { color: #404068; width: 120px; flex-shrink: 0; text-align: right; }
+    .d-spd  { color: #303058; width: 90px; flex-shrink: 0; text-align: right; }
+
+    .lvl-init { color: #6366f1; }
+    .lvl-dl   { color: #f59e0b; }
+    .lvl-ok   { color: #22c55e; }
+    .lvl-warn { color: #ef4444; }
+    .lvl-info { color: #06b6d4; }
+
+    /* ════════════════════════════════════════
+       GAME AREA
+       ════════════════════════════════════════ */
+    #game {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px 64px;
+    }
+
+    #game-inner {
+      width: 100%;
+      max-width: 580px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── Title ── */
+    #hero { text-align: center; }
+
+    #hero-title {
+      font-size: clamp(36px, 8vw, 52px);
+      font-weight: 900;
+      letter-spacing: -.03em;
+      background: linear-gradient(135deg, #e2e2f0 20%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    #hero-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    #meta-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .meta-chip {
+      font-size: 11.5px;
+      padding: 3px 11px;
+      border-radius: 99px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: #50508a;
+    }
+    .meta-chip.live { color: #7060a8; }
+
+    /* ── Engine loading placeholder ── */
+    #loading-state {
+      background: rgba(168,85,247,.05);
+      border: 1px solid rgba(168,85,247,.18);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #6050a0;
+    }
+    .spin { width: 18px; height: 18px; border: 2px solid rgba(168,85,247,.2); border-top-color: var(--accent); border-radius: 50%; animation: spin .75s linear infinite; flex-shrink: 0; }
+
+    /* ── Input row ── */
+    #input-wrap { display: none; flex-direction: column; gap: 6px; }
+
+    #input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    #guess-in {
+      flex: 1;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 13px 18px;
+      font-size: 16px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+      letter-spacing: .01em;
+    }
+    #guess-in:focus { border-color: var(--accent); }
+    #guess-in::placeholder { color: #252545; }
+    #guess-in:disabled { opacity: .35; cursor: not-allowed; }
+
+    #guess-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 13px;
+      padding: 13px 22px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: background .15s, transform .1s;
+    }
+    #guess-btn:hover:not(:disabled) { background: #9333ea; }
+    #guess-btn:active:not(:disabled) { transform: scale(.96); }
+    #guess-btn:disabled { background: #201030; color: #402060; cursor: not-allowed; }
+
+    #err-msg { font-size: 12px; color: #ef4444; min-height: 14px; padding-left: 4px; }
+
+    /* ── Score Gauge ── */
+    #gauge-wrap {
+      display: none;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    #gauge-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gauge-glow, transparent);
+      pointer-events: none;
+      transition: background .6s;
+    }
+
+    #gauge-lbl {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #404068;
+      margin-bottom: 12px;
+    }
+
+    #gauge-top {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 12px;
+    }
+
+    #gauge-word {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    #gauge-right { text-align: right; }
+
+    #gauge-num {
+      font-size: 44px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      transition: color .4s;
+    }
+
+    #gauge-temp {
+      font-size: 12.5px;
+      margin-top: 2px;
+      transition: color .4s;
+    }
+
+    #gauge-track {
+      height: 8px;
+      background: #09091a;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    #gauge-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 99px;
+      transition: width .7s cubic-bezier(.22, 1, .36, 1), background-color .4s;
+    }
+
+    /* ── History ── */
+    #history-wrap { display: none; }
+
+    #hist-hdr {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: #404068;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    #hist-best { font-size: 11.5px; }
+
+    #hist-list { display: flex; flex-direction: column; gap: 5px; }
+
+    .hrow {
+      display: grid;
+      grid-template-columns: 24px minmax(0,1fr) 100px 52px;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 14px;
+      animation: row-in .18s ease;
+    }
+    .hrow.best { border-color: rgba(168,85,247,.3); background: rgba(168,85,247,.04); }
+
+    .h-rank { font-size: 10.5px; color: #303055; font-variant-numeric: tabular-nums; }
+    .h-word-col { min-width: 0; }
+    .h-word { font-size: 13.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+    .h-mini-track { height: 3px; background: #09091a; border-radius: 99px; overflow: hidden; margin-top: 3px; }
+    .h-mini-fill  { height: 100%; border-radius: 99px; }
+    .h-temp { font-size: 11.5px; color: #505080; }
+    .h-pct  { font-size: 14px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* ── Win overlay ── */
+    #win-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(7,7,14,.88);
+      backdrop-filter: blur(10px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #win-overlay.show { display: flex; }
+
+    #win-card {
+      background: #0f0f1e;
+      border: 1px solid rgba(168,85,247,.35);
+      border-radius: 22px;
+      padding: 44px 36px 36px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 0 80px rgba(168,85,247,.12);
+      animation: pop-in .32s cubic-bezier(.22,1,.36,1);
+    }
+
+    #win-emoji  { font-size: 54px; margin-bottom: 14px; line-height: 1; }
+    #win-title  { font-size: 26px; font-weight: 900; color: var(--text); margin-bottom: 6px; }
+    #win-label  { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+
+    #win-word {
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+    }
+
+    #win-stat { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+    .w-btn {
+      display: inline-block;
+      padding: 11px 22px;
+      border-radius: 11px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      margin: 4px;
+      transition: opacity .15s;
+    }
+    .w-btn:hover { opacity: .85; }
+    #copy-btn   { background: var(--accent); color: #fff; }
+    #dismiss-btn{ background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+
+    /* ── Animations ── */
+    @keyframes led-pulse  { 0%,100%{opacity:1} 50%{opacity:.3} }
+    @keyframes spin       { to{transform:rotate(360deg)} }
+    @keyframes d-in       { from{opacity:0} to{opacity:1} }
+    @keyframes row-in     { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+    @keyframes pop-in     { from{opacity:0;transform:scale(.9)} to{opacity:1;transform:none} }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e1e38; border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     DIAGNOSTIC PANEL
+     ══════════════════════════════════════ -->
+<div id="diag-panel">
+  <div id="diag-title">
+    <span class="led loading" id="led"></span>
+    EMBEDDING ENGINE &nbsp;·&nbsp; DIAGNOSTICS
+  </div>
+  <div id="diag-log"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     GAME
+     ══════════════════════════════════════ -->
+<div id="game">
+  <div id="game-inner">
+
+    <!-- Hero -->
+    <div id="hero">
+      <div id="hero-title">SYNAPSE</div>
+      <div id="hero-sub">Guess the hidden word through semantic similarity</div>
+      <div id="meta-row">
+        <span class="meta-chip" id="chip-day">—</span>
+        <span class="meta-chip" id="chip-len">— letters</span>
+        <span class="meta-chip live" id="chip-cnt">0 guesses</span>
+      </div>
+    </div>
+
+    <!-- Loading placeholder -->
+    <div id="loading-state">
+      <div class="spin"></div>
+      <span>Loading <strong>mxbai-embed-xsmall-v1</strong> into your browser…</span>
+    </div>
+
+    <!-- Input (shown when ready) -->
+    <div id="input-wrap">
+      <div id="input-row">
+        <input id="guess-in" type="text"
+          placeholder="Type a word and press Enter…"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <button id="guess-btn">GUESS</button>
+      </div>
+      <div id="err-msg"></div>
+    </div>
+
+    <!-- Score gauge (shown after first guess) -->
+    <div id="gauge-wrap">
+      <div id="gauge-lbl">Most Recent Guess</div>
+      <div id="gauge-top">
+        <div id="gauge-word"></div>
+        <div id="gauge-right">
+          <div id="gauge-num">—</div>
+          <div id="gauge-temp"></div>
+        </div>
+      </div>
+      <div id="gauge-track">
+        <div id="gauge-fill"></div>
+      </div>
+    </div>
+
+    <!-- History (shown after first guess) -->
+    <div id="history-wrap">
+      <div id="hist-hdr">
+        <span>All Guesses</span>
+        <span id="hist-best"></span>
+      </div>
+      <div id="hist-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     WIN OVERLAY
+     ══════════════════════════════════════ -->
+<div id="win-overlay">
+  <div id="win-card">
+    <div id="win-emoji">🎉</div>
+    <div id="win-title">YOU FOUND IT!</div>
+    <div id="win-label">The hidden word was</div>
+    <div id="win-word"></div>
+    <div id="win-stat"></div>
+    <button class="w-btn" id="copy-btn">📋 Copy Score</button>
+    <button class="w-btn" id="dismiss-btn">← Keep Playing</button>
+  </div>
+</div>
+
+<script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WORD BANK  (daily word rotates by calendar day)
+// ─────────────────────────────────────────────────────────────────────────────
+const WORDS = [
+  'ocean',   'thunder', 'diamond',  'shadow',  'forest',
+  'dragon',  'voyage',  'castle',   'winter',  'harvest',
+  'lantern', 'mirror',  'compass',  'phantom', 'garden',
+  'rhythm',  'crystal', 'eclipse',  'horizon', 'jungle',
+  'meteor',  'pyramid', 'temple',   'vortex',  'wisdom',
+  'anchor',  'beacon',  'cipher',   'dagger',  'empire',
+  'falcon',  'glacier', 'herald',   'ignite',  'jasper',
+  'kindle',  'labyrinth','mosaic',  'nebula',  'oracle',
+];
+const DAY = Math.floor(Date.now() / 86_400_000);
+const TARGET = WORDS[DAY % WORDS.length];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+let embedder  = null;
+let targetVec = null;
+let guesses   = [];   // [{word, score}]  — best score first after re-sort
+let won       = false;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DOM
+// ─────────────────────────────────────────────────────────────────────────────
+const led          = document.getElementById('led');
+const diagLog      = document.getElementById('diag-log');
+const loadState    = document.getElementById('loading-state');
+const inputWrap    = document.getElementById('input-wrap');
+const guessIn      = document.getElementById('guess-in');
+const guessBtn     = document.getElementById('guess-btn');
+const errMsg       = document.getElementById('err-msg');
+const gaugeWrap    = document.getElementById('gauge-wrap');
+const gaugeWord    = document.getElementById('gauge-word');
+const gaugeNum     = document.getElementById('gauge-num');
+const gaugeTemp    = document.getElementById('gauge-temp');
+const gaugeFill    = document.getElementById('gauge-fill');
+const historyWrap  = document.getElementById('history-wrap');
+const histList     = document.getElementById('hist-list');
+const histBest     = document.getElementById('hist-best');
+const chipDay      = document.getElementById('chip-day');
+const chipLen      = document.getElementById('chip-len');
+const chipCnt      = document.getElementById('chip-cnt');
+const winOverlay   = document.getElementById('win-overlay');
+const winWord      = document.getElementById('win-word');
+const winStat      = document.getElementById('win-stat');
+
+chipDay.textContent = `Puzzle #${(DAY % WORDS.length) + 1}`;
+chipLen.textContent = `${TARGET.length} letters`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DIAGNOSTIC LOG HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+function nowMs() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}.${String(d.getMilliseconds()).padStart(3,'0')}`;
+}
+
+function bar20(pct) {
+  const f = Math.round(Math.min(100, Math.max(0, pct)) / 5);
+  return '[' + '█'.repeat(f) + '░'.repeat(20 - f) + ']';
+}
+
+function fmtBytes(b) {
+  if (!b || b === 0) return '—';
+  if (b < 1024) return b + ' B';
+  if (b < 1_048_576) return (b / 1024).toFixed(1) + ' KB';
+  return (b / 1_048_576).toFixed(2) + ' MB';
+}
+
+function fmtSpeed(bps) {
+  if (!bps || bps <= 0) return '';
+  if (bps < 1024) return bps.toFixed(0) + ' B/s';
+  if (bps < 1_048_576) return (bps / 1024).toFixed(1) + ' KB/s';
+  return (bps / 1_048_576).toFixed(2) + ' MB/s';
+}
+
+// Append a static log line and return its element
+function log(level, msg, extras = {}) {
+  const row = document.createElement('div');
+  row.className = 'dline';
+
+  const lvlClass = {
+    INIT: 'lvl-init', DL: 'lvl-dl', OK: 'lvl-ok',
+    WARN: 'lvl-warn', INFO: 'lvl-info'
+  }[level] ?? 'lvl-info';
+
+  let html = `<span class="d-ts">${nowMs()}</span><span class="d-lvl ${lvlClass}">${level.padEnd(6)}</span>`;
+  html    += `<span class="d-msg">${msg}</span>`;
+
+  if (extras.pct !== undefined) {
+    html += `<span class="d-bar">${bar20(extras.pct)}</span>`;
+    html += `<span class="d-pct">${extras.pct.toFixed(1).padStart(6)}%</span>`;
+    html += `<span class="d-size">${extras.size ?? ''}</span>`;
+    html += `<span class="d-spd">${extras.spd ?? ''}</span>`;
+  }
+
+  row.innerHTML = html;
+  diagLog.appendChild(row);
+  diagLog.scrollTop = diagLog.scrollHeight;
+  return row;
+}
+
+// Update an existing DL row in-place (avoids log spam)
+function updateDlRow(row, pct, size, spd) {
+  const barEl  = row.querySelector('.d-bar');
+  const pctEl  = row.querySelector('.d-pct');
+  const sizeEl = row.querySelector('.d-size');
+  const spdEl  = row.querySelector('.d-spd');
+  if (barEl)  barEl.textContent  = bar20(pct);
+  if (pctEl)  pctEl.textContent  = pct.toFixed(1).padStart(6) + '%';
+  if (sizeEl) sizeEl.textContent = size;
+  if (spdEl)  spdEl.textContent  = spd;
+  diagLog.scrollTop = diagLog.scrollHeight;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODEL INIT
+// ─────────────────────────────────────────────────────────────────────────────
+const MODEL   = 'mixedbread-ai/mxbai-embed-xsmall-v1';
+const t0      = performance.now();
+const dlRows  = {};       // file → {row, startMs, lastLoaded}
+
+log('INIT', `Runtime: <em>@huggingface/transformers@3</em>`);
+log('INIT', `Model: <em>${MODEL}</em>`);
+log('INIT', `Task: feature-extraction · Pooling: mean · Normalize: true`);
+
+async function initEngine() {
+  try {
+    embedder = await pipeline('feature-extraction', MODEL, {
+      progress_callback: ({ status, file, progress, loaded, total }) => {
+        const name = file ? file.split('/').pop() : '';
+        const pct  = progress ?? 0;
+
+        if (status === 'initiate' && name) {
+          const row = log('DL', `Fetching <em>${name}</em>`, { pct: 0, size: '—', spd: '' });
+          dlRows[name] = { row, startMs: performance.now(), lastLoaded: 0, lastMs: performance.now() };
+
+        } else if ((status === 'downloading' || status === 'progress') && name && dlRows[name]) {
+          const state  = dlRows[name];
+          const now    = performance.now();
+          const dt     = (now - state.lastMs) / 1000;
+          const delta  = (loaded ?? 0) - state.lastLoaded;
+          const bps    = dt > 0 ? delta / dt : 0;
+          state.lastLoaded = loaded ?? 0;
+          state.lastMs     = now;
+          const sizeStr    = total ? `${fmtBytes(loaded)} / ${fmtBytes(total)}` : fmtBytes(loaded);
+          updateDlRow(state.row, pct, sizeStr, fmtSpeed(bps));
+
+        } else if (status === 'done' && name && dlRows[name]) {
+          const state   = dlRows[name];
+          const elapsed = ((performance.now() - state.startMs) / 1000).toFixed(2);
+          updateDlRow(state.row, 100, fmtBytes(total), `${elapsed}s`);
+          log('OK', `<em>${name}</em> — cached in browser storage`);
+
+        } else if (status === 'loading') {
+          log('INFO', `Deserialising weights into WASM runtime…`);
+        }
+      }
+    });
+
+    // Pre-compute target word embedding
+    const tOut    = await embedder(TARGET, { pooling: 'mean', normalize: true });
+    targetVec     = Array.from(tOut.data);
+
+    const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
+    log('OK', `Engine ready in <em>${elapsed}s</em> · Embedding dim: <em>${targetVec.length}</em> · Inference: WASM`);
+    log('INFO', `Target embedded · Game active · Awaiting first guess`);
+
+    led.className = 'led ready';
+    loadState.style.display = 'none';
+    inputWrap.style.display = 'flex';
+    guessIn.focus();
+
+  } catch (err) {
+    led.className = 'led';
+    led.style.background = '#ef4444';
+    led.style.boxShadow  = '0 0 6px #ef4444';
+    log('WARN', `Init failed: ${err.message}`);
+    loadState.innerHTML = `<span style="color:#fca5a5">⚠️ ${err.message} — Chrome 113+ or Edge required.</span>`;
+    console.error(err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COSINE SIMILARITY  (full formula — works on normalised and raw vectors)
+// ─────────────────────────────────────────────────────────────────────────────
+function cosineSim(a, b) {
+  let dot = 0, ma = 0, mb = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    ma  += a[i] * a[i];
+    mb  += b[i] * b[i];
+  }
+  const denom = Math.sqrt(ma) * Math.sqrt(mb);
+  return denom === 0 ? 0 : Math.max(-1, Math.min(1, dot / denom));
+}
+
+// Map raw cosine → 0–100 integer score
+function toScore(sim) {
+  return Math.max(0, Math.min(100, Math.round(sim * 100)));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TEMPERATURE SCALE
+// ─────────────────────────────────────────────────────────────────────────────
+function temp(score) {
+  if (score >= 95) return { label: '🔥 Burning',   hex: '#22c55e', glow: 'rgba(34,197,94,.07)' };
+  if (score >= 80) return { label: '♨️ Very Hot',  hex: '#84cc16', glow: 'rgba(132,204,22,.06)' };
+  if (score >= 65) return { label: '🌡️ Hot',        hex: '#eab308', glow: 'rgba(234,179,8,.05)'  };
+  if (score >= 48) return { label: '☀️ Warm',       hex: '#f97316', glow: 'rgba(249,115,22,.05)' };
+  if (score >= 30) return { label: '❄️ Cool',       hex: '#60a5fa', glow: 'rgba(96,165,250,.05)' };
+  return                   { label: '🧊 Cold',       hex: '#818cf8', glow: 'rgba(129,140,248,.04)'};
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UI UPDATES
+// ─────────────────────────────────────────────────────────────────────────────
+function renderGauge(word, score) {
+  const t = temp(score);
+  gaugeWrap.style.display      = 'block';
+  gaugeWrap.style.setProperty('--gauge-glow', `radial-gradient(ellipse 80% 60% at 50% 0%, ${t.glow} 0%, transparent 70%)`);
+  gaugeWord.textContent        = word.toUpperCase();
+  gaugeWord.style.color        = t.hex;
+  gaugeNum.textContent         = score + '%';
+  gaugeNum.style.color         = t.hex;
+  gaugeTemp.textContent        = t.label;
+  gaugeTemp.style.color        = t.hex;
+  gaugeFill.style.width        = score + '%';
+  gaugeFill.style.background   = t.hex;
+  gaugeFill.style.boxShadow    = score >= 80 ? `0 0 14px ${t.hex}88` : 'none';
+}
+
+function renderHistory() {
+  histList.innerHTML = '';
+  const sorted = [...guesses].sort((a, b) => b.score - a.score);
+  sorted.forEach((g, i) => {
+    const t   = temp(g.score);
+    const row = document.createElement('div');
+    row.className = 'hrow' + (i === 0 ? ' best' : '');
+    row.innerHTML = `
+      <div class="h-rank">#${i + 1}</div>
+      <div class="h-word-col">
+        <div class="h-word" style="color:${t.hex}">${g.word.toUpperCase()}</div>
+        <div class="h-mini-track">
+          <div class="h-mini-fill" style="width:${g.score}%;background:${t.hex}"></div>
+        </div>
+      </div>
+      <div class="h-temp">${t.label}</div>
+      <div class="h-pct" style="color:${t.hex}">${g.score}%</div>
+    `;
+    histList.appendChild(row);
+  });
+
+  historyWrap.style.display = 'block';
+  if (sorted[0]) {
+    const best = sorted[0];
+    histBest.textContent = `Best: ${best.score}%`;
+    histBest.style.color = temp(best.score).hex;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WIN
+// ─────────────────────────────────────────────────────────────────────────────
+function triggerWin(score) {
+  won = true;
+  winWord.textContent = TARGET.toUpperCase();
+  winStat.textContent = `Found in ${guesses.length} guess${guesses.length !== 1 ? 'es' : ''} · Similarity ${score}%`;
+  winOverlay.classList.add('show');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GUESS SUBMISSION
+// ─────────────────────────────────────────────────────────────────────────────
+async function submit() {
+  if (!targetVec || won) return;
+  errMsg.textContent = '';
+
+  const raw = guessIn.value.trim().toLowerCase();
+  if (!raw)                          { errMsg.textContent = 'Type a word first.'; return; }
+  if (!/^[a-z]+$/.test(raw))         { errMsg.textContent = 'Single words only — letters a–z, no spaces.'; return; }
+  if (guesses.some(g => g.word === raw)) { errMsg.textContent = `"${raw}" already guessed.`; return; }
+
+  guessBtn.disabled  = true;
+  guessIn.disabled   = true;
+  guessBtn.textContent = '…';
+
+  try {
+    let score;
+    if (raw === TARGET) {
+      score = 100;
+    } else {
+      const out   = await embedder(raw, { pooling: 'mean', normalize: true });
+      const vec   = Array.from(out.data);
+      score       = toScore(cosineSim(targetVec, vec));
+    }
+
+    guesses.push({ word: raw, score });
+    chipCnt.textContent = `${guesses.length} guess${guesses.length !== 1 ? 'es' : ''}`;
+
+    renderGauge(raw, score);
+    renderHistory();
+    guessIn.value = '';
+
+    if (raw === TARGET || score >= 95) {
+      setTimeout(() => triggerWin(score), 700);
+    }
+
+  } catch (err) {
+    errMsg.textContent = `Embedding error: ${err.message}`;
+    console.error(err);
+  } finally {
+    guessBtn.disabled    = false;
+    guessIn.disabled     = false;
+    guessBtn.textContent = 'GUESS';
+    if (!won) guessIn.focus();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SHARE
+// ─────────────────────────────────────────────────────────────────────────────
+document.getElementById('copy-btn').addEventListener('click', function () {
+  const sorted = [...guesses].sort((a, b) => b.score - a.score);
+  const lines  = [`SYNAPSE Puzzle #${(DAY % WORDS.length) + 1}  —  ${guesses.length} guess${guesses.length !== 1 ? 'es' : ''}`];
+  sorted.slice(0, 6).forEach(g => {
+    const blocks = Math.round(g.score / 10);
+    lines.push(`${'🟩'.repeat(blocks)}${'⬜'.repeat(10 - blocks)}  ${String(g.score).padStart(3)}%  ${g.word}`);
+  });
+  lines.push('synapse.game');
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    this.textContent = '✓ Copied!';
+    setTimeout(() => { this.textContent = '📋 Copy Score'; }, 2000);
+  });
+});
+
+document.getElementById('dismiss-btn').addEventListener('click', () => {
+  winOverlay.classList.remove('show');
+  if (!won) guessIn.focus();
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────────────────────────────────────
+guessBtn.addEventListener('click', submit);
+guessIn.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────────────────────────────────────
+initEngine();
+</script>
+</body>
+</html>

