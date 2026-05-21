@@ -35,6 +35,8 @@ includes a README with setup steps, expected outputs, and student extension idea
 
 ## Cyber Security
 
+**[→ CyberSecurity section overview](CyberSecurity/)**
+
 | Folder | Topic | Key Techniques |
 |--------|-------|----------------|
 | [ServerLogIntrusion](CyberSecurity/ServerLogIntrusion/) | Intrusion detection from server logs | Apache access log parsing, SSH brute-force detection, firewall port-scan analysis, 7 detectors mapped to MITRE ATT&CK |
