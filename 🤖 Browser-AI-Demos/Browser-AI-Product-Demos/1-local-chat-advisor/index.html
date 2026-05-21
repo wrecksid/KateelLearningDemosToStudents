@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local Chat Advisor | Browser AI Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a14;
+      color: #e2e2f0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── status bar ── */
+    #status-bar {
+      flex-shrink: 0;
+      background: #0f0f1e;
+      border-bottom: 1px solid #1e1e38;
+      padding: 7px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12.5px;
+    }
+
+    #dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #505090;
+      flex-shrink: 0;
+      transition: background .4s, box-shadow .4s;
+    }
+    #dot.loading { background: #f59e0b; animation: pulse 1.2s ease-in-out infinite; }
+    #dot.ready   { background: #22c55e; box-shadow: 0 0 8px #22c55e88; }
+    #dot.error   { background: #ef4444; }
+
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+
+    #status-label { color: #9090c0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    #progress-track {
+      width: 160px; height: 3px;
+      background: #1e1e38; border-radius: 99px;
+      overflow: hidden; flex-shrink: 0;
+    }
+    #progress-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #6366f1, #a855f7);
+      border-radius: 99px;
+      transition: width .25s;
+    }
+    #progress-pct { color: #6366f1; font-size: 11.5px; min-width: 36px; text-align: right; }
+
+    .back-link {
+      color: #40406a;
+      text-decoration: none;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .back-link:hover { color: #8080b0; }
+
+    /* ── header ── */
+    #header {
+      flex-shrink: 0;
+      background: #0d0d1a;
+      border-bottom: 1px solid #1a1a30;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #header h1 { font-size: 15px; font-weight: 700; }
+    .badge {
+      font-size: 10.5px; font-weight: 600;
+      padding: 2px 9px; border-radius: 99px;
+      background: rgba(99,102,241,.15);
+      border: 1px solid rgba(99,102,241,.3);
+      color: #a5b4fc;
+    }
+    .badge.green {
+      background: rgba(34,197,94,.1);
+      border-color: rgba(34,197,94,.3);
+      color: #86efac;
+    }
+
+    /* ── chat ── */
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+
+    /* welcome screen */
+    #welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      text-align: center;
+      gap: 12px;
+      color: #40406a;
+      padding: 40px;
+    }
+    #welcome .icon { font-size: 48px; }
+    #welcome h2 { font-size: 20px; font-weight: 700; color: #7070a0; }
+    #welcome p  { font-size: 13px; max-width: 380px; line-height: 1.6; }
+
+    /* messages */
+    .msg { display: flex; gap: 10px; max-width: 820px; animation: fadeUp .25s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; } }
+
+    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .msg.assistant { align-self: flex-start; }
+
+    .avatar {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0; margin-top: 2px;
+    }
+    .msg.user .avatar      { background: #312e81; }
+    .msg.assistant .avatar { background: #0e2a47; }
+
+    .bubble {
+      padding: 11px 15px;
+      line-height: 1.65;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .msg.user .bubble {
+      background: #312e81;
+      border-radius: 14px 3px 14px 14px;
+      max-width: 580px;
+    }
+    .msg.assistant .bubble {
+      background: #13132a;
+      border: 1px solid #22223a;
+      border-radius: 3px 14px 14px 14px;
+      max-width: 680px;
+    }
+
+    .cursor::after {
+      content: '▋';
+      display: inline-block;
+      animation: blink .65s steps(1) infinite;
+      color: #6366f1;
+    }
+    @keyframes blink { 50% { opacity:0; } }
+
+    /* ── input area ── */
+    #input-area {
+      flex-shrink: 0;
+      background: #0d0d1a;
+      border-top: 1px solid #1a1a30;
+      padding: 14px 20px 16px;
+    }
+
+    #input-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      background: #13132a;
+      border: 1px solid #2a2a4a;
+      border-radius: 14px;
+      padding: 8px 8px 8px 16px;
+      max-width: 860px;
+      margin: 0 auto;
+      transition: border-color .2s;
+    }
+    #input-row:focus-within { border-color: #6366f1; }
+
+    #msg-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: #e2e2f0;
+      font-size: 14px;
+      font-family: inherit;
+      resize: none;
+      line-height: 1.55;
+      max-height: 130px;
+      overflow-y: auto;
+    }
+    #msg-input::placeholder { color: #404070; }
+
+    #send-btn {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: #6366f1;
+      color: #fff;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s, transform .1s;
+    }
+    #send-btn:hover:not(:disabled) { background: #4f46e5; }
+    #send-btn:active:not(:disabled) { transform: scale(.93); }
+    #send-btn:disabled { background: #22223a; cursor: not-allowed; color: #40406a; }
+
+    #hint {
+      text-align: center;
+      font-size: 11px;
+      color: #28284a;
+      margin-top: 7px;
+    }
+
+    /* ── scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e1e38; border-radius: 99px; }
+
+    /* ── error notice ── */
+    .error-notice {
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.3);
+      color: #fca5a5;
+      font-size: 13px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin: 12px 20px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Status Bar -->
+<div id="status-bar">
+  <div id="dot" class="loading"></div>
+  <span id="status-label">⚪ Downloading Components...</span>
+  <div id="progress-track"><div id="progress-fill"></div></div>
+  <span id="progress-pct">0%</span>
+  <a class="back-link" href="../index.html">← Hub</a>
+</div>
+
+<!-- Header -->
+<div id="header">
+  <h1>🔒 Privacy-First Chat Advisor</h1>
+  <span class="badge">Demo 01</span>
+  <span class="badge green">100% Local · No API Key</span>
+</div>
+
+<!-- Chat window -->
+<div id="chat">
+  <div id="welcome">
+    <div class="icon">🤖</div>
+    <h2>Loading your offline AI...</h2>
+    <p>The model weights are being downloaded to your browser's cache. This only happens once — future visits load instantly.</p>
+  </div>
+</div>
+
+<!-- Input -->
+<div id="input-area">
+  <div id="input-row">
+    <textarea id="msg-input" placeholder="Ask your study buddy anything…" rows="1" disabled></textarea>
+    <button id="send-btn" disabled title="Send (Enter)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+  <div id="hint">SmolLM2-135M · Shift+Enter for new line · Runs entirely in your browser</div>
+</div>
+
+<script type="module">
+import { pipeline, TextStreamer } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
+
+// ── Config ──────────────────────────────────────────────────────────────────
+const MODEL_ID = 'onnx-community/SmolLM2-135M-Instruct';
+const SYSTEM_PROMPT = 'You are an expert academic study buddy. Keep your answers concise, structured, and use encouraging language.';
+const MAX_NEW_TOKENS = 350;
+
+// ── DOM refs ─────────────────────────────────────────────────────────────────
+const dot          = document.getElementById('dot');
+const statusLabel  = document.getElementById('status-label');
+const progressFill = document.getElementById('progress-fill');
+const progressPct  = document.getElementById('progress-pct');
+const chat         = document.getElementById('chat');
+const welcome      = document.getElementById('welcome');
+const msgInput     = document.getElementById('msg-input');
+const sendBtn      = document.getElementById('send-btn');
+
+// ── State ────────────────────────────────────────────────────────────────────
+let generator   = null;
+let generating  = false;
+const history   = [{ role: 'system', content: SYSTEM_PROMPT }];
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function setStatus(state, text, pct = null) {
+  dot.className = state;          // 'loading' | 'ready' | 'error'
+  statusLabel.textContent = text;
+  if (pct !== null) {
+    progressFill.style.width = pct + '%';
+    progressPct.textContent  = Math.round(pct) + '%';
+  }
+}
+
+function appendMessage(role, text = '', streaming = false) {
+  if (welcome && welcome.parentNode === chat) chat.removeChild(welcome);
+
+  const wrap   = document.createElement('div');
+  wrap.className = `msg ${role}`;
+
+  const emojiMap = { user: '🧑', assistant: '🤖' };
+  wrap.innerHTML = `
+    <div class="avatar">${emojiMap[role]}</div>
+    <div class="bubble${streaming ? ' cursor' : ''}">${text}</div>
+  `;
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+  return wrap.querySelector('.bubble');
+}
+
+function showError(msg) {
+  const div = document.createElement('div');
+  div.className = 'error-notice';
+  div.textContent = '⚠️ ' + msg;
+  chat.appendChild(div);
+}
+
+// ── Model init ────────────────────────────────────────────────────────────────
+async function initModel() {
+  try {
+    let lastFile = '';
+    generator = await pipeline('text-generation', MODEL_ID, {
+      dtype: 'q4',
+      progress_callback: ({ status, file, progress }) => {
+        const pct  = progress ?? 0;
+        const name = file ? file.split('/').pop() : '';
+        if (name && name !== lastFile) { lastFile = name; }
+        if (status === 'downloading' || status === 'progress') {
+          setStatus('loading', `⚪ Downloading${name ? ' — ' + name : ''}…`, pct);
+        } else if (status === 'loading') {
+          setStatus('loading', '⚪ Initialising model weights…', 99);
+        }
+      }
+    });
+
+    setStatus('ready', '🟢 Offline AI Engine Ready', 100);
+    welcome.innerHTML = `
+      <div class="icon">🎓</div>
+      <h2>Ready to help!</h2>
+      <p>Your AI study buddy is running 100 % offline. Ask anything — history, science, code, maths — it's all private.</p>
+    `;
+    msgInput.disabled = false;
+    sendBtn.disabled  = false;
+    msgInput.focus();
+
+  } catch (err) {
+    setStatus('error', '⚠️ Failed to load model', 0);
+    welcome.innerHTML = `
+      <div class="icon">⚠️</div>
+      <h2 style="color:#f87171">Model Load Error</h2>
+      <p style="color:#fca5a5">${err.message}</p>
+      <p>Ensure WebGPU / WebAssembly is available (Chrome 113+ or Edge). See console for details.</p>
+    `;
+    console.error(err);
+  }
+}
+
+// ── Send logic ────────────────────────────────────────────────────────────────
+async function sendMessage() {
+  const text = msgInput.value.trim();
+  if (!text || generating || !generator) return;
+
+  generating        = true;
+  sendBtn.disabled  = true;
+  msgInput.value    = '';
+  msgInput.style.height = 'auto';
+
+  appendMessage('user', text);
+  history.push({ role: 'user', content: text });
+
+  const bubble = appendMessage('assistant', '', true);
+  let output   = '';
+
+  try {
+    const streamer = new TextStreamer(generator.tokenizer, {
+      skip_prompt: true,
+      callback_function: (token) => {
+        output += token;
+        bubble.textContent = output;
+        bubble.classList.add('cursor');
+        chat.scrollTop = chat.scrollHeight;
+      }
+    });
+
+    await generator(history, {
+      max_new_tokens: MAX_NEW_TOKENS,
+      do_sample: true,
+      temperature: 0.7,
+      top_p: 0.9,
+      streamer
+    });
+
+    bubble.classList.remove('cursor');
+    history.push({ role: 'assistant', content: output });
+
+  } catch (err) {
+    bubble.classList.remove('cursor');
+    bubble.textContent = '';
+    showError(err.message + ' — check the browser console for details.');
+    console.error(err);
+  } finally {
+    generating       = false;
+    sendBtn.disabled = false;
+    msgInput.focus();
+  }
+}
+
+// ── Events ────────────────────────────────────────────────────────────────────
+msgInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+msgInput.addEventListener('input', () => {
+  msgInput.style.height = 'auto';
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 130) + 'px';
+});
+
+sendBtn.addEventListener('click', sendMessage);
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+initModel();
+</script>
+</body>
+</html>

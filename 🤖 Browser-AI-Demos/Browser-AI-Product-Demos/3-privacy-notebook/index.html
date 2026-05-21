@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Notebook | Browser AI Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #08080e;
+      color: #e2e2f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── status bar ── */
+    #status-bar {
+      background: #0c0c18;
+      border-bottom: 1px solid #181830;
+      padding: 7px 20px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12.5px; flex-shrink: 0;
+    }
+    .dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #505090; flex-shrink: 0;
+      transition: background .4s, box-shadow .4s;
+    }
+    .dot.loading { background: #f59e0b; animation: pulse 1.2s ease-in-out infinite; }
+    .dot.ready   { background: #22c55e; box-shadow: 0 0 8px #22c55e88; }
+    .dot.error   { background: #ef4444; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    #status-label { color: #8080b0; flex: 1; }
+    #prog-wrap { width: 130px; height: 3px; background: #181830; border-radius: 99px; overflow: hidden; flex-shrink: 0; }
+    #prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 99px; transition: width .25s; }
+    #prog-pct  { color: #10b981; font-size: 11.5px; min-width: 34px; text-align: right; }
+    .back-link { color: #30305a; text-decoration: none; font-size: 12px; flex-shrink: 0; }
+    .back-link:hover { color: #7070a0; }
+
+    /* ── header ── */
+    #header {
+      background: #0a0a16;
+      border-bottom: 1px solid #141428;
+      padding: 10px 20px;
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    #header h1 { font-size: 15px; font-weight: 700; }
+    .badge {
+      font-size: 10.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px;
+      background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.3); color: #6ee7b7;
+    }
+
+    /* ── workspace ── */
+    #workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      min-height: 0;
+    }
+    @media (max-width: 800px) {
+      #workspace { grid-template-columns: 1fr; }
+    }
+
+    /* ── editor pane ── */
+    #editor-pane {
+      border-right: 1px solid #141428;
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+
+    .pane-header {
+      padding: 10px 16px;
+      border-bottom: 1px solid #141428;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11.5px; color: #50508a; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+
+    #note-area {
+      flex: 1;
+      background: #0a0a16;
+      border: none;
+      outline: none;
+      color: #d8d8f0;
+      font-size: 14.5px;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      line-height: 1.8;
+      padding: 24px 28px;
+      resize: none;
+      overflow-y: auto;
+    }
+    #note-area::placeholder { color: #252540; font-style: italic; }
+    #note-area:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* word count */
+    #word-count { font-size: 11px; color: #30305a; }
+
+    /* ── floating tool dock ── */
+    #tool-dock {
+      position: sticky;
+      bottom: 16px;
+      margin: 0 20px 16px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: #0f0f20;
+      border: 1px solid #22223a;
+      border-radius: 14px;
+      padding: 10px 14px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.6);
+    }
+
+    .tool-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 1px solid #22223a;
+      background: #111122;
+      color: #9090c0;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s, transform .1s;
+    }
+    .tool-btn:hover:not(:disabled) {
+      background: #181835;
+      border-color: var(--accent, #6366f1);
+      color: #e2e2f0;
+    }
+    .tool-btn:active:not(:disabled) { transform: scale(.96); }
+    .tool-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    #btn-polish  { --accent: #a855f7; }
+    #btn-tldr    { --accent: #10b981; }
+    #btn-grammar { --accent: #3b82f6; }
+
+    .tool-btn.running {
+      border-color: var(--accent);
+      color: var(--accent);
+      animation: glow 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes glow { from { box-shadow: none; } to { box-shadow: 0 0 12px var(--accent); } }
+
+    /* ── output pane ── */
+    #output-pane {
+      display: flex; flex-direction: column;
+    }
+
+    #output-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* empty state */
+    #empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; flex: 1; text-align: center;
+      gap: 12px; color: #28284a; padding: 40px;
+    }
+    #empty-state .big { font-size: 40px; }
+    #empty-state h3 { font-size: 16px; color: #40406a; }
+    #empty-state p { font-size: 13px; line-height: 1.6; max-width: 320px; }
+
+    /* result block */
+    .result-block {
+      background: #0d0d1e;
+      border: 1px solid #1e1e38;
+      border-radius: 14px;
+      overflow: hidden;
+      animation: fadeUp .25s ease;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1} }
+
+    .result-block.polish  { border-color: rgba(168,85,247,.3); }
+    .result-block.tldr    { border-color: rgba(16,185,129,.3); }
+    .result-block.grammar { border-color: rgba(59,130,246,.3); }
+
+    .result-header {
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid #1e1e38;
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .result-block.polish  .result-header { color: #c084fc; background: rgba(168,85,247,.06); }
+    .result-block.tldr    .result-header { color: #34d399; background: rgba(16,185,129,.06); }
+    .result-block.grammar .result-header { color: #60a5fa; background: rgba(59,130,246,.06); }
+
+    .result-body {
+      padding: 16px;
+      font-size: 14px;
+      font-family: 'Georgia', serif;
+      line-height: 1.75;
+      color: #c8c8e8;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 60px;
+    }
+
+    .cursor-blink::after {
+      content: '▋';
+      display: inline-block;
+      animation: blink .65s steps(1) infinite;
+      color: #6366f1; font-size: 12px;
+    }
+    @keyframes blink { 50%{opacity:0} }
+
+    .result-footer {
+      padding: 8px 14px;
+      border-top: 1px solid #1e1e38;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .copy-btn {
+      font-size: 11.5px; color: #40406a; background: none;
+      border: 1px solid #22223a; border-radius: 6px; padding: 3px 10px;
+      cursor: pointer; font-family: inherit; transition: color .15s, border-color .15s;
+    }
+    .copy-btn:hover { color: #e2e2f0; border-color: #50508a; }
+    .ts { font-size: 10.5px; color: #28284a; }
+
+    /* loading model overlay on output pane */
+    #model-loading {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; flex: 1; gap: 14px;
+      color: #40406a; text-align: center; padding: 40px;
+    }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid #1e1e38;
+      border-top-color: #10b981; border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e1e38; border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<!-- Status bar -->
+<div id="status-bar">
+  <div class="dot loading" id="dot"></div>
+  <span id="status-label">⚪ Downloading T5-Small…</span>
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <span id="prog-pct">0%</span>
+  <a class="back-link" href="../index.html">← Hub</a>
+</div>
+
+<!-- Header -->
+<div id="header">
+  <h1>📓 Local AI Note-Taking Copilot</h1>
+  <span class="badge">Demo 03</span>
+</div>
+
+<!-- Main workspace -->
+<div id="workspace">
+
+  <!-- Left: editor -->
+  <div id="editor-pane">
+    <div class="pane-header">
+      <span>📝 Your Private Notes</span>
+      <span id="word-count">0 words</span>
+    </div>
+
+    <textarea id="note-area" disabled
+      placeholder="Start typing your notes here…&#10;&#10;Your text never leaves this device. Once the AI model loads, use the toolbar below to polish your writing, generate a TL;DR, or fix grammar — all running locally in your browser."></textarea>
+
+    <!-- Floating tool dock -->
+    <div id="tool-dock">
+      <button class="tool-btn" id="btn-polish"  disabled title="Rewrite in polished, professional English">✨ Professional Polish</button>
+      <button class="tool-btn" id="btn-tldr"    disabled title="Condense to a bullet-point summary">📝 Condense to TL;DR</button>
+      <button class="tool-btn" id="btn-grammar" disabled title="Fix grammar and spelling">🔍 Fix Grammar</button>
+    </div>
+  </div>
+
+  <!-- Right: output -->
+  <div id="output-pane">
+    <div class="pane-header">
+      <span>🤖 AI Output</span>
+      <span id="result-count" style="color:#28284a">No results yet</span>
+    </div>
+
+    <div id="output-scroll">
+
+      <!-- Shown while model loads -->
+      <div id="model-loading">
+        <div class="spinner"></div>
+        <div>Loading T5-Small into your browser…<br><span style="font-size:12px">~60 MB · cached after first load</span></div>
+      </div>
+
+      <!-- Empty state after model ready -->
+      <div id="empty-state" style="display:none">
+        <div class="big">✨</div>
+        <h3>AI Copilot Ready</h3>
+        <p>Type or paste text in the editor, then click a tool button to transform it — all running offline on your device.</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
+
+// ── Config ────────────────────────────────────────────────────────────────────
+const MODEL_ID = 'Xenova/t5-small';
+
+const TASK_CONFIG = {
+  polish:  { label: '✨ Professional Polish', cls: 'polish',  prefix: 'paraphrase: ', max: 200, icon: '✨' },
+  tldr:    { label: '📝 TL;DR Summary',       cls: 'tldr',   prefix: 'summarize: ',  max: 120, icon: '📝' },
+  grammar: { label: '🔍 Grammar Fix',          cls: 'grammar',prefix: 'grammar: ',   max: 200, icon: '🔍' }
+};
+
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const dotEl         = document.getElementById('dot');
+const statusLabel   = document.getElementById('status-label');
+const progFill      = document.getElementById('prog-fill');
+const progPct       = document.getElementById('prog-pct');
+const noteArea      = document.getElementById('note-area');
+const wordCount     = document.getElementById('word-count');
+const outputScroll  = document.getElementById('output-scroll');
+const modelLoading  = document.getElementById('model-loading');
+const emptyState    = document.getElementById('empty-state');
+const resultCountEl = document.getElementById('result-count');
+const btnPolish     = document.getElementById('btn-polish');
+const btnTldr       = document.getElementById('btn-tldr');
+const btnGrammar    = document.getElementById('btn-grammar');
+const toolBtns      = [btnPolish, btnTldr, btnGrammar];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let t5 = null;
+let resultCount = 0;
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function initModel() {
+  try {
+    t5 = await pipeline('text2text-generation', MODEL_ID, {
+      progress_callback: ({ status, progress, file }) => {
+        const pct  = progress ?? 0;
+        const name = file ? file.split('/').pop() : '';
+        if (status === 'downloading' || status === 'progress') {
+          statusLabel.textContent = `⚪ Downloading${name ? ' — ' + name : ''}…`;
+          progFill.style.width = pct + '%';
+          progPct.textContent  = Math.round(pct) + '%';
+        } else if (status === 'loading') {
+          statusLabel.textContent = '⚪ Loading T5-Small weights…';
+          progFill.style.width = '99%'; progPct.textContent = '99%';
+        }
+      }
+    });
+
+    dotEl.className = 'dot ready';
+    statusLabel.textContent = '🟢 Offline AI Engine Ready';
+    progFill.style.width = '100%'; progPct.textContent = '100%';
+
+    modelLoading.style.display = 'none';
+    emptyState.style.display   = 'flex';
+    noteArea.disabled = false;
+    toolBtns.forEach(b => b.disabled = false);
+    noteArea.focus();
+
+  } catch (err) {
+    dotEl.className = 'dot error';
+    statusLabel.textContent = '⚠️ Failed to load model';
+    modelLoading.innerHTML = `<div style="color:#fca5a5;font-size:13px">⚠️ ${err.message}<br><br>Chrome 113+ / Edge required. Check console.</div>`;
+    console.error(err);
+  }
+}
+
+// ── Run a task ────────────────────────────────────────────────────────────────
+async function runTask(taskKey) {
+  const text = noteArea.value.trim();
+  if (!text) {
+    noteArea.style.borderColor = '#ef4444';
+    setTimeout(() => noteArea.style.borderColor = '', 800);
+    return;
+  }
+  if (!t5) return;
+
+  const cfg = TASK_CONFIG[taskKey];
+
+  // Hide empty state, lock buttons
+  emptyState.style.display = 'none';
+  toolBtns.forEach(b => { b.disabled = true; b.classList.remove('running'); });
+  const activeBtn = document.getElementById('btn-' + taskKey);
+  activeBtn.classList.add('running');
+
+  // Create result block (streaming placeholder)
+  const block = document.createElement('div');
+  block.className = `result-block ${cfg.cls}`;
+  const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  block.innerHTML = `
+    <div class="result-header"><span>${cfg.icon}</span> ${cfg.label}</div>
+    <div class="result-body cursor-blink">Generating…</div>
+    <div class="result-footer">
+      <span class="ts">${ts}</span>
+      <button class="copy-btn" disabled>Copy</button>
+    </div>
+  `;
+  outputScroll.insertBefore(block, outputScroll.firstChild);
+  outputScroll.scrollTop = 0;
+
+  const bodyEl = block.querySelector('.result-body');
+  const copyBtn = block.querySelector('.copy-btn');
+
+  try {
+    // T5-small input is truncated to ~512 tokens; trim source text reasonably
+    const source = text.length > 800 ? text.slice(0, 800) + '…' : text;
+    const input  = cfg.prefix + source;
+
+    const output = await t5(input, {
+      max_new_tokens: cfg.max,
+      num_beams: 4,
+      early_stopping: true
+    });
+
+    const generated = output[0]?.generated_text ?? '(no output)';
+    bodyEl.textContent = generated;
+    bodyEl.classList.remove('cursor-blink');
+
+    copyBtn.disabled = false;
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(generated).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+      });
+    });
+
+    resultCount++;
+    resultCountEl.textContent = resultCount + (resultCount === 1 ? ' result' : ' results');
+
+  } catch (err) {
+    bodyEl.textContent = '⚠️ ' + err.message;
+    bodyEl.classList.remove('cursor-blink');
+    console.error(err);
+  } finally {
+    toolBtns.forEach(b => { b.disabled = false; b.classList.remove('running'); });
+  }
+}
+
+// ── Word counter ──────────────────────────────────────────────────────────────
+noteArea.addEventListener('input', () => {
+  const words = noteArea.value.trim() ? noteArea.value.trim().split(/\s+/).length : 0;
+  wordCount.textContent = words + (words === 1 ? ' word' : ' words');
+});
+
+// ── Button events ─────────────────────────────────────────────────────────────
+btnPolish .addEventListener('click', () => runTask('polish'));
+btnTldr   .addEventListener('click', () => runTask('tldr'));
+btnGrammar.addEventListener('click', () => runTask('grammar'));
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+initModel();
+</script>
+</body>
+</html>

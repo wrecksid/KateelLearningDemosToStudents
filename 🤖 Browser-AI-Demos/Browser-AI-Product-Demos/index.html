@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browser AI Demos — Edge AI Showcase</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #07070f;
+      color: #e2e2f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── hero ── */
+    header {
+      text-align: center;
+      padding: 64px 24px 40px;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, #1a0050 0%, transparent 70%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99,102,241,.15);
+      border: 1px solid rgba(99,102,241,.4);
+      color: #a5b4fc;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 99px;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      background: linear-gradient(135deg, #e2e2f0 30%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    header p {
+      font-size: 16px;
+      color: #7878a8;
+      max-width: 580px;
+      margin: 0 auto 32px;
+      line-height: 1.6;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .pill {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      color: #9090c0;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 99px;
+    }
+
+    /* ── section divider ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #30306a;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-label::before,
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #131328;
+    }
+
+    /* ── cards ── */
+    main {
+      flex: 1;
+      padding: 40px 24px 64px;
+      max-width: 1160px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: #10101e;
+      border: 1px solid #1e1e3a;
+      border-radius: 16px;
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--glow);
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+    .card:hover::before { opacity: 1; }
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+
+    /* Per-card accent colours */
+    .card[data-n="1"] { --accent:#6366f1; --glow:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,.08) 0%,transparent 70%); }
+    .card[data-n="2"] { --accent:#f59e0b; --glow:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(245,158,11,.08) 0%,transparent 70%); }
+    .card[data-n="3"] { --accent:#10b981; --glow:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(16,185,129,.08) 0%,transparent 70%); }
+    .card[data-n="4"] { --accent:#ec4899; --glow:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(236,72,153,.08) 0%,transparent 70%); }
+    .card[data-n="5"] { --accent:#06b6d4; --glow:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(6,182,212,.08) 0%,transparent 70%); }
+    .card[data-n="6"] { --accent:#f97316; --glow:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(249,115,22,.08) 0%,transparent 70%); }
+
+    .card-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .card-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: #6060a0;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .tag {
+      font-size: 10.5px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #5858a0;
+    }
+
+    .launch-btn {
+      margin-top: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      align-self: flex-start;
+      transition: opacity .15s, transform .1s;
+    }
+    .card:hover .launch-btn { opacity: .9; transform: scale(.98); }
+
+    /* model size badge on card */
+    .model-size {
+      font-size: 10.5px;
+      color: #38385a;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* ── footer ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #30306a;
+      border-top: 1px solid #131328;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hero-badge">
+    <span>🧠</span> Edge AI · Runs 100% In Your Browser
+  </div>
+  <h1>Browser AI Product Demos</h1>
+  <p>Six production-quality demos powered by Small Language Models running entirely on-device — no servers, no API keys, no data leaving your machine.</p>
+  <div class="pill-row">
+    <span class="pill">✦ WebGPU Accelerated</span>
+    <span class="pill">✦ Transformers.js v3</span>
+    <span class="pill">✦ Zero Dependencies</span>
+    <span class="pill">✦ Privacy First</span>
+    <span class="pill">✦ 6 Demos</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── Original three ── -->
+  <div class="section-label">Text & Language</div>
+  <div class="cards">
+
+    <a class="card" data-n="1" href="1-local-chat-advisor/index.html">
+      <div class="card-icon">💬</div>
+      <div class="card-num">Demo 01</div>
+      <h2>Privacy-First Local Chat Advisor</h2>
+      <p>A full ChatGPT-style interface backed by SmolLM2-135M running locally. System-prompted as an academic study buddy. Streams responses token by token.</p>
+      <div class="card-tags">
+        <span class="tag">Text Generation</span>
+        <span class="tag">SmolLM2-135M</span>
+        <span class="tag">Chat Template</span>
+        <span class="tag">Streaming</span>
+      </div>
+      <div class="model-size">⚖️ ~135 MB download</div>
+      <span class="launch-btn">Open Demo →</span>
+    </a>
+
+    <a class="card" data-n="2" href="2-customer-support-tagger/index.html">
+      <div class="card-icon">🏷️</div>
+      <div class="card-num">Demo 02</div>
+      <h2>E-Commerce Smart Ticket Tagger</h2>
+      <p>Real-time customer support triage. As you type a complaint, the demo classifies sentiment, urgency level, and auto-routes to the correct department — all on-device.</p>
+      <div class="card-tags">
+        <span class="tag">Sentiment Analysis</span>
+        <span class="tag">Zero-Shot NLI</span>
+        <span class="tag">DistilBERT</span>
+        <span class="tag">DeBERTa</span>
+      </div>
+      <div class="model-size">⚖️ ~140 MB download</div>
+      <span class="launch-btn">Open Demo →</span>
+    </a>
+
+    <a class="card" data-n="3" href="3-privacy-notebook/index.html">
+      <div class="card-icon">📓</div>
+      <div class="card-num">Demo 03</div>
+      <h2>Local AI Note-Taking Copilot</h2>
+      <p>A clean document editor with a floating AI toolbar. Invoke Professional Polish, TL;DR Summarization, or Grammar Fix — all processed locally by T5-Small.</p>
+      <div class="card-tags">
+        <span class="tag">Text2Text</span>
+        <span class="tag">T5-Small</span>
+        <span class="tag">Summarization</span>
+        <span class="tag">Grammar</span>
+      </div>
+      <div class="model-size">⚖️ ~60 MB download</div>
+      <span class="launch-btn">Open Demo →</span>
+    </a>
+
+  </div>
+
+  <!-- ── New three ── -->
+  <div class="section-label">Audio · Vision · Search</div>
+  <div class="cards">
+
+    <a class="card" data-n="4" href="4-whisper-voice-transcriber/index.html">
+      <div class="card-icon">🎙️</div>
+      <div class="card-num">Demo 04</div>
+      <h2>Whisper Voice Transcriber</h2>
+      <p>Record from your microphone and transcribe speech to text locally using OpenAI's Whisper-Tiny model. Live waveform visualiser, multi-language support, and transcription history — zero cloud.</p>
+      <div class="card-tags">
+        <span class="tag">Speech-to-Text</span>
+        <span class="tag">Whisper-Tiny</span>
+        <span class="tag">WebAudio API</span>
+        <span class="tag">Multi-language</span>
+      </div>
+      <div class="model-size">⚖️ ~40 MB download</div>
+      <span class="launch-btn">Open Demo →</span>
+    </a>
+
+    <a class="card" data-n="5" href="5-entity-tagger/index.html">
+      <div class="card-icon">🏷️</div>
+      <div class="card-num">Demo 05</div>
+      <h2>Named Entity Tagger</h2>
+      <p>Paste any text and watch BERT colour-highlight every person, organisation, location, and miscellaneous entity in real time. Entity count stats update live as you type.</p>
+      <div class="card-tags">
+        <span class="tag">Token Classification</span>
+        <span class="tag">BERT-NER</span>
+        <span class="tag">Real-time</span>
+        <span class="tag">Entity Linking</span>
+      </div>
+      <div class="model-size">⚖️ ~400 MB download</div>
+      <span class="launch-btn">Open Demo →</span>
+    </a>
+
+    <a class="card" data-n="6" href="6-semantic-search/index.html">
+      <div class="card-icon">🔍</div>
+      <div class="card-num">Demo 06</div>
+      <h2>Semantic Search Engine</h2>
+      <p>Search a 10-document corpus by <em>meaning</em> using sentence embeddings. Toggle keyword comparison to see why semantic search finds relevant results that keyword matching misses entirely.</p>
+      <div class="card-tags">
+        <span class="tag">Embeddings</span>
+        <span class="tag">MiniLM-L6-v2</span>
+        <span class="tag">Cosine Similarity</span>
+        <span class="tag">RAG Foundations</span>
+      </div>
+      <div class="model-size">⚖️ ~23 MB download</div>
+      <span class="launch-btn">Open Demo →</span>
+    </a>
+
+  </div>
+
+</main>
+
+<footer>
+  Built with Transformers.js v3 · Models run 100% client-side · KateelLearningDemosToStudents
+</footer>
+
+</body>
+</html>

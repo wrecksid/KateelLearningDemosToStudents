@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Semantic Search | Browser AI Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #07070e;
+      color: #e2e2f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── status bar ── */
+    #status-bar {
+      background: #0b0b18;
+      border-bottom: 1px solid #161630;
+      padding: 7px 20px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12.5px; flex-shrink: 0;
+    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #505090; flex-shrink: 0; transition: background .4s, box-shadow .4s; }
+    .dot.loading { background: #f59e0b; animation: pulse 1.2s ease-in-out infinite; }
+    .dot.ready   { background: #22c55e; box-shadow: 0 0 8px #22c55e88; }
+    .dot.error   { background: #ef4444; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    #status-label { color: #8080b0; flex: 1; }
+    #prog-wrap { width: 140px; height: 3px; background: #161630; border-radius: 99px; overflow: hidden; flex-shrink: 0; }
+    #prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f97316, #eab308); border-radius: 99px; transition: width .25s; }
+    #prog-pct  { color: #f97316; font-size: 11.5px; min-width: 34px; text-align: right; }
+    .back-link { color: #30305a; text-decoration: none; font-size: 12px; flex-shrink: 0; }
+    .back-link:hover { color: #7070a0; }
+
+    /* ── header ── */
+    #header { background: #090915; border-bottom: 1px solid #131325; padding: 10px 20px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    #header h1 { font-size: 15px; font-weight: 700; }
+    .badge { font-size: 10.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px; }
+    .badge-orange { background: rgba(249,115,22,.12); border: 1px solid rgba(249,115,22,.3); color: #fdba74; }
+    .badge-info   { background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.3); color: #a5b4fc; }
+
+    /* ── explainer banner ── */
+    #explainer {
+      background: rgba(99,102,241,.06);
+      border-bottom: 1px solid rgba(99,102,241,.15);
+      padding: 10px 24px;
+      font-size: 12.5px;
+      color: #6060a0;
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    #explainer strong { color: #8888c8; }
+
+    /* ── main ── */
+    #main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 0;
+      overflow: hidden;
+    }
+    @media (max-width: 860px) { #main { grid-template-columns: 1fr; } }
+
+    /* ── corpus panel ── */
+    #corpus-panel {
+      border-right: 1px solid #131325;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 10px 16px;
+      border-bottom: 1px solid #131325;
+      font-size: 11.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em; color: #404070;
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    #doc-count { color: #f97316; }
+
+    #doc-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+
+    .doc-card {
+      background: #0e0e1e;
+      border: 1px solid #1a1a32;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #8080b0;
+      cursor: default;
+      transition: border-color .2s;
+      position: relative;
+    }
+    .doc-card.matched { border-color: #f97316; color: #d8d8f0; background: rgba(249,115,22,.05); }
+    .doc-card .doc-title { font-weight: 700; font-size: 11.5px; color: #5050a0; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .05em; }
+    .doc-card.matched .doc-title { color: #f97316; }
+    .del-doc {
+      position: absolute; top: 6px; right: 8px;
+      background: none; border: none; color: #30305a; font-size: 12px;
+      cursor: pointer; padding: 0 3px; line-height: 1; border-radius: 4px;
+      transition: color .15s;
+    }
+    .del-doc:hover { color: #ef4444; }
+
+    /* add document form */
+    #add-doc-form {
+      border-top: 1px solid #131325;
+      padding: 10px;
+      display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;
+    }
+    #new-doc-title {
+      background: #0e0e1e; border: 1px solid #1a1a32; border-radius: 8px;
+      padding: 6px 10px; color: #e2e2f0; font-size: 12.5px; font-family: inherit; outline: none;
+    }
+    #new-doc-title::placeholder { color: #303055; }
+    #new-doc-text {
+      background: #0e0e1e; border: 1px solid #1a1a32; border-radius: 8px;
+      padding: 6px 10px; color: #e2e2f0; font-size: 12.5px; font-family: inherit;
+      resize: none; outline: none; min-height: 56px;
+    }
+    #new-doc-text::placeholder { color: #303055; }
+    #new-doc-title:focus, #new-doc-text:focus { border-color: #f97316; }
+    #add-btn {
+      background: #f97316; border: none; border-radius: 8px; color: #fff;
+      font-size: 12.5px; font-weight: 700; font-family: inherit;
+      padding: 7px; cursor: pointer; transition: background .15s;
+    }
+    #add-btn:hover { background: #ea6c0a; }
+    #add-btn:disabled { background: #1e1e38; color: #40406a; cursor: not-allowed; }
+
+    /* ── search panel ── */
+    #search-panel { display: flex; flex-direction: column; overflow: hidden; }
+
+    /* search bar */
+    #search-bar-wrap {
+      padding: 14px 20px;
+      border-bottom: 1px solid #131325;
+      flex-shrink: 0;
+    }
+    #search-row {
+      display: flex; gap: 8px; align-items: center;
+      background: #0e0e1e; border: 1px solid #1e1e38;
+      border-radius: 12px; padding: 8px 12px;
+      transition: border-color .2s;
+    }
+    #search-row:focus-within { border-color: #f97316; }
+    #search-input {
+      flex: 1; background: none; border: none; outline: none;
+      color: #e2e2f0; font-size: 15px; font-family: inherit;
+    }
+    #search-input::placeholder { color: #303055; }
+    #search-input:disabled { cursor: not-allowed; }
+    #search-btn {
+      background: #f97316; border: none; border-radius: 8px; color: #fff;
+      width: 32px; height: 32px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; transition: background .15s;
+    }
+    #search-btn:hover:not(:disabled) { background: #ea6c0a; }
+    #search-btn:disabled { background: #1e1e38; cursor: not-allowed; }
+
+    /* keyword toggle */
+    #toggle-row {
+      display: flex; align-items: center; gap: 8px; margin-top: 8px;
+      font-size: 12px; color: #50508a;
+    }
+    .toggle-switch { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+    #kw-toggle { display: none; }
+    .toggle-track {
+      width: 32px; height: 18px; background: #1e1e38; border-radius: 99px;
+      position: relative; transition: background .2s;
+    }
+    #kw-toggle:checked + .toggle-track { background: #f97316; }
+    .toggle-thumb {
+      position: absolute; top: 2px; left: 2px;
+      width: 14px; height: 14px; background: #fff; border-radius: 50%;
+      transition: left .2s;
+    }
+    #kw-toggle:checked + .toggle-track .toggle-thumb { left: 16px; }
+
+    /* results */
+    #results-scroll { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+
+    /* empty / loading states */
+    #empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      flex: 1; text-align: center; color: #20203a; gap: 10px; padding: 40px;
+    }
+    #empty-state .icon { font-size: 40px; }
+    #empty-state h3 { font-size: 15px; color: #30306a; }
+    #empty-state p { font-size: 12.5px; max-width: 340px; line-height: 1.6; }
+
+    #model-loading-overlay {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      flex: 1; gap: 14px; color: #404070; text-align: center; padding: 40px;
+    }
+    #model-loading-overlay.hidden { display: none; }
+    .spinner { width: 36px; height: 36px; border: 3px solid #1a1a38; border-top-color: #f97316; border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* result card */
+    .result-card {
+      background: #0e0e1e;
+      border: 1px solid #1a1a32;
+      border-radius: 14px;
+      overflow: hidden;
+      animation: fadeUp .2s ease;
+      transition: border-color .2s;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1} }
+    .result-card:first-child { border-color: #f97316; box-shadow: 0 0 20px rgba(249,115,22,.1); }
+
+    .rc-header {
+      padding: 8px 14px;
+      background: #0c0c1c;
+      border-bottom: 1px solid #1a1a32;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .rc-rank {
+      font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+    }
+    .result-card:first-child .rc-rank { color: #f97316; }
+    .rc-rank-rest { color: #404070; }
+
+    .score-display { display: flex; align-items: center; gap: 8px; }
+    .score-pct { font-size: 13px; font-weight: 700; }
+    .result-card:first-child .score-pct { color: #f97316; }
+    .score-bar-wrap { width: 80px; height: 4px; background: #1a1a32; border-radius: 99px; overflow: hidden; }
+    .score-bar { height: 100%; border-radius: 99px; background: #404070; transition: width .4s; }
+    .result-card:first-child .score-bar { background: linear-gradient(90deg, #f97316, #eab308); }
+
+    .rc-title { padding: 10px 14px 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #50508a; }
+    .rc-text  { padding: 4px 14px 14px; font-size: 13.5px; line-height: 1.65; color: #b0b0d0; }
+
+    /* keyword match highlight inside result */
+    .kw-match { background: rgba(249,115,22,.2); border-radius: 3px; padding: 0 2px; color: #fdba74; font-weight: 600; }
+
+    /* comparison badge */
+    .vs-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10.5px; padding: 2px 8px; border-radius: 99px;
+      font-weight: 700; margin-left: 6px;
+    }
+    .vs-better { background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); color: #86efac; }
+    .vs-same   { background: rgba(148,163,184,.1); border: 1px solid rgba(148,163,184,.2); color: #94a3b8; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1a1a32; border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<div id="status-bar">
+  <div class="dot loading" id="dot"></div>
+  <span id="status-label">⚪ Downloading MiniLM embeddings…</span>
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <span id="prog-pct">0%</span>
+  <a class="back-link" href="../index.html">← Hub</a>
+</div>
+
+<div id="header">
+  <h1>🔍 Semantic Search Engine</h1>
+  <span class="badge badge-orange">Demo 06</span>
+  <span class="badge badge-info">all-MiniLM-L6-v2</span>
+</div>
+
+<div id="explainer">
+  💡 <span>Unlike keyword search, <strong>semantic search</strong> understands <em>meaning</em> — try searching <em>"stock market crash"</em> and notice it finds documents about <em>"financial crisis"</em> and <em>"market downturn"</em> without those exact words.</span>
+</div>
+
+<div id="main">
+
+  <!-- Corpus panel -->
+  <div id="corpus-panel">
+    <div class="panel-header">
+      <span>Document Corpus</span>
+      <span id="doc-count">0 docs</span>
+    </div>
+    <div id="doc-list"></div>
+    <div id="add-doc-form">
+      <input id="new-doc-title" placeholder="Document title (optional)" />
+      <textarea id="new-doc-text" placeholder="Paste a document or paragraph to add to the corpus…"></textarea>
+      <button id="add-btn" disabled>+ Add Document</button>
+    </div>
+  </div>
+
+  <!-- Search panel -->
+  <div id="search-panel">
+    <div id="search-bar-wrap">
+      <div id="search-row">
+        <span style="font-size:16px;flex-shrink:0">🔍</span>
+        <input id="search-input" placeholder="Search by meaning, not just keywords…" disabled />
+        <button id="search-btn" disabled title="Search">↵</button>
+      </div>
+      <div id="toggle-row">
+        <label class="toggle-switch">
+          <input type="checkbox" id="kw-toggle" />
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        </label>
+        <span>Show keyword comparison</span>
+      </div>
+    </div>
+
+    <div id="results-scroll">
+      <div id="model-loading-overlay">
+        <div class="spinner"></div>
+        <span>Loading sentence embedding model…</span>
+        <span style="font-size:12px">all-MiniLM-L6-v2 · ~23 MB · cached after first load</span>
+      </div>
+      <div id="empty-state" style="display:none">
+        <div class="icon">🔍</div>
+        <h3>Ready to search</h3>
+        <p>Type a query above and press Enter. The AI will rank every document by how well it <em>semantically</em> matches your intent — not just by word overlap.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
+
+// ── Default corpus ────────────────────────────────────────────────────────────
+const DEFAULT_DOCS = [
+  { title: 'Market Crash 2008',      text: 'The 2008 global financial crisis was triggered by the collapse of the US housing bubble. Major banks like Lehman Brothers declared bankruptcy, credit markets froze, and stock markets around the world experienced severe downturns. Governments intervened with massive bailout packages.' },
+  { title: 'Renewable Energy Rise',  text: 'Solar and wind power have seen dramatic cost reductions over the past decade. Utility-scale solar farms can now generate electricity cheaper than coal or natural gas plants. Several countries have pledged to achieve 100% renewable energy grids by 2035.' },
+  { title: 'Machine Learning Basics',text: 'Machine learning is a branch of artificial intelligence where algorithms learn patterns from data without being explicitly programmed. Common techniques include neural networks, decision trees, and support vector machines. Applications range from image recognition to natural language processing.' },
+  { title: 'Inflation and Interest', text: 'Central banks raise interest rates to combat rising inflation. Higher rates increase the cost of borrowing, which slows consumer spending and business investment. The Federal Reserve and European Central Bank have both used rate hikes as a primary tool against post-pandemic inflation.' },
+  { title: 'CRISPR Gene Editing',    text: 'CRISPR-Cas9 is a revolutionary gene-editing technology that allows scientists to precisely cut and modify DNA sequences. It has potential applications in treating genetic diseases, developing disease-resistant crops, and even eliminating inherited conditions in embryos.' },
+  { title: 'Supply Chain Disruption',text: 'The COVID-19 pandemic exposed significant vulnerabilities in global supply chains. Semiconductor shortages crippled automotive and electronics industries. Companies are now investing in reshoring manufacturing and building larger safety-stock inventories to improve resilience.' },
+  { title: 'Quantum Computing',      text: 'Quantum computers use qubits that can exist in superposition, enabling them to solve certain problems exponentially faster than classical computers. Companies like IBM, Google, and startups are racing to achieve quantum advantage for cryptography, drug discovery, and optimization problems.' },
+  { title: 'Portfolio Diversification',text: 'Diversification is a risk management strategy where investors spread capital across different asset classes, geographies, and industries. A well-diversified portfolio reduces the impact of any single investment performing poorly. Modern Portfolio Theory, developed by Harry Markowitz, formalizes this concept.' },
+  { title: 'Climate Tipping Points', text: 'Scientists warn that the Earth may be approaching irreversible climate tipping points, including the collapse of the West Antarctic Ice Sheet, Amazon rainforest dieback, and permafrost thawing. Crossing these thresholds could trigger cascading effects that accelerate global warming beyond current projections.' },
+  { title: 'Blockchain Technology',  text: 'Blockchain is a distributed ledger technology that records transactions in a tamper-resistant chain of blocks. Each block is cryptographically linked to the previous one, ensuring data integrity. Beyond cryptocurrencies, blockchain is being explored for supply chain tracking, smart contracts, and digital identity.' },
+];
+
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const dotEl         = document.getElementById('dot');
+const statusLabel   = document.getElementById('status-label');
+const progFill      = document.getElementById('prog-fill');
+const progPct       = document.getElementById('prog-pct');
+const docList       = document.getElementById('doc-list');
+const docCount      = document.getElementById('doc-count');
+const addBtn        = document.getElementById('add-btn');
+const newDocTitle   = document.getElementById('new-doc-title');
+const newDocText    = document.getElementById('new-doc-text');
+const searchInput   = document.getElementById('search-input');
+const searchBtn     = document.getElementById('search-btn');
+const kwToggle      = document.getElementById('kw-toggle');
+const resultsScroll = document.getElementById('results-scroll');
+const modelOverlay  = document.getElementById('model-loading-overlay');
+const emptyState    = document.getElementById('empty-state');
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let extractor = null;
+const corpus  = [];       // [{title, text, embedding}]
+
+// ── Cosine similarity (embeddings are L2-normalised) ─────────────────────────
+function cosineSim(a, b) {
+  let dot = 0;
+  for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
+  return dot;
+}
+
+// ── Keyword score (simple TF overlap) ────────────────────────────────────────
+function keywordScore(query, text) {
+  const tokens = q => q.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w => w.length > 2);
+  const qTokens  = new Set(tokens(query));
+  const docWords = tokens(text);
+  if (!qTokens.size) return 0;
+  const matches = docWords.filter(w => qTokens.has(w)).length;
+  return matches / (docWords.length + 1);
+}
+
+// ── Init model ────────────────────────────────────────────────────────────────
+async function initModel() {
+  try {
+    extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
+      progress_callback: ({ status, progress, file }) => {
+        const pct  = progress ?? 0;
+        const name = file ? file.split('/').pop() : '';
+        if (status === 'downloading' || status === 'progress') {
+          statusLabel.textContent = `⚪ Downloading${name ? ' — ' + name : ''}…`;
+          progFill.style.width = pct + '%';
+          progPct.textContent  = Math.round(pct) + '%';
+        } else if (status === 'loading') {
+          statusLabel.textContent = '⚪ Loading embedding model…';
+          progFill.style.width = '99%'; progPct.textContent = '99%';
+        }
+      }
+    });
+
+    dotEl.className = 'dot ready';
+    statusLabel.textContent = '🟢 Semantic Search Ready — computing corpus embeddings…';
+    progFill.style.width = '100%'; progPct.textContent = '100%';
+
+    // Embed default corpus
+    for (const doc of DEFAULT_DOCS) await addDocument(doc.title, doc.text, false);
+    renderDocList();
+
+    modelOverlay.classList.add('hidden');
+    emptyState.style.display = 'flex';
+    searchInput.disabled = false;
+    searchBtn.disabled   = false;
+    addBtn.disabled      = false;
+    statusLabel.textContent = `🟢 Semantic Search Ready — ${corpus.length} documents indexed`;
+
+  } catch (err) {
+    dotEl.className = 'dot error';
+    statusLabel.textContent = '⚠️ Failed to load model';
+    modelOverlay.innerHTML = `<div style="color:#fca5a5;font-size:13px">⚠️ ${err.message}<br><br>Chrome 113+ / Edge required. Check console.</div>`;
+    console.error(err);
+  }
+}
+
+// ── Embed text ────────────────────────────────────────────────────────────────
+async function embed(text) {
+  const out = await extractor(text, { pooling: 'mean', normalize: true });
+  return Array.from(out.data);
+}
+
+// ── Add document to corpus ────────────────────────────────────────────────────
+async function addDocument(title, text, rerender = true) {
+  if (!text.trim()) return;
+  const embedding = await embed(text);
+  corpus.push({ title: title || `Document ${corpus.length + 1}`, text, embedding });
+  if (rerender) {
+    renderDocList();
+    docCount.textContent = corpus.length + ' docs';
+    statusLabel.textContent = `🟢 ${corpus.length} documents indexed`;
+  }
+}
+
+// ── Render corpus list ────────────────────────────────────────────────────────
+function renderDocList() {
+  docList.innerHTML = '';
+  docCount.textContent = corpus.length + ' docs';
+  corpus.forEach((doc, idx) => {
+    const card = document.createElement('div');
+    card.className = 'doc-card';
+    card.id = `doc-${idx}`;
+    card.innerHTML = `
+      <div class="doc-title">${escHtml(doc.title)}</div>
+      ${escHtml(doc.text.slice(0, 100))}${doc.text.length > 100 ? '…' : ''}
+      <button class="del-doc" data-idx="${idx}" title="Remove">✕</button>
+    `;
+    docList.appendChild(card);
+  });
+}
+
+// ── Delete a document ────────────────────────────────────────────────────────
+docList.addEventListener('click', e => {
+  if (e.target.classList.contains('del-doc')) {
+    const idx = +e.target.dataset.idx;
+    corpus.splice(idx, 1);
+    renderDocList();
+    statusLabel.textContent = `🟢 ${corpus.length} documents indexed`;
+  }
+});
+
+// ── Search ────────────────────────────────────────────────────────────────────
+async function search() {
+  const query = searchInput.value.trim();
+  if (!query || !extractor || corpus.length === 0) return;
+
+  searchBtn.disabled = true;
+  searchInput.disabled = true;
+  emptyState.style.display = 'none';
+
+  // Clear old results but keep placeholder
+  Array.from(resultsScroll.children).forEach(c => {
+    if (c !== modelOverlay && c !== emptyState) c.remove();
+  });
+
+  // Highlight matched docs in corpus list
+  document.querySelectorAll('.doc-card').forEach(c => c.classList.remove('matched'));
+
+  try {
+    const queryEmb = await embed(query);
+    const showKw   = kwToggle.checked;
+
+    const scored = corpus.map((doc, idx) => ({
+      idx,
+      doc,
+      semScore: cosineSim(queryEmb, doc.embedding),
+      kwScore:  keywordScore(query, doc.text)
+    }));
+
+    scored.sort((a, b) => b.semScore - a.semScore);
+    const maxSem = scored[0]?.semScore ?? 1;
+
+    scored.forEach((item, rank) => {
+      const pct     = Math.round((item.semScore / maxSem) * 100);
+      const kwPct   = Math.round(item.kwScore * 1000); // scaled for visibility
+      const isTop   = rank === 0;
+      const rankLabel = rank === 0 ? '🏆 Best Match' : `#${rank + 1}`;
+
+      // Highlight in corpus list
+      if (rank < 3) {
+        const el = document.getElementById(`doc-${item.idx}`);
+        if (el) el.classList.add('matched');
+      }
+
+      let vsHtml = '';
+      if (showKw) {
+        const kwBetter = kwPct < pct * 0.4;
+        vsHtml = kwBetter
+          ? `<span class="vs-badge vs-better">✦ Semantic finds this, keyword misses</span>`
+          : `<span class="vs-badge vs-same">Keyword: ${kwPct}%</span>`;
+      }
+
+      // Highlight query terms in result text
+      const highlightedText = showKw ? highlightKeywords(item.doc.text, query) : escHtml(item.doc.text);
+
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      card.innerHTML = `
+        <div class="rc-header">
+          <span class="rc-rank ${isTop ? '' : 'rc-rank-rest'}">${rankLabel}</span>
+          <div class="score-display">
+            <span class="score-pct">${pct}%</span>
+            <div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%"></div></div>
+          </div>
+        </div>
+        <div class="rc-title">${escHtml(item.doc.title)} ${vsHtml}</div>
+        <div class="rc-text">${highlightedText}</div>
+      `;
+      resultsScroll.appendChild(card);
+    });
+
+    resultsScroll.scrollTop = 0;
+
+  } catch (err) {
+    const div = document.createElement('div');
+    div.style.cssText = 'color:#fca5a5;font-size:13px;padding:12px';
+    div.textContent = '⚠️ ' + err.message;
+    resultsScroll.appendChild(div);
+    console.error(err);
+  } finally {
+    searchBtn.disabled  = false;
+    searchInput.disabled = false;
+    searchInput.focus();
+  }
+}
+
+// ── Keyword highlight helper ──────────────────────────────────────────────────
+function highlightKeywords(text, query) {
+  const words = query.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w => w.length > 2);
+  if (!words.length) return escHtml(text);
+  const re = new RegExp(`(${words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g,'\\')).join('|')})`, 'gi');
+  return escHtml(text).replace(re, m => `<span class="kw-match">${m}</span>`);
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── Add document form ─────────────────────────────────────────────────────────
+addBtn.addEventListener('click', async () => {
+  const title = newDocTitle.value.trim();
+  const text  = newDocText.value.trim();
+  if (!text) return;
+  addBtn.disabled = true;
+  addBtn.textContent = 'Embedding…';
+  await addDocument(title, text);
+  newDocTitle.value = '';
+  newDocText.value  = '';
+  addBtn.disabled   = false;
+  addBtn.textContent = '+ Add Document';
+});
+
+// ── Search events ─────────────────────────────────────────────────────────────
+searchBtn.addEventListener('click', search);
+searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+initModel();
+</script>
+</body>
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Ticket Tagger | Browser AI Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #09090f;
+      color: #e2e2f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── status bar ── */
+    #status-bar {
+      background: #0e0e1c;
+      border-bottom: 1px solid #1c1c30;
+      padding: 7px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12.5px;
+      flex-shrink: 0;
+    }
+    .dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #505090; flex-shrink: 0;
+      transition: background .4s, box-shadow .4s;
+    }
+    .dot.loading { background: #f59e0b; animation: pulse 1.2s ease-in-out infinite; }
+    .dot.ready   { background: #22c55e; box-shadow: 0 0 8px #22c55e88; }
+    .dot.error   { background: #ef4444; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    #status-label { color: #8080b0; flex: 1; }
+    .model-tag {
+      font-size: 11px; color: #404068;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      padding: 2px 8px; border-radius: 6px;
+    }
+    #prog-wrap { width: 130px; height: 3px; background: #1c1c30; border-radius: 99px; overflow: hidden; flex-shrink: 0; }
+    #prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg,#f59e0b,#f97316); border-radius: 99px; transition: width .25s; }
+    #prog-pct  { color: #f59e0b; font-size: 11.5px; min-width: 34px; text-align: right; }
+    .back-link { color: #30305a; text-decoration: none; font-size: 12px; flex-shrink: 0; }
+    .back-link:hover { color: #7070a0; }
+
+    /* ── header ── */
+    #header {
+      background: #0c0c1a;
+      border-bottom: 1px solid #181830;
+      padding: 10px 20px;
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    #header h1 { font-size: 15px; font-weight: 700; }
+    .badge {
+      font-size: 10.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px;
+      background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.3); color: #fcd34d;
+    }
+
+    /* ── two-column layout ── */
+    #main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    @media (max-width: 720px) {
+      #main { grid-template-columns: 1fr; }
+    }
+
+    /* ── left panel ── */
+    #left-panel {
+      border-right: 1px solid #181830;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    #left-panel label {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .07em; color: #50508a;
+    }
+    #ticket-input {
+      flex: 1;
+      min-height: 280px;
+      background: #111122;
+      border: 1px solid #22223a;
+      border-radius: 12px;
+      padding: 16px;
+      color: #e2e2f0;
+      font-size: 14px;
+      font-family: inherit;
+      line-height: 1.65;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #ticket-input:focus { border-color: #f59e0b; }
+    #ticket-input::placeholder { color: #303055; }
+    #ticket-input:disabled { opacity: .5; cursor: not-allowed; }
+
+    .sample-btns {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .sample-btn {
+      font-size: 11.5px;
+      padding: 5px 11px;
+      border-radius: 8px;
+      border: 1px solid #22223a;
+      background: #111122;
+      color: #7070a0;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .sample-btn:hover { border-color: #f59e0b; color: #fcd34d; }
+
+    #char-count { font-size: 11px; color: #303055; text-align: right; }
+
+    /* ── right panel ── */
+    #right-panel {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    #right-panel > .section-title {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .07em; color: #50508a;
+    }
+
+    /* loading skeleton */
+    #loading-overlay {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; flex: 1; color: #40406a; text-align: center;
+    }
+    #loading-overlay .spinner {
+      width: 36px; height: 36px; border: 3px solid #1e1e38;
+      border-top-color: #f59e0b; border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* result cards */
+    #results { display: flex; flex-direction: column; gap: 16px; }
+
+    .result-card {
+      background: #0f0f1e;
+      border: 1px solid #1e1e38;
+      border-radius: 14px;
+      padding: 16px 18px;
+      transition: border-color .3s;
+    }
+    .result-card.active { border-color: var(--c); }
+
+    .rc-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; color: #40406a; margin-bottom: 10px;
+    }
+
+    /* Sentiment gauge */
+    .sentiment-value {
+      font-size: 22px; font-weight: 800;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sentiment-bar-wrap {
+      margin-top: 10px; height: 5px;
+      background: #1e1e38; border-radius: 99px; overflow: hidden;
+    }
+    .sentiment-bar { height: 100%; border-radius: 99px; transition: width .5s, background .5s; }
+    .sentiment-meta { font-size: 11px; color: #40406a; margin-top: 6px; }
+
+    /* Urgency pills */
+    .urgency-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .urgency-pill {
+      padding: 6px 14px; border-radius: 99px; font-size: 13px; font-weight: 700;
+      border: 2px solid transparent; transition: all .3s; opacity: .3;
+    }
+    .urgency-pill.active { opacity: 1; }
+    .urgency-pill.high   { border-color: #ef4444; color: #fca5a5; background: rgba(239,68,68,.1); }
+    .urgency-pill.medium { border-color: #f59e0b; color: #fcd34d; background: rgba(245,158,11,.1); }
+    .urgency-pill.low    { border-color: #22c55e; color: #86efac; background: rgba(34,197,94,.1); }
+
+    /* Department routing */
+    .dept-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .dept-row {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; opacity: .35; transition: opacity .3s;
+    }
+    .dept-row.active { opacity: 1; }
+    .dept-icon {
+      width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; background: #111122; border: 1px solid #1e1e38;
+    }
+    .dept-label { flex: 1; font-weight: 600; }
+    .dept-score {
+      font-size: 11px; color: #50508a;
+      font-variant-numeric: tabular-nums;
+    }
+    .dept-bar-wrap { width: 80px; height: 3px; background: #1e1e38; border-radius: 99px; overflow: hidden; }
+    .dept-bar { height: 100%; border-radius: 99px; background: #6366f1; transition: width .5s; }
+
+    /* idle placeholder */
+    .idle-placeholder {
+      color: #28284a; font-size: 13px; font-style: italic;
+    }
+
+    /* processing indicator */
+    #processing {
+      display: none;
+      align-items: center; gap: 8px;
+      font-size: 12px; color: #50508a;
+      padding: 8px 0;
+    }
+    #processing.visible { display: flex; }
+    .proc-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #f59e0b;
+      animation: proc 1s ease-in-out infinite;
+    }
+    .proc-dot:nth-child(2) { animation-delay: .15s; }
+    .proc-dot:nth-child(3) { animation-delay: .3s; }
+    @keyframes proc { 0%,100%{opacity:.2} 50%{opacity:1} }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e1e38; border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<!-- Status bar -->
+<div id="status-bar">
+  <div class="dot loading" id="dot1"></div>
+  <span id="status-label">⚪ Loading Sentiment Model…</span>
+  <span class="model-tag">DistilBERT SST-2</span>
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <span id="prog-pct">0%</span>
+  <a class="back-link" href="../index.html">← Hub</a>
+</div>
+
+<!-- Header -->
+<div id="header">
+  <h1>🏷️ E-Commerce Smart Ticket Tagger</h1>
+  <span class="badge">Demo 02</span>
+</div>
+
+<!-- Two-column body -->
+<div id="main">
+
+  <!-- Left: input -->
+  <div id="left-panel">
+    <label>Customer Message / Support Ticket</label>
+    <textarea id="ticket-input" disabled
+      placeholder="Type or paste a customer support message here…&#10;&#10;The AI will analyse sentiment, urgency, and auto-route it to the right team — all in real time, entirely in your browser."></textarea>
+    <div id="char-count">0 characters</div>
+
+    <label>Try a sample</label>
+    <div class="sample-btns">
+      <button class="sample-btn" data-sample="angry">😠 Angry Customer</button>
+      <button class="sample-btn" data-sample="billing">💳 Billing Issue</button>
+      <button class="sample-btn" data-sample="bug">🐛 Bug Report</button>
+      <button class="sample-btn" data-sample="happy">😊 Happy Feedback</button>
+    </div>
+  </div>
+
+  <!-- Right: analysis -->
+  <div id="right-panel">
+    <div class="section-title">Real-Time Analysis</div>
+
+    <!-- Loading overlay shown until models ready -->
+    <div id="loading-overlay">
+      <div class="spinner"></div>
+      <div>Loading AI models into your browser…<br><span style="font-size:12px">First load downloads ~140 MB · cached after that</span></div>
+    </div>
+
+    <!-- Results (hidden until models ready) -->
+    <div id="results" style="display:none">
+
+      <div id="processing">
+        <div class="proc-dot"></div>
+        <div class="proc-dot"></div>
+        <div class="proc-dot"></div>
+        <span>Analysing…</span>
+      </div>
+
+      <!-- Sentiment -->
+      <div class="result-card" id="card-sentiment" style="--c:#6366f1">
+        <div class="rc-label">Sentiment</div>
+        <div class="sentiment-value" id="sentiment-value">
+          <span id="sentiment-emoji">—</span>
+          <span id="sentiment-text" style="font-size:16px;color:#40406a">Waiting for input…</span>
+        </div>
+        <div class="sentiment-bar-wrap">
+          <div class="sentiment-bar" id="sentiment-bar" style="width:0%"></div>
+        </div>
+        <div class="sentiment-meta" id="sentiment-meta"></div>
+      </div>
+
+      <!-- Urgency -->
+      <div class="result-card" id="card-urgency" style="--c:#f59e0b">
+        <div class="rc-label">Urgency Level</div>
+        <div class="urgency-pills">
+          <div class="urgency-pill high"   id="pill-high">🔴 High</div>
+          <div class="urgency-pill medium" id="pill-medium">🟡 Medium</div>
+          <div class="urgency-pill low"    id="pill-low">🟢 Low</div>
+        </div>
+      </div>
+
+      <!-- Department routing -->
+      <div class="result-card" id="card-dept" style="--c:#22c55e">
+        <div class="rc-label">Auto-Route Department</div>
+        <div class="dept-list" id="dept-list">
+          <div class="idle-placeholder">Start typing to see routing suggestions…</div>
+        </div>
+      </div>
+
+    </div><!-- /results -->
+  </div>
+</div>
+
+<script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
+
+// ── Models ────────────────────────────────────────────────────────────────────
+const SENTIMENT_MODEL = 'Xenova/distilbert-base-uncased-finetuned-sst-2-english';
+const ZSC_MODEL       = 'Xenova/nli-deberta-v3-small';
+const DEPT_LABELS     = ['Billing & Payments', 'Technical Support', 'Product Feedback', 'Returns & Refunds'];
+const DEPT_ICONS      = { 'Billing & Payments': '💳', 'Technical Support': '🔧', 'Product Feedback': '💡', 'Returns & Refunds': '📦' };
+const URGENCY_KW      = ['urgent','immediately','asap','broken','not working','stopped working','outage','down','furious','angry','unacceptable','worst','terrible','scam','fraud','refund now','fix this','lawsuit'];
+
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const dot1         = document.getElementById('dot1');
+const statusLabel  = document.getElementById('status-label');
+const progFill     = document.getElementById('prog-fill');
+const progPct      = document.getElementById('prog-pct');
+const ticketInput  = document.getElementById('ticket-input');
+const charCount    = document.getElementById('char-count');
+const loadOverlay  = document.getElementById('loading-overlay');
+const results      = document.getElementById('results');
+const processing   = document.getElementById('processing');
+const sentEmoji    = document.getElementById('sentiment-emoji');
+const sentText     = document.getElementById('sentiment-text');
+const sentBar      = document.getElementById('sentiment-bar');
+const sentMeta     = document.getElementById('sentiment-meta');
+const pillHigh     = document.getElementById('pill-high');
+const pillMed      = document.getElementById('pill-medium');
+const pillLow      = document.getElementById('pill-low');
+const deptList     = document.getElementById('dept-list');
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let sentimentPipe = null;
+let zscPipe       = null;
+let debounceTimer = null;
+
+// ── Sample texts ──────────────────────────────────────────────────────────────
+const SAMPLES = {
+  angry:   "I have been waiting for my refund for THREE WEEKS now! This is absolutely unacceptable. Your customer service is terrible and I will never shop here again. I demand an immediate resolution or I'm disputing the charge with my bank!",
+  billing: "Hi, I was charged twice for my order #48291 placed on the 12th. Could you please look into this and refund the duplicate charge? I've attached my bank statement. Thanks.",
+  bug:     "The checkout page keeps crashing whenever I try to apply a promo code on mobile (iPhone 15, Safari). The error says 'undefined is not a function'. This has been happening since your last update.",
+  happy:   "I just received my order and I'm thrilled! The packaging was beautiful, delivery was super fast, and the product exceeded my expectations. Will definitely be ordering again. Thank you so much!"
+};
+
+// ── Progress callback builder ─────────────────────────────────────────────────
+function makeProgress(label) {
+  return ({ status, progress }) => {
+    if (status === 'downloading' || status === 'progress') {
+      statusLabel.textContent = `⚪ Downloading ${label}…`;
+      const pct = progress ?? 0;
+      progFill.style.width = pct + '%';
+      progPct.textContent  = Math.round(pct) + '%';
+    } else if (status === 'loading') {
+      statusLabel.textContent = `⚪ Loading ${label}…`;
+    }
+  };
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function initModels() {
+  try {
+    statusLabel.textContent = '⚪ Loading Sentiment Model…';
+    sentimentPipe = await pipeline('sentiment-analysis', SENTIMENT_MODEL, {
+      progress_callback: makeProgress('DistilBERT SST-2')
+    });
+
+    statusLabel.textContent = '⚪ Loading Zero-Shot Classifier…';
+    progFill.style.width = '0%'; progPct.textContent = '0%';
+    zscPipe = await pipeline('zero-shot-classification', ZSC_MODEL, {
+      progress_callback: makeProgress('DeBERTa NLI')
+    });
+
+    dot1.className = 'dot ready';
+    statusLabel.textContent = '🟢 Offline AI Engine Ready';
+    progFill.style.width = '100%'; progPct.textContent = '100%';
+
+    loadOverlay.style.display = 'none';
+    results.style.display     = 'flex';
+    results.style.flexDirection = 'column';
+    ticketInput.disabled      = false;
+    ticketInput.focus();
+
+  } catch (err) {
+    dot1.className = 'dot error';
+    statusLabel.textContent = '⚠️ Failed to load models';
+    loadOverlay.innerHTML = `<div style="color:#fca5a5;font-size:13px">⚠️ ${err.message}<br><br>Ensure WebGPU/WASM is available (Chrome 113+ / Edge). Check console.</div>`;
+    console.error(err);
+  }
+}
+
+// ── Analysis ──────────────────────────────────────────────────────────────────
+function deriveUrgency(text, sentLabel, sentScore) {
+  const lower = text.toLowerCase();
+  if (URGENCY_KW.some(k => lower.includes(k))) return 'high';
+  if (sentLabel === 'NEGATIVE' && sentScore > 0.85) return 'high';
+  if (sentLabel === 'NEGATIVE' && sentScore > 0.60) return 'medium';
+  return 'low';
+}
+
+async function analyse(text) {
+  if (!text || text.trim().length < 5) {
+    resetResults();
+    return;
+  }
+
+  processing.classList.add('visible');
+  try {
+    const [sentResult, zscResult] = await Promise.all([
+      sentimentPipe(text),
+      zscPipe(text, DEPT_LABELS, { multi_label: false })
+    ]);
+
+    const sent  = sentResult[0];
+    const score = sent.score;
+
+    // ── Sentiment ──
+    let emoji, label, barColor;
+    if (sent.label === 'NEGATIVE' && score > 0.80) {
+      emoji = '🔴'; label = 'Frustrated / Angry'; barColor = '#ef4444';
+    } else if (sent.label === 'NEGATIVE') {
+      emoji = '🟠'; label = 'Dissatisfied'; barColor = '#f97316';
+    } else if (sent.label === 'POSITIVE' && score < 0.70) {
+      emoji = '🟡'; label = 'Neutral'; barColor = '#f59e0b';
+    } else {
+      emoji = '🟢'; label = 'Satisfied / Happy'; barColor = '#22c55e';
+    }
+    sentEmoji.textContent = emoji;
+    sentText.textContent  = label;
+    sentBar.style.width   = Math.round(score * 100) + '%';
+    sentBar.style.background = barColor;
+    sentMeta.textContent  = `Confidence: ${Math.round(score * 100)}% · Raw: ${sent.label}`;
+    document.getElementById('card-sentiment').classList.add('active');
+
+    // ── Urgency ──
+    const urgency = deriveUrgency(text, sent.label, score);
+    pillHigh.classList.toggle('active', urgency === 'high');
+    pillMed.classList.toggle('active',  urgency === 'medium');
+    pillLow.classList.toggle('active',  urgency === 'low');
+    document.getElementById('card-urgency').classList.add('active');
+
+    // ── Department routing ──
+    const topIdx    = zscResult.scores.indexOf(Math.max(...zscResult.scores));
+    deptList.innerHTML = '';
+    zscResult.labels.forEach((lbl, i) => {
+      const isTop = i === topIdx;
+      const row   = document.createElement('div');
+      row.className = `dept-row${isTop ? ' active' : ''}`;
+      const pct = Math.round(zscResult.scores[i] * 100);
+      row.innerHTML = `
+        <div class="dept-icon">${DEPT_ICONS[lbl] ?? '📂'}</div>
+        <div class="dept-label">${lbl}${isTop ? ' <span style="font-size:10px;color:#22c55e;font-weight:800">▶ ROUTED</span>' : ''}</div>
+        <div class="dept-bar-wrap"><div class="dept-bar" style="width:${pct}%"></div></div>
+        <div class="dept-score">${pct}%</div>
+      `;
+      deptList.appendChild(row);
+    });
+    document.getElementById('card-dept').classList.add('active');
+
+  } catch (err) {
+    console.error('Analysis error:', err);
+  } finally {
+    processing.classList.remove('visible');
+  }
+}
+
+function resetResults() {
+  sentEmoji.textContent = '—';
+  sentText.textContent  = 'Waiting for input…';
+  sentText.style.color  = '#40406a';
+  sentBar.style.width   = '0%';
+  sentMeta.textContent  = '';
+  [pillHigh, pillMed, pillLow].forEach(p => p.classList.remove('active'));
+  deptList.innerHTML = '<div class="idle-placeholder">Start typing to see routing suggestions…</div>';
+  ['card-sentiment','card-urgency','card-dept'].forEach(id => document.getElementById(id).classList.remove('active'));
+}
+
+// ── Events ────────────────────────────────────────────────────────────────────
+ticketInput.addEventListener('input', () => {
+  charCount.textContent = ticketInput.value.length + ' characters';
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => analyse(ticketInput.value), 300);
+});
+
+document.querySelectorAll('.sample-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    ticketInput.value = SAMPLES[btn.dataset.sample] ?? '';
+    ticketInput.dispatchEvent(new Event('input'));
+    ticketInput.focus();
+  });
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+initModels();
+</script>
+</body>
+</html>

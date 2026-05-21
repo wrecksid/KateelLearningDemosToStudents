@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whisper Transcriber | Browser AI Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #08080f;
+      color: #e2e2f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── status bar ── */
+    #status-bar {
+      background: #0c0c1a;
+      border-bottom: 1px solid #181830;
+      padding: 7px 20px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12.5px; flex-shrink: 0;
+    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #505090; flex-shrink: 0; transition: background .4s, box-shadow .4s; }
+    .dot.loading { background: #f59e0b; animation: pulse 1.2s ease-in-out infinite; }
+    .dot.ready   { background: #22c55e; box-shadow: 0 0 8px #22c55e88; }
+    .dot.error   { background: #ef4444; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    #status-label { color: #8080b0; flex: 1; }
+    #prog-wrap { width: 140px; height: 3px; background: #181830; border-radius: 99px; overflow: hidden; flex-shrink: 0; }
+    #prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ec4899, #8b5cf6); border-radius: 99px; transition: width .25s; }
+    #prog-pct  { color: #ec4899; font-size: 11.5px; min-width: 34px; text-align: right; }
+    .back-link { color: #30305a; text-decoration: none; font-size: 12px; flex-shrink: 0; }
+    .back-link:hover { color: #7070a0; }
+
+    /* ── header ── */
+    #header { background: #0a0a16; border-bottom: 1px solid #141428; padding: 10px 20px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    #header h1 { font-size: 15px; font-weight: 700; }
+    .badge { font-size: 10.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px; background: rgba(236,72,153,.12); border: 1px solid rgba(236,72,153,.3); color: #f9a8d4; }
+
+    /* ── main layout ── */
+    #main { flex: 1; max-width: 900px; margin: 0 auto; width: 100%; padding: 32px 24px; display: flex; flex-direction: column; gap: 28px; }
+
+    /* ── recorder card ── */
+    #recorder-card {
+      background: #0f0f1e;
+      border: 1px solid #1e1e38;
+      border-radius: 20px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    /* Waveform visualiser */
+    #waveform-wrap {
+      width: 100%; height: 64px;
+      background: #0a0a14;
+      border: 1px solid #1a1a30;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 8px 12px;
+    }
+    .bar {
+      width: 3px;
+      border-radius: 99px;
+      background: #ec4899;
+      height: 4px;
+      transition: height .08s;
+      opacity: .6;
+    }
+    .bar.active { opacity: 1; animation: idle-bob 1.4s ease-in-out infinite; }
+    @keyframes idle-bob { 0%,100%{height:4px} 50%{height:8px} }
+
+    /* Record button */
+    #record-btn {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: none;
+      background: #ec4899;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(236,72,153,.3);
+      position: relative;
+    }
+    #record-btn:hover:not(:disabled) { background: #db2777; transform: scale(1.05); }
+    #record-btn:active:not(:disabled) { transform: scale(.95); }
+    #record-btn:disabled { background: #2a1a30; color: #604060; cursor: not-allowed; box-shadow: none; }
+    #record-btn.recording { background: #ef4444; box-shadow: 0 0 0 0 rgba(239,68,68,.4); animation: ripple 1.4s ease-out infinite; }
+    @keyframes ripple { 70% { box-shadow: 0 0 0 20px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+
+    .ring {
+      position: absolute; inset: -8px;
+      border-radius: 50%;
+      border: 2px solid rgba(239,68,68,.4);
+      animation: ring-expand 1.4s ease-out infinite;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .recording .ring { opacity: 1; }
+    @keyframes ring-expand { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(1.5);opacity:0} }
+
+    #record-label { font-size: 13px; color: #60608a; text-align: center; }
+    #timer { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; color: #ef4444; display: none; }
+    #timer.visible { display: block; }
+
+    /* Language selector */
+    .lang-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #50508a; }
+    #lang-select {
+      background: #0a0a14; border: 1px solid #22223a; color: #e2e2f0;
+      border-radius: 8px; padding: 5px 10px; font-size: 13px; font-family: inherit; outline: none; cursor: pointer;
+    }
+    #lang-select:focus { border-color: #ec4899; }
+
+    /* ── processing state ── */
+    #processing-bar {
+      display: none; align-items: center; gap: 10px;
+      background: rgba(139,92,246,.08); border: 1px solid rgba(139,92,246,.2);
+      border-radius: 10px; padding: 10px 16px;
+      font-size: 13px; color: #c4b5fd;
+    }
+    #processing-bar.visible { display: flex; }
+    .spin-sm { width: 16px; height: 16px; border: 2px solid rgba(139,92,246,.3); border-top-color: #8b5cf6; border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* ── transcription history ── */
+    #history-section h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #40406a; margin-bottom: 14px; }
+    #history-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .transcript-card {
+      background: #0f0f1e;
+      border: 1px solid #1e1e38;
+      border-radius: 14px;
+      overflow: hidden;
+      animation: fadeUp .25s ease;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1} }
+
+    .tc-header {
+      background: #111120; padding: 8px 14px;
+      border-bottom: 1px solid #1e1e38;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px;
+    }
+    .tc-meta { color: #40406a; display: flex; gap: 12px; }
+    .tc-meta span { display: flex; align-items: center; gap: 4px; }
+    .tc-actions { display: flex; gap: 6px; }
+    .mini-btn {
+      background: none; border: 1px solid #22223a; border-radius: 6px;
+      color: #50508a; font-size: 11px; padding: 2px 9px;
+      cursor: pointer; font-family: inherit; transition: color .15s, border-color .15s;
+    }
+    .mini-btn:hover { color: #e2e2f0; border-color: #50508a; }
+
+    .tc-text { padding: 14px 16px; font-size: 14.5px; line-height: 1.7; color: #c8c8e8; }
+
+    /* empty state */
+    #history-empty { text-align: center; padding: 32px; color: #28284a; font-size: 13px; }
+
+    /* ── model loading overlay in recorder ── */
+    #model-overlay {
+      position: absolute; inset: 0; background: rgba(8,8,15,.85);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; border-radius: 20px; font-size: 13px; color: #50508a;
+    }
+    #model-overlay.hidden { display: none; }
+    .spinner-lg { width: 40px; height: 40px; border: 3px solid #1e1e38; border-top-color: #ec4899; border-radius: 50%; animation: spin .8s linear infinite; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e1e38; border-radius: 99px; }
+
+    .error-box { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); color: #fca5a5; border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<div id="status-bar">
+  <div class="dot loading" id="dot"></div>
+  <span id="status-label">⚪ Downloading Whisper-Tiny…</span>
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <span id="prog-pct">0%</span>
+  <a class="back-link" href="../index.html">← Hub</a>
+</div>
+
+<div id="header">
+  <h1>🎙️ Whisper Voice Transcriber</h1>
+  <span class="badge">Demo 04</span>
+</div>
+
+<div id="main">
+
+  <!-- Recorder card -->
+  <div id="recorder-card" style="position:relative">
+
+    <div id="model-overlay">
+      <div class="spinner-lg"></div>
+      <span>Loading Whisper model…</span>
+      <span style="font-size:12px">~40 MB · cached after first load</span>
+    </div>
+
+    <!-- Waveform -->
+    <div id="waveform-wrap"></div>
+
+    <!-- Timer -->
+    <div id="timer">0:00</div>
+
+    <!-- Record button -->
+    <button id="record-btn" disabled>
+      <div class="ring"></div>
+      🎙️
+    </button>
+    <div id="record-label">Click to start recording</div>
+
+    <!-- Language -->
+    <div class="lang-row">
+      Language:
+      <select id="lang-select">
+        <option value="english">English</option>
+        <option value="spanish">Spanish</option>
+        <option value="french">French</option>
+        <option value="german">German</option>
+        <option value="japanese">Japanese</option>
+        <option value="chinese">Chinese</option>
+        <option value="hindi">Hindi</option>
+      </select>
+    </div>
+
+  </div>
+
+  <!-- Processing indicator -->
+  <div id="processing-bar">
+    <div class="spin-sm"></div>
+    <span id="processing-text">Transcribing audio…</span>
+  </div>
+
+  <!-- History -->
+  <div id="history-section">
+    <h2>Transcription History</h2>
+    <div id="history-list">
+      <div id="history-empty">Press record, speak, then press stop — your transcription will appear here.</div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
+
+// ── Config ────────────────────────────────────────────────────────────────────
+const MODEL_ID   = 'onnx-community/whisper-tiny.en';
+const MODEL_MULTI = 'onnx-community/whisper-tiny';
+const BAR_COUNT  = 60;
+
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const dotEl        = document.getElementById('dot');
+const statusLabel  = document.getElementById('status-label');
+const progFill     = document.getElementById('prog-fill');
+const progPct      = document.getElementById('prog-pct');
+const modelOverlay = document.getElementById('model-overlay');
+const waveformWrap = document.getElementById('waveform-wrap');
+const recordBtn    = document.getElementById('record-btn');
+const recordLabel  = document.getElementById('record-label');
+const timerEl      = document.getElementById('timer');
+const langSelect   = document.getElementById('lang-select');
+const processingBar = document.getElementById('processing-bar');
+const processingText = document.getElementById('processing-text');
+const historyList  = document.getElementById('history-list');
+const historyEmpty = document.getElementById('history-empty');
+
+// ── Build waveform bars ───────────────────────────────────────────────────────
+const bars = [];
+for (let i = 0; i < BAR_COUNT; i++) {
+  const b = document.createElement('div');
+  b.className = 'bar';
+  waveformWrap.appendChild(b);
+  bars.push(b);
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let transcriber  = null;
+let isRecording  = false;
+let mediaRecorder = null;
+let audioChunks  = [];
+let timerInterval = null;
+let secondsElapsed = 0;
+let analyserNode  = null;
+let animFrame     = null;
+let transcriptCount = 0;
+
+// ── Init model ────────────────────────────────────────────────────────────────
+async function initModel() {
+  try {
+    transcriber = await pipeline('automatic-speech-recognition', MODEL_ID, {
+      dtype: { encoder_model: 'fp32', decoder_model_merged: 'q4' },
+      progress_callback: ({ status, progress, file }) => {
+        const pct  = progress ?? 0;
+        const name = file ? file.split('/').pop() : '';
+        if (status === 'downloading' || status === 'progress') {
+          statusLabel.textContent = `⚪ Downloading${name ? ' — ' + name : ''}…`;
+          progFill.style.width = pct + '%';
+          progPct.textContent  = Math.round(pct) + '%';
+        } else if (status === 'loading') {
+          statusLabel.textContent = '⚪ Loading Whisper…';
+          progFill.style.width = '99%'; progPct.textContent = '99%';
+        }
+      }
+    });
+
+    dotEl.className = 'dot ready';
+    statusLabel.textContent = '🟢 Whisper Ready — Speak to transcribe';
+    progFill.style.width = '100%'; progPct.textContent = '100%';
+    modelOverlay.classList.add('hidden');
+    recordBtn.disabled = false;
+    idleAnimation();
+
+  } catch (err) {
+    dotEl.className = 'dot error';
+    statusLabel.textContent = '⚠️ Failed to load model';
+    modelOverlay.innerHTML = `<div class="error-box">⚠️ ${err.message}<br><br>Chrome 113+ / Edge with mic access required. See console.</div>`;
+    console.error(err);
+  }
+}
+
+// ── Idle bar animation ────────────────────────────────────────────────────────
+function idleAnimation() {
+  if (isRecording) return;
+  bars.forEach((b, i) => {
+    const h = 3 + Math.sin(Date.now() / 500 + i * 0.4) * 2;
+    b.style.height = h + 'px';
+  });
+  animFrame = requestAnimationFrame(idleAnimation);
+}
+
+// ── Analyser visualisation ────────────────────────────────────────────────────
+function startVisualiser(stream) {
+  cancelAnimationFrame(animFrame);
+  const ctx      = new AudioContext();
+  const source   = ctx.createMediaStreamSource(stream);
+  analyserNode   = ctx.createAnalyser();
+  analyserNode.fftSize = 128;
+  source.connect(analyserNode);
+  const dataArr  = new Uint8Array(analyserNode.frequencyBinCount);
+
+  function draw() {
+    if (!isRecording) return;
+    analyserNode.getByteFrequencyData(dataArr);
+    bars.forEach((b, i) => {
+      const idx = Math.floor(i * dataArr.length / BAR_COUNT);
+      const h   = 4 + (dataArr[idx] / 255) * 52;
+      b.style.height = h + 'px';
+    });
+    animFrame = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ── Timer ─────────────────────────────────────────────────────────────────────
+function startTimer() {
+  secondsElapsed = 0;
+  timerEl.classList.add('visible');
+  timerInterval = setInterval(() => {
+    secondsElapsed++;
+    const m = Math.floor(secondsElapsed / 60).toString();
+    const s = (secondsElapsed % 60).toString().padStart(2, '0');
+    timerEl.textContent = `${m}:${s}`;
+  }, 1000);
+}
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerEl.classList.remove('visible');
+}
+
+// ── Start recording ───────────────────────────────────────────────────────────
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    audioChunks  = [];
+    mediaRecorder = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg' });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); processAudio(); };
+    mediaRecorder.start(100);
+
+    isRecording = true;
+    recordBtn.classList.add('recording');
+    recordBtn.innerHTML = '<div class="ring"></div>⏹';
+    recordLabel.textContent = 'Recording… click to stop';
+    startTimer();
+    startVisualiser(stream);
+
+  } catch (err) {
+    addError('Microphone access denied: ' + err.message);
+  }
+}
+
+// ── Stop recording ────────────────────────────────────────────────────────────
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  isRecording = false;
+  stopTimer();
+  cancelAnimationFrame(animFrame);
+  recordBtn.classList.remove('recording');
+  recordBtn.innerHTML = '<div class="ring"></div>🎙️';
+  recordBtn.disabled  = true;
+  recordLabel.textContent = 'Processing…';
+  bars.forEach(b => { b.style.height = '4px'; });
+}
+
+// ── Process audio via Whisper ─────────────────────────────────────────────────
+async function processAudio() {
+  processingBar.classList.add('visible');
+  processingText.textContent = 'Transcribing audio…';
+  const t0 = performance.now();
+
+  try {
+    const blob       = new Blob(audioChunks, { type: audioChunks[0]?.type ?? 'audio/webm' });
+    const arrayBuf   = await blob.arrayBuffer();
+    const audioCtx   = new AudioContext({ sampleRate: 16000 });
+    const decoded    = await audioCtx.decodeAudioData(arrayBuf);
+
+    // Resample to 16 kHz mono via OfflineAudioContext
+    const offCtx    = new OfflineAudioContext(1, decoded.duration * 16000, 16000);
+    const src       = offCtx.createBufferSource();
+    src.buffer      = decoded;
+    src.connect(offCtx.destination);
+    src.start();
+    const rendered  = await offCtx.startRendering();
+    const pcm       = rendered.getChannelData(0);
+
+    const lang    = langSelect.value === 'english' ? undefined : langSelect.value;
+    const result  = await transcriber(pcm, {
+      sampling_rate: 16000,
+      language: lang,
+      task: lang ? 'transcribe' : undefined
+    });
+
+    const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
+    addTranscript(result.text?.trim() ?? '(empty)', elapsed, secondsElapsed);
+
+  } catch (err) {
+    addError('Transcription failed: ' + err.message);
+    console.error(err);
+  } finally {
+    processingBar.classList.remove('visible');
+    recordBtn.disabled  = false;
+    recordLabel.textContent = 'Click to start recording';
+    idleAnimation();
+  }
+}
+
+// ── Add transcript card ────────────────────────────────────────────────────────
+function addTranscript(text, processingTime, audioDuration) {
+  if (historyEmpty.parentNode === historyList) historyList.removeChild(historyEmpty);
+
+  transcriptCount++;
+  const card = document.createElement('div');
+  card.className = 'transcript-card';
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dur = audioDuration < 60 ? audioDuration + 's' : Math.floor(audioDuration/60) + 'm ' + (audioDuration%60) + 's';
+
+  card.innerHTML = `
+    <div class="tc-header">
+      <div class="tc-meta">
+        <span>🕐 ${now}</span>
+        <span>🎙️ ${dur} audio</span>
+        <span>⚡ ${processingTime}s processing</span>
+      </div>
+      <div class="tc-actions">
+        <button class="mini-btn copy-btn">Copy</button>
+        <button class="mini-btn del-btn">✕</button>
+      </div>
+    </div>
+    <div class="tc-text">${escHtml(text)}</div>
+  `;
+
+  card.querySelector('.copy-btn').addEventListener('click', function() {
+    navigator.clipboard.writeText(text).then(() => { this.textContent = 'Copied!'; setTimeout(() => { this.textContent = 'Copy'; }, 1500); });
+  });
+  card.querySelector('.del-btn').addEventListener('click', () => card.remove());
+
+  historyList.insertBefore(card, historyList.firstChild);
+}
+
+function addError(msg) {
+  const div = document.createElement('div');
+  div.className = 'error-box';
+  div.textContent = '⚠️ ' + msg;
+  historyList.insertBefore(div, historyList.firstChild);
+  if (historyEmpty.parentNode === historyList) historyList.removeChild(historyEmpty);
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── Events ────────────────────────────────────────────────────────────────────
+recordBtn.addEventListener('click', () => {
+  if (isRecording) stopRecording();
+  else startRecording();
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+initModel();
+</script>
+</body>
+</html>
