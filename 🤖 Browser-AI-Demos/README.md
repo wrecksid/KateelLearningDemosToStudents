@@ -1,81 +1,119 @@
-# 📋 PROJECT SPECIFICATION: Client-Side In-Browser SLM Demos
+# 🤖 Browser-AI-Demos
 
-## 1. Overview & Objective
+**Repository:** [KateelLearningDemosToStudents](https://github.com/VinayaSharada/KateelLearningDemosToStudents)
+**Author:** Professor Vinaya Sathyanarayana
 
-The goal is to build a suite of isolated, zero-dependency, pure client-side web application demos demonstrating the use of Small Language Models (SLMs) running **100% locally in the browser** via hardware acceleration (WebGPU/WASM). These are added to the student-facing repository `KateelLearningDemosToStudents` to demonstrate edge AI capabilities without cloud API dependencies.
-
----
-
-## 2. Tech Stack & Architectural Rules
-
-| Layer | Choice |
-|---|---|
-| **Frontend** | Vanilla HTML5, CSS3 (modern responsive styling), native JavaScript (ES6+ Modules) |
-| **Dependencies** | None to install — AI frameworks imported via CDN (`https://cdn.jsdelivr.net/npm/`) |
-| **AI Engine 1** | Transformers.js v3 for lightweight task-specific SLM workloads |
-| **AI Engine 2** | WebLLM for streaming conversational instruction-tuned SLMs |
-| **Environment** | Windows 11 Native Win32 · Chromium-based browsers (Chrome/Edge) with WebGPU enabled |
+Seven production-quality in-browser AI demos. Every demo runs 100% locally — no server,
+no API key, no data ever leaves the device. Models are downloaded once by the browser and
+cached; subsequent runs are fully offline.
 
 ---
 
-## 3. Sub-Project Specifications
+## Why In-Browser AI?
 
-### 📂 Demo 1: The Privacy-First Local Chat Advisor
-- **Directory:** `Browser-AI-Product-Demos/1-local-chat-advisor/`
-- **Core Task:** A standard, beautiful chat interface (like ChatGPT) that lets students talk to an AI advisor completely offline.
-- **Model Config:** `onnx-community/SmolLM2-135M-Instruct` via Transformers.js v3 pipeline
-- **UI/UX Requirements:**
-  - Clean, responsive layout with a top status bar indicating download status in `%`
-  - Explicit status toggle: `⚪ Downloading Components` ➡️ `🟢 Offline AI Engine Ready`
-  - System prompt hardcoded: *"You are an expert academic study buddy. Keep your answers concise, structured, and use encouraging language."*
+| Traditional Server-Side AI | These Demos |
+|---------------------------|-------------|
+| Requires a running server | Open `index.html` directly |
+| Needs API keys and billing | Zero cost, zero accounts |
+| Data leaves the device | 100% private — runs on-device |
+| Breaks if internet drops | Works fully offline after first load |
+| Hard to share with students | Share a single HTML file |
 
-### 📂 Demo 2: The E-Commerce Smart Ticket Tagger
-- **Directory:** `Browser-AI-Product-Demos/2-customer-support-tagger/`
-- **Core Task:** Real-time customer sentiment and request routing categorization as the customer types their support ticket.
-- **Model Config:** `Xenova/distilbert-base-uncased-finetuned-sst-2-english` (sentiment) + `Xenova/nli-deberta-v3-small` (zero-shot classification) via Transformers.js
-- **UI/UX Requirements:**
-  - **Left Column:** Form text-area for typing an email or complaint
-  - **Right Column:** Real-time analysis gauges — debounce 300ms then update:
-    - Sentiment: (`🔴 Frustrated/Angry`, `🟡 Neutral`, `🟢 Satisfied`)
-    - Urgency: (`High` / `Medium` / `Low`)
-    - Auto-Route Department: (`Billing`, `Tech Support`, `Product Feedback`)
-
-### 📂 Demo 3: Local AI Note-Taking Copilot
-- **Directory:** `Browser-AI-Product-Demos/3-privacy-notebook/`
-- **Core Task:** A rich text editing notepad where users can use shortcut buttons to rewrite, fix grammar, or summarize sensitive data safely — all offline.
-- **Model Config:** `Xenova/t5-small` via Transformers.js text2text-generation pipeline
-- **UI/UX Requirements:**
-  - A text area resembling a clean document pad
-  - A floating tool-dock with buttons: `✨ Professional Polish`, `📝 Condense to TL;DR`, `🔍 Fix Grammar`
-  - An output preview block showing the new text stream without page refreshes
+These demos show students that modern Small Language Models are compact enough to run
+entirely in a browser tab using WebGPU — a fundamental shift in how AI applications
+can be deployed.
 
 ---
 
-## 4. Coding Standards
+## Tech Stack
 
-- **No Node/NPM overhead** — pure static files, no `package.json`, `webpack`, or `vite` configs
-- **State management** — local only; model weights cache automatically via the browser's Cache Storage
-- **Error resilience** — gracefully catch WebGPU unavailability and fall back to CPU WASM with an on-screen notice
-
----
-
-## 5. Development Workflow
-
-```powershell
-# Run a local verification server from the Browser-AI-Product-Demos directory
-npx serve .
-```
-
-Then open Chrome or Edge to `http://localhost:3000`.
-
-> **WebGPU check:** `chrome://gpu` → look for **WebGPU: Enabled**
+| Layer | Technology |
+|-------|-----------|
+| Models | Hugging Face ONNX-quantised checkpoints |
+| Inference runtime | **Transformers.js v3** (`@huggingface/transformers@3` via jsDelivr CDN) |
+| Language | Vanilla JavaScript ES2022 — no build step, no bundler |
+| Styling | Pure CSS3, no framework |
+| Audio | Web Audio API + OfflineAudioContext (16 kHz PCM for Whisper) |
+| Hardware | WebGPU (Chrome 113+, Edge 113+); fallback to WASM |
 
 ---
 
-## 6. Implemented Demos
+## Demo Hub
 
-| # | Demo | Model | Size |
-|---|---|---|---|
-| 1 | [Local Chat Advisor](Browser-AI-Product-Demos/1-local-chat-advisor/index.html) | SmolLM2-135M-Instruct | ~135 MB |
-| 2 | [Smart Ticket Tagger](Browser-AI-Product-Demos/2-customer-support-tagger/index.html) | DistilBERT SST-2 + DeBERTa NLI | ~140 MB |
-| 3 | [Privacy Notebook](Browser-AI-Product-Demos/3-privacy-notebook/index.html) | T5-Small | ~60 MB |
+Open **[Browser-AI-Product-Demos/index.html](Browser-AI-Product-Demos/index.html)** for
+the full launcher page with cards for all seven demos.
+
+---
+
+## Demos
+
+### Text & Language
+
+| # | Demo | Model | Size | Description |
+|---|------|-------|------|-------------|
+| 1 | [Local Chat Advisor](Browser-AI-Product-Demos/1-local-chat-advisor/) | SmolLM2-135M-Instruct | ~135 MB | Offline study-buddy chatbot with streaming token output and persistent message history |
+| 2 | [Smart Ticket Tagger](Browser-AI-Product-Demos/2-customer-support-tagger/) | DistilBERT + DeBERTa | ~140 MB | Real-time sentiment, urgency scoring, and zero-shot department routing on typed support tickets |
+| 3 | [Privacy Notebook](Browser-AI-Product-Demos/3-privacy-notebook/) | T5-Small | ~60 MB | Offline text polish, TL;DR summarisation, and grammar correction — no text ever sent to a server |
+
+### Audio, Vision & Search
+
+| # | Demo | Model | Size | Description |
+|---|------|-------|------|-------------|
+| 4 | [Whisper Voice Transcriber](Browser-AI-Product-Demos/4-whisper-voice-transcriber/) | Whisper Tiny EN | ~39 MB | Live microphone transcription in 7 languages; 60-bar waveform visualiser; 16 kHz PCM resampling pipeline |
+| 5 | [Named Entity Tagger](Browser-AI-Product-Demos/5-entity-tagger/) | BERT-NER | ~110 MB | Inline span highlighting of PER / ORG / LOC / MISC entities with colour-coded entity chips |
+| 6 | [Semantic Search Engine](Browser-AI-Product-Demos/6-semantic-search/) | all-MiniLM-L6-v2 | ~23 MB | Cosine-similarity search over 10 pre-loaded documents; add your own; keyword comparison toggle |
+
+### Interactive Game
+
+| # | Demo | Model | Size | Description |
+|---|------|-------|------|-------------|
+| 7 | [SYNAPSE — Semantic Word Game](Browser-AI-Product-Demos/semantic-game/) | mxbai-embed-xsmall-v1 | ~25 MB | Wordle-style word game driven by semantic similarity (0–100% gauge, temperature labels, daily word rotation, share grid) |
+
+---
+
+## Running the Demos
+
+1. Clone the repository (or download a ZIP).
+2. Open any `index.html` file directly in **Chrome 113+** or **Edge 113+**.
+3. On first load the model downloads (sizes listed above) and is cached by the browser.
+4. All subsequent runs are fully offline.
+
+> **No `npm install`, no `python app.py`, no Docker.** Double-click the HTML file.
+
+Verify WebGPU is enabled: navigate to `chrome://gpu` and look for **WebGPU: Enabled**.
+If unavailable the demos fall back to WASM automatically.
+
+---
+
+## Architecture Notes
+
+- **Model download tracking** — each demo shows a live download progress bar with
+  per-file speed metrics using the Transformers.js `progress_callback` API.
+- **Cosine similarity** — implemented as a pure JS formula (`dot / (|a| · |b|)`) with
+  no external library, demonstrating that embedding arithmetic needs no ML framework.
+- **Whisper audio pipeline** — `MediaRecorder` → `AudioContext.decodeAudioData` →
+  `OfflineAudioContext` resampled to 16 kHz mono PCM → passed to the ASR pipeline.
+- **Zero-shot routing** — the ticket tagger uses `Xenova/nli-deberta-v3-small` with
+  natural-language category labels, requiring no labelled training data.
+- **Daily word rotation** — SYNAPSE selects its hidden word via
+  `WORDS[Math.floor(Date.now() / 86_400_000) % WORDS.length]` so every player gets
+  the same word each day without a server.
+
+---
+
+## Original Specification
+
+The original design spec that drove this section is preserved at the top of this file's
+git history. The implemented demos fully satisfy the spec and extend it with four
+additional demos (Whisper, NER, Semantic Search, SYNAPSE) beyond the original three.
+
+---
+
+## Attribution Reminder
+
+If you use any of these demos in a course, workshop, or project, the three mandatory
+requirements in [ATTRIBUTION.md](../ATTRIBUTION.md) apply:
+
+1. **Credit Professor Vinaya Sathyanarayana** in every presentation, handout, and published resource.
+2. **Star the repository** at https://github.com/VinayaSharada/KateelLearningDemosToStudents
+3. **Email vinallcontact@gmail.com** with a usage notification.
