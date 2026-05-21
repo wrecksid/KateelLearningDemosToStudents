@@ -4,90 +4,73 @@
 **Author:** Professor Vinaya Sathyanarayana
 **Section:** `DomainUseCaseDemos/CyberSecurity/`
 
-Hands-on cybersecurity demos designed for students learning how data science and machine
-learning techniques apply to real-world threat detection, log analysis, and security
-operations. All demos use synthetic data with realistic formats — no real infrastructure
-is exposed or required.
+Six hands-on cybersecurity demos covering threat detection, log analysis, user
+behaviour analytics, alert correlation, and malware classification. All demos use
+synthetic data in realistic formats — no real infrastructure, API keys, or sensitive
+data required.
 
 ---
 
 ## Demos
 
-| Folder | Topic | Difficulty |
-|--------|-------|-----------|
-| [ServerLogIntrusion](ServerLogIntrusion/) | Intrusion detection from server logs | Intermediate |
+| # | Folder | Topic | Key Techniques | Difficulty |
+|---|--------|-------|----------------|-----------|
+| 1 | [ServerLogIntrusion](ServerLogIntrusion/) | Intrusion detection from server logs | Regex, sliding-window rate analysis, Apache/SSH/iptables log parsing | Intermediate |
+| 2 | [NetworkAnomalyDetection](NetworkAnomalyDetection/) | NetFlow anomaly detection | Isolation Forest, Z-score, port-scan rule, beaconing CV | Intermediate |
+| 3 | [PhishingURLClassifier](PhishingURLClassifier/) | URL phishing classification | Logistic Regression, Random Forest, Gradient Boosting on URL features | Beginner–Intermediate |
+| 4 | [InsiderThreatUBA](InsiderThreatUBA/) | Insider threat user behaviour analytics | Per-user baselines, Z-score risk scoring, Isolation Forest | Intermediate |
+| 5 | [SIEMAlertCorrelation](SIEMAlertCorrelation/) | SIEM alert correlation & noise reduction | IP reputation, burst detection, deduplication, kill-chain reconstruction | Intermediate–Advanced |
+| 6 | [MalwareStaticAnalysis](MalwareStaticAnalysis/) | PE static feature malware classification | Random Forest, PCA, ROC one-vs-rest, 5 malware families | Intermediate |
 
 ---
 
-## ServerLogIntrusion
+## Demo Summaries
 
-**[→ Open Demo](ServerLogIntrusion/)**
+### 1. Server Log Intrusion Detection
+Parse Apache access logs, Linux SSH auth logs, and iptables firewall logs to detect
+7 attack types. All attacker IPs use RFC 5737 non-routable ranges. Maps detections
+to MITRE ATT&CK tactics.
+**Run:** `python intrusion_detection.py`
 
-Detect cyberattacks by parsing and analysing three standard log formats that every
-production Linux server generates:
+### 2. Network Anomaly Detection
+Detect data exfiltration, port scans, C2 beaconing, and DDoS participation in
+synthetic NetFlow-style traffic (~5,800 flows). Four complementary detectors with
+a 2×3 matplotlib dashboard.
+**Run:** `python syndata.py && python network_anomaly_detection.py`
 
-| Log File | Format | Attack Scenarios Embedded |
-|----------|--------|--------------------------|
-| `apache_access.log` | Apache Combined Log Format | SQL injection, path traversal, XSS, HTTP flood, malicious scanner |
-| `ssh_auth.log` | Linux syslog (OpenSSH) | SSH brute force (139 attempts → successful login) |
-| `firewall.log` | iptables / netfilter kernel log | Port scan across 40 distinct ports |
+### 3. Phishing URL Classifier
+Classify URLs as benign or phishing using 18 structural features (URL length, dots,
+hyphens, entropy, suspicious words, etc.). Trains 3 models, compares ROC/AUC/F1.
+**Run:** `python syndata.py && python phishing_classifier.py`
 
-All attacker IPs use RFC 5737 non-routable ranges (`192.0.2.0/24`, `198.51.100.0/24`,
-`203.0.113.0/24`) — safe for classroom use without any real IP exposure.
+### 4. Insider Threat UBA
+90 days of daily activity for 50 employees with 3 embedded threats (disgruntled,
+malicious, compromised). Builds per-user baselines, scores deviations, produces
+risk-ranked user list.
+**Run:** `python syndata.py && python insider_threat_detection.py`
 
-**Detection algorithms (7):**
+### 5. SIEM Alert Correlation
+7 days of synthetic SIEM alerts (1,400+) with 3 embedded attack campaigns. Reduces
+noise through deduplication, bursts IP reputation scoring, and reconstructs kill
+chains mapped to MITRE ATT&CK.
+**Run:** `python syndata.py && python siem_correlation.py`
 
-1. SSH brute-force — sliding-window failed-login rate
-2. SQL injection — regex pattern matching on request URIs
-3. Path traversal — directory escape sequence detection
-4. Cross-site scripting (XSS) — script injection pattern matching
-5. Malicious scanner user-agent — known bad UA string matching
-6. HTTP flood / DoS — request-rate cardinality counting per IP
-7. Port scan — distinct destination-port count per source IP
-
-**Attack → MITRE ATT&CK mapping included in the README and detection script.**
-
-**Files:**
-```
-ServerLogIntrusion/
-├── README.md                  # full lab guide with learning exercises
-├── intrusion_detection.py     # 7-detector analysis script, matplotlib 2x3 dashboard
-├── generate_logs.py           # reproducible log generator (--seed, --days flags)
-├── requirements.txt
-└── data/
-    ├── apache_access.log      # 205 lines, Apache Combined Log Format
-    ├── ssh_auth.log           # 214 lines, Linux syslog SSH auth
-    └── firewall.log           # 90 lines, iptables kernel log
-```
-
-**Quick start:**
-```bash
-cd DomainUseCaseDemos/CyberSecurity/ServerLogIntrusion
-pip install -r requirements.txt
-python intrusion_detection.py
-```
-
----
-
-## Planned / Suggested Future Demos
-
-The following demos would fit naturally in this section. Contributions are welcome —
-see [CONTRIBUTING.md](../../CONTRIBUTING.md).
-
-| Demo Idea | Techniques | Suggested Folder |
-|-----------|------------|-----------------|
-| Network Traffic Anomaly Detection | Isolation Forest, DBSCAN on synthetic PCAP-derived flow data | `NetworkAnomalyDetection/` |
-| Phishing URL Classifier | NLP + feature engineering on URL structure | `PhishingURLClassifier/` |
-| Insider Threat Detection | User behaviour analytics, sequence anomalies | `InsiderThreatUBA/` |
-| SIEM Alert Correlation | Rule-based + ML alert triage on synthetic SIEM events | `SIEMAlertCorrelation/` |
-| Malware Feature Analysis | Static PE feature classification (synthetic feature vectors) | `MalwareStaticAnalysis/` |
+### 6. Malware Static Analysis
+3,600 synthetic PE feature vectors across 6 classes (benign + 5 malware families).
+Random Forest with feature importance, PCA 2D scatter, ROC curves, and confusion
+matrix.
+**Run:** `python syndata.py && python malware_analysis.py`
 
 ---
 
 ## Prerequisites
 
-Python 3.9+ with the packages in each demo's `requirements.txt`. No external services,
-no API keys, and no real network traffic required.
+Python 3.9+ with the packages in each demo's `requirements.txt`.
+No external services, API keys, or real network traffic required.
+
+```bash
+pip install -r <demo-folder>/requirements.txt
+```
 
 ---
 
