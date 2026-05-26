@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Opinion Quintuple Extractor | Browser AI Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #07070f;
+      color: #e2e2f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── status bar ── */
+    #status-bar {
+      background: #0b0b1a;
+      border-bottom: 1px solid #161630;
+      padding: 7px 20px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12.5px; flex-shrink: 0;
+    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #505090; flex-shrink: 0; transition: background .4s, box-shadow .4s; }
+    .dot.loading { background: #f59e0b; animation: pulse 1.2s ease-in-out infinite; }
+    .dot.ready   { background: #22c55e; box-shadow: 0 0 8px #22c55e88; }
+    .dot.error   { background: #ef4444; }
+    .dot.working { background: #818cf8; animation: pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    #status-label { color: #8080b0; flex: 1; }
+    #prog-wrap { width: 140px; height: 3px; background: #161630; border-radius: 99px; overflow: hidden; flex-shrink: 0; }
+    #prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #a855f7, #ec4899); border-radius: 99px; transition: width .25s; }
+    #prog-pct  { color: #a855f7; font-size: 11.5px; min-width: 34px; text-align: right; }
+    .back-link { color: #30305a; text-decoration: none; font-size: 12px; flex-shrink: 0; }
+    .back-link:hover { color: #7070a0; }
+
+    /* ── header ── */
+    #header {
+      background: #090916;
+      border-bottom: 1px solid #131328;
+      padding: 12px 20px;
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    #header h1 { font-size: 15px; font-weight: 700; }
+    .badge {
+      font-size: 10.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px;
+      background: rgba(168,85,247,.14); border: 1px solid rgba(168,85,247,.35); color: #c084fc;
+    }
+    .badge-pink {
+      background: rgba(236,72,153,.12); border: 1px solid rgba(236,72,153,.3); color: #f9a8d4;
+    }
+
+    /* ── main layout ── */
+    #main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      overflow: hidden;
+    }
+    @media (max-width: 900px) {
+      #main { grid-template-columns: 1fr; overflow: visible; }
+    }
+
+    /* ── left panel: input ── */
+    #left-panel {
+      border-right: 1px solid #131328;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 20px 10px;
+      border-bottom: 1px solid #0f0f22;
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #40407a;
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .panel-header span { color: #6060a0; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; }
+
+    /* preset examples */
+    #presets {
+      padding: 10px 16px;
+      display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0;
+      border-bottom: 1px solid #0f0f22;
+    }
+    .preset-btn {
+      font-size: 11px; padding: 3px 10px; border-radius: 99px;
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+      color: #8080b0; cursor: pointer; transition: all .15s;
+    }
+    .preset-btn:hover { background: rgba(168,85,247,.15); border-color: #a855f7; color: #c084fc; }
+    .preset-btn.active { background: rgba(168,85,247,.2); border-color: #a855f7; color: #e2d9f3; }
+
+    #review-input {
+      flex: 1;
+      padding: 16px 18px;
+      background: transparent;
+      border: none;
+      resize: none;
+      color: #d0d0f0;
+      font-size: 13.5px;
+      line-height: 1.75;
+      outline: none;
+      font-family: inherit;
+      min-height: 200px;
+    }
+    #review-input::placeholder { color: #2a2a4a; }
+
+    /* info box */
+    #quintuple-info {
+      margin: 0 16px 12px;
+      background: #0d0d22;
+      border: 1px solid #1a1a38;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 11.5px;
+      color: #50509a;
+      line-height: 1.6;
+      flex-shrink: 0;
+    }
+    #quintuple-info strong { color: #7070b8; }
+    #quintuple-info code {
+      background: rgba(168,85,247,.12); padding: 1px 5px;
+      border-radius: 4px; font-size: 10.5px; color: #c084fc;
+      font-family: 'Fira Code', monospace;
+    }
+
+    #extract-btn {
+      margin: 0 16px 16px;
+      padding: 11px 0;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border: none; border-radius: 10px;
+      color: #fff; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: opacity .15s, transform .1s;
+      flex-shrink: 0;
+    }
+    #extract-btn:hover:not(:disabled) { opacity: .9; }
+    #extract-btn:active:not(:disabled) { transform: scale(.98); }
+    #extract-btn:disabled { background: #1e1e38; color: #40405a; cursor: not-allowed; }
+
+    /* ── right panel: results ── */
+    #right-panel {
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    #results-area {
+      flex: 1; overflow-y: auto;
+      padding: 16px;
+    }
+
+    /* empty state */
+    #empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; min-height: 300px; gap: 12px; text-align: center;
+    }
+    #empty-state .icon { font-size: 44px; opacity: .3; }
+    #empty-state p { color: #30305a; font-size: 13px; max-width: 260px; line-height: 1.6; }
+
+    /* spinner */
+    #spinner {
+      display: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; min-height: 300px; gap: 16px;
+    }
+    .spinner-ring {
+      width: 40px; height: 40px;
+      border: 3px solid #1a1a32;
+      border-top-color: #a855f7;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #spinner p { color: #50508a; font-size: 13px; }
+
+    /* streaming raw output */
+    #raw-stream {
+      display: none;
+      background: #0a0a18; border: 1px solid #1a1a30; border-radius: 10px;
+      padding: 12px 14px; margin-bottom: 12px;
+      font-family: 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 11px; color: #6060a0;
+      line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+      max-height: 120px; overflow-y: auto;
+    }
+
+    /* quintuple cards */
+    .qcard {
+      background: #0e0e1e;
+      border: 1px solid #1c1c32;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 14px;
+      animation: fadeIn .3s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+    .qcard:hover { border-color: #2a2a48; }
+
+    .qcard-header {
+      grid-column: 1 / -1;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 4px;
+    }
+    .qcard-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(168,85,247,.2); border: 1px solid rgba(168,85,247,.4);
+      color: #c084fc; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .qcard-title { font-size: 12.5px; font-weight: 600; color: #c0c0e0; flex: 1; }
+
+    .sentiment-badge {
+      font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 99px;
+    }
+    .sentiment-badge.positive { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.35); color: #86efac; }
+    .sentiment-badge.negative { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; }
+    .sentiment-badge.neutral  { background: rgba(148,163,184,.1); border: 1px solid rgba(148,163,184,.25); color: #94a3b8; }
+
+    .qfield {
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .qfield-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #35355a;
+    }
+    .qfield-value {
+      font-size: 12.5px; color: #b0b0d8;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 6px; padding: 4px 8px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* results footer */
+    #results-footer {
+      display: none;
+      padding: 10px 16px;
+      border-top: 1px solid #0f0f22;
+      flex-shrink: 0;
+      align-items: center; gap: 10px;
+    }
+    #count-badge {
+      font-size: 12px; color: #6060a0;
+    }
+    #count-badge strong { color: #a855f7; }
+    #copy-btn {
+      margin-left: auto;
+      font-size: 12px; padding: 5px 14px;
+      background: rgba(168,85,247,.12); border: 1px solid rgba(168,85,247,.3);
+      color: #c084fc; border-radius: 8px; cursor: pointer;
+      transition: all .15s;
+    }
+    #copy-btn:hover { background: rgba(168,85,247,.22); }
+    #toggle-raw-btn {
+      font-size: 12px; padding: 5px 14px;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      color: #5050a0; border-radius: 8px; cursor: pointer;
+      transition: all .15s;
+    }
+    #toggle-raw-btn:hover { color: #8080c0; }
+
+    /* error state */
+    .parse-error {
+      background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25);
+      border-radius: 10px; padding: 14px 16px; margin-bottom: 12px;
+      font-size: 12.5px; color: #fca5a5; line-height: 1.6;
+    }
+    .parse-error strong { color: #f87171; }
+
+    /* legend */
+    #legend {
+      padding: 10px 16px 8px;
+      display: flex; gap: 12px; flex-wrap: wrap;
+      border-bottom: 1px solid #0f0f22; flex-shrink: 0;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: #40405a;
+    }
+    .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e1e38; border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<!-- file:// protocol detection -->
+<div id="fp-warn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a0800;border-bottom:2px solid #f59e0b;padding:12px 16px;font-family:system-ui,sans-serif;font-size:13px;color:#fde68a;gap:12px;align-items:flex-start;">
+  <span style="font-size:20px;flex-shrink:0">⚠️</span>
+  <div><strong style="color:#fbbf24">Cannot run as file:// — serve over HTTP instead.</strong><br>
+  Double-click <code style="background:rgba(255,255,255,.12);padding:1px 6px;border-radius:4px">start_demos.bat</code> in the parent folder, or run <code style="background:rgba(255,255,255,.12);padding:1px 6px;border-radius:4px">python -m http.server 8080</code> there and open <a href="http://localhost:8080" style="color:#60a5fa">http://localhost:8080</a>.</div>
+  <button onclick="document.getElementById('fp-warn').style.display='none'" style="margin-left:auto;flex-shrink:0;background:transparent;border:1px solid #92400e;color:#fbbf24;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px">✕</button>
+</div>
+<script>if(location.protocol==='file:'){var w=document.getElementById('fp-warn');w.style.display='flex';}</script>
+
+<!-- Status Bar -->
+<div id="status-bar">
+  <div class="dot loading" id="dot"></div>
+  <span id="status-label">⚪ Loading Opinion Mining Model...</span>
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <span id="prog-pct">0%</span>
+  <a class="back-link" href="../index.html">← Hub</a>
+</div>
+
+<!-- Header -->
+<div id="header">
+  <span style="font-size:20px">💬</span>
+  <h1>Opinion Quintuple Extractor</h1>
+  <span class="badge">Opinion Mining</span>
+  <span class="badge badge-pink">ABSA</span>
+  <span class="badge" style="background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3);color:#a5b4fc;">SmolLM2-360M</span>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- LEFT: Input -->
+  <div id="left-panel">
+    <div class="panel-header">
+      Review Text
+      <span>Paste or type any product / service review</span>
+    </div>
+
+    <div id="presets">
+      <button class="preset-btn active" onclick="loadPreset(0)">📱 iPhone</button>
+      <button class="preset-btn" onclick="loadPreset(1)">🏨 Hotel</button>
+      <button class="preset-btn" onclick="loadPreset(2)">💻 Laptop</button>
+      <button class="preset-btn" onclick="loadPreset(3)">🍕 Restaurant</button>
+    </div>
+
+    <textarea id="review-input" spellcheck="false" placeholder="Type or paste a customer review here…"></textarea>
+
+    <div id="quintuple-info">
+      <strong>Opinion Quintuple</strong> &nbsp;( <code>oj</code>, <code>fjk</code>, <code>soijkl</code>, <code>hi</code>, <code>tl</code> )<br>
+      <code>oj</code> object &nbsp;·&nbsp; <code>fjk</code> feature &nbsp;·&nbsp;
+      <code>soijkl</code> sentiment &nbsp;·&nbsp; <code>hi</code> holder &nbsp;·&nbsp; <code>tl</code> time
+    </div>
+
+    <button id="extract-btn" disabled onclick="extractQuintuples()">
+      ⏳ Loading Model…
+    </button>
+  </div>
+
+  <!-- RIGHT: Results -->
+  <div id="right-panel">
+    <div class="panel-header">
+      Extracted Quintuples
+      <span id="panel-subtitle">results appear here</span>
+    </div>
+
+    <div id="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#86efac"></div>Positive sentiment</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fca5a5"></div>Negative sentiment</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div>Neutral sentiment</div>
+    </div>
+
+    <div id="results-area">
+      <div id="empty-state">
+        <div class="icon">🔍</div>
+        <p>Paste a review on the left and click <strong>Extract Quintuples</strong> to begin opinion mining.</p>
+      </div>
+      <div id="spinner">
+        <div class="spinner-ring"></div>
+        <p id="spinner-label">Analysing opinions…</p>
+      </div>
+      <div id="raw-stream"></div>
+      <div id="quintuples-list"></div>
+      <div class="parse-error" id="parse-error" style="display:none">
+        <strong>⚠️ Could not parse structured JSON from model output.</strong><br>
+        The raw model response is shown above. Try rephrasing the review or running again.
+      </div>
+    </div>
+
+    <div id="results-footer">
+      <span id="count-badge"></span>
+      <button id="toggle-raw-btn" onclick="toggleRaw()">Show raw JSON</button>
+      <button id="copy-btn" onclick="copyJSON()">⎘ Copy JSON</button>
+    </div>
+  </div>
+
+</div><!-- /#main -->
+
+<!-- Loading overlay -->
+<div id="load-overlay" style="
+  position:fixed; inset:0; background:#07070f;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:20px; z-index:1000;
+">
+  <div style="font-size:48px">💬</div>
+  <div style="font-size:16px; font-weight:700; color:#c0c0e0">Opinion Quintuple Extractor</div>
+  <div style="font-size:13px; color:#50508a; text-align:center; max-width:340px; line-height:1.6">
+    Downloading SmolLM2-360M-Instruct to your browser cache…<br>
+    <span style="color:#35355a;font-size:11.5px">This only happens once — subsequent visits load instantly.</span>
+  </div>
+  <div style="width:280px; height:4px; background:#1a1a30; border-radius:99px; overflow:hidden;">
+    <div id="overlay-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:99px;transition:width .25s;"></div>
+  </div>
+  <div id="overlay-pct" style="font-size:12px;color:#a855f7;">0%</div>
+</div>
+
+<script type="module">
+import { pipeline, TextStreamer } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
+
+// ── Config ──────────────────────────────────────────────────────────────────
+const MODEL_ID  = 'onnx-community/SmolLM2-360M-Instruct';
+const MAX_TOKENS = 768;
+
+const SYSTEM_PROMPT = `You are an expert opinion mining system. Extract ALL opinion quintuples from the customer review.
+
+A quintuple has exactly 5 fields (use these exact JSON keys):
+- "object"    : the product or main entity being reviewed (e.g. "iPhone", "hotel", "laptop")
+- "feature"   : the specific aspect or attribute discussed (e.g. "battery life", "touch screen", "price", "location", "staff")
+- "sentiment" : MUST be exactly one of: "positive", "negative", or "neutral"
+- "holder"    : who holds the opinion — use "reviewer" for "I/me", or describe others (e.g. "reviewer's mother")
+- "time"      : time reference from the text (e.g. "a few days ago", "at time of review", "recently")
+
+Rules:
+1. Extract EVERY opinion expressed, including indirect and third-party opinions
+2. Each sentence may yield multiple quintuples (one per aspect)
+3. Output ONLY a valid JSON array — no explanation, no markdown, no code fences
+4. Start your response with [ and end with ]
+
+Example:
+Input: "The camera is amazing but the battery drains too fast. My friend also said the price is too high."
+Output: [{"object":"phone","feature":"camera","sentiment":"positive","holder":"reviewer","time":"at time of review"},{"object":"phone","feature":"battery","sentiment":"negative","holder":"reviewer","time":"at time of review"},{"object":"phone","feature":"price","sentiment":"negative","holder":"reviewer's friend","time":"at time of review"}]`;
+
+// ── Preset reviews ───────────────────────────────────────────────────────────
+const PRESETS = [
+  {
+    label: 'iPhone',
+    text: `I bought an iPhone a few days ago. It was such a nice phone. The touch screen was really cool. The voice quality was clear too. Although the battery life was not long, that is ok for me. However, my mother was mad with me as I did not tell her before I bought the phone. She also thought the phone was too expensive, and wanted me to return it to the shop.`
+  },
+  {
+    label: 'Hotel',
+    text: `We stayed at this hotel for three nights last summer. The location was perfect — right in the city centre. The rooms were clean and spacious, and the bed was incredibly comfortable. However, the breakfast was disappointing and overpriced for what was served. The reception staff were friendly and helpful, but the housekeeping team was slow to respond to requests. My wife loved the rooftop pool, though I thought it was too crowded in the evenings.`
+  },
+  {
+    label: 'Laptop',
+    text: `I purchased this laptop two weeks ago for university. The display is absolutely stunning — the colours are vivid and the resolution is sharp. It boots up in seconds and handles multitasking very smoothly. Unfortunately the keyboard feels flimsy and the trackpad occasionally misregisters clicks. The battery lasts about 6 hours which is acceptable. My colleague borrowed it for a presentation and said the speakers were too quiet for a large room. Customer support was unhelpful when I reported the trackpad issue.`
+  },
+  {
+    label: 'Restaurant',
+    text: `We visited this restaurant for my wife's birthday last Friday. The ambiance was romantic and beautifully decorated. The pasta and risotto were absolutely delicious. However, we waited nearly 45 minutes for our main course, which was unacceptable. Our waiter was friendly and apologised for the delay. The dessert menu was limited but the tiramisu was excellent. My wife felt the wine list was overpriced for the quality offered. We may return but only if the service improves.`
+  }
+];
+
+// ── State ────────────────────────────────────────────────────────────────────
+let generator = null;
+let lastJSON   = null;
+let rawShown   = false;
+
+// ── DOM refs ─────────────────────────────────────────────────────────────────
+const dot          = document.getElementById('dot');
+const statusLabel  = document.getElementById('status-label');
+const progFill     = document.getElementById('prog-fill');
+const progPct      = document.getElementById('prog-pct');
+const overlayBar   = document.getElementById('overlay-bar');
+const overlayPct   = document.getElementById('overlay-pct');
+const overlay      = document.getElementById('load-overlay');
+const extractBtn   = document.getElementById('extract-btn');
+const reviewInput  = document.getElementById('review-input');
+const emptyState   = document.getElementById('empty-state');
+const spinner      = document.getElementById('spinner');
+const spinnerLabel = document.getElementById('spinner-label');
+const rawStream    = document.getElementById('raw-stream');
+const quintList    = document.getElementById('quintuples-list');
+const parseError   = document.getElementById('parse-error');
+const footer       = document.getElementById('results-footer');
+const countBadge   = document.getElementById('count-badge');
+const subtitle     = document.getElementById('panel-subtitle');
+
+// ── Preset loader ────────────────────────────────────────────────────────────
+window.loadPreset = function(idx) {
+  reviewInput.value = PRESETS[idx].text;
+  document.querySelectorAll('.preset-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+};
+loadPreset(0); // default
+
+// ── Model loader ─────────────────────────────────────────────────────────────
+(async () => {
+  try {
+    let lastFile = '';
+    generator = await pipeline('text-generation', MODEL_ID, {
+      dtype: 'q4',
+      progress_callback: ({ status, file, progress }) => {
+        if (status === 'progress' && file) {
+          const pct = Math.round(progress ?? 0);
+          const short = file.split('/').pop();
+          if (short !== lastFile) { lastFile = short; }
+          statusLabel.textContent = `↓ ${short} — ${pct}%`;
+          progFill.style.width    = pct + '%';
+          progPct.textContent     = pct + '%';
+          overlayBar.style.width  = pct + '%';
+          overlayPct.textContent  = pct + '%';
+        }
+      }
+    });
+
+    // Ready
+    dot.className = 'dot ready';
+    statusLabel.textContent = '✓ SmolLM2-360M-Instruct ready';
+    progFill.style.width = '100%';
+    progPct.textContent  = '100%';
+    extractBtn.disabled  = false;
+    extractBtn.textContent = '🔍 Extract Quintuples';
+    overlay.style.display = 'none';
+
+  } catch (err) {
+    dot.className = 'dot error';
+    statusLabel.textContent = '✗ Model load error: ' + err.message;
+    overlay.innerHTML = `<div style="color:#f87171;font-size:15px;text-align:center;padding:40px">
+      ⚠️ Model Load Error<br><span style="font-size:13px;color:#7a3030">${err.message}</span><br>
+      <span style="font-size:12px;color:#50303a;margin-top:8px;display:block">Ensure WebGPU is available (Chrome 113+) and the page is served over HTTP.</span>
+    </div>`;
+    console.error(err);
+  }
+})();
+
+// ── Extraction ────────────────────────────────────────────────────────────────
+window.extractQuintuples = async function() {
+  const review = reviewInput.value.trim();
+  if (!review) { reviewInput.focus(); return; }
+  if (!generator) return;
+
+  // Reset UI
+  extractBtn.disabled   = true;
+  extractBtn.textContent = '⏳ Analysing…';
+  dot.className          = 'dot working';
+  statusLabel.textContent = '⚙ Extracting quintuples…';
+  emptyState.style.display  = 'none';
+  spinner.style.display     = 'flex';
+  rawStream.style.display   = 'none';
+  rawStream.textContent     = '';
+  quintList.innerHTML       = '';
+  parseError.style.display  = 'none';
+  footer.style.display      = 'none';
+  rawShown = false;
+  document.getElementById('toggle-raw-btn').textContent = 'Show raw JSON';
+
+  const messages = [
+    { role: 'system',    content: SYSTEM_PROMPT },
+    { role: 'user',      content: `Extract opinion quintuples from this review:\n\n"${review}"` },
+    { role: 'assistant', content: '[' }   // prime the model to start with [
+  ];
+
+  let accumulated = '[';
+
+  try {
+    spinnerLabel.textContent = 'Model is reading the review…';
+    const streamer = new TextStreamer(generator.tokenizer, {
+      skip_prompt: true,
+      callback_function: (token) => {
+        accumulated += token;
+        rawStream.textContent = accumulated;
+        rawStream.scrollTop   = rawStream.scrollHeight;
+      }
+    });
+
+    await generator(messages, {
+      max_new_tokens: MAX_TOKENS,
+      do_sample: false,
+      streamer
+    });
+
+  } catch (err) {
+    console.error('Generation error:', err);
+    accumulated = '';
+  }
+
+  // ── Parse ──────────────────────────────────────────────────────────────────
+  spinner.style.display = 'none';
+  const quintuples = parseQuintuples(accumulated);
+
+  if (quintuples && quintuples.length > 0) {
+    lastJSON = quintuples;
+    renderCards(quintuples);
+    subtitle.textContent = quintuples.length + ' quintuple' + (quintuples.length !== 1 ? 's' : '') + ' found';
+    countBadge.innerHTML = `<strong>${quintuples.length}</strong> quintuple${quintuples.length !== 1 ? 's' : ''} extracted`;
+    footer.style.display = 'flex';
+    rawStream.style.display = 'none'; // hide by default, toggle button reveals
+  } else {
+    rawStream.style.display = 'block';
+    rawStream.textContent   = accumulated || '(no output)';
+    parseError.style.display = 'block';
+    subtitle.textContent     = 'parse error';
+    lastJSON = null;
+    footer.style.display = 'none';
+  }
+
+  // Restore button
+  dot.className = 'dot ready';
+  statusLabel.textContent = '✓ Extraction complete';
+  extractBtn.disabled    = false;
+  extractBtn.textContent = '🔍 Extract Quintuples';
+};
+
+// ── JSON parser (robust) ──────────────────────────────────────────────────────
+function parseQuintuples(text) {
+  if (!text) return null;
+  // Try to find a JSON array anywhere in the output
+  const candidates = [];
+
+  // Strategy 1: look for [...] blocks
+  const re = /\[[\s\S]*?\]/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    try {
+      const parsed = JSON.parse(m[0]);
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].object) {
+        candidates.push(parsed);
+      }
+    } catch {}
+  }
+
+  // Strategy 2: try the whole text as JSON (might be valid array)
+  if (candidates.length === 0) {
+    try {
+      const stripped = text.trim().replace(/```json|```/g, '');
+      const parsed = JSON.parse(stripped);
+      if (Array.isArray(parsed)) candidates.push(parsed);
+    } catch {}
+  }
+
+  // Strategy 3: try appending ] to close an open array
+  if (candidates.length === 0) {
+    try {
+      const closed = text.trim().replace(/,\s*$/, '') + ']';
+      const parsed = JSON.parse(closed);
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].object) {
+        candidates.push(parsed);
+      }
+    } catch {}
+  }
+
+  // Return the longest valid candidate
+  if (candidates.length === 0) return null;
+  return candidates.reduce((a, b) => b.length > a.length ? b : a);
+}
+
+// ── Render cards ──────────────────────────────────────────────────────────────
+function renderCards(quintuples) {
+  quintList.innerHTML = '';
+  quintuples.forEach((q, i) => {
+    const sentiment = (q.sentiment || 'neutral').toLowerCase();
+    const sentClass = sentiment.includes('pos') ? 'positive'
+                    : sentiment.includes('neg') ? 'negative' : 'neutral';
+    const sentLabel = sentClass === 'positive' ? '▲ Positive'
+                    : sentClass === 'negative' ? '▼ Negative' : '— Neutral';
+    const sentIcon  = sentClass === 'positive' ? '😊' : sentClass === 'negative' ? '😠' : '😐';
+
+    const card = document.createElement('div');
+    card.className = 'qcard';
+    card.innerHTML = `
+      <div class="qcard-header">
+        <div class="qcard-num">${i + 1}</div>
+        <div class="qcard-title">${esc(q.object || '—')} · ${esc(q.feature || '—')}</div>
+        <span class="sentiment-badge ${sentClass}">${sentIcon} ${sentLabel}</span>
+      </div>
+      <div class="qfield">
+        <div class="qfield-label">oj · Object</div>
+        <div class="qfield-value" title="${esc(q.object)}">${esc(q.object || '—')}</div>
+      </div>
+      <div class="qfield">
+        <div class="qfield-label">fjk · Feature</div>
+        <div class="qfield-value" title="${esc(q.feature)}">${esc(q.feature || '—')}</div>
+      </div>
+      <div class="qfield">
+        <div class="qfield-label">hi · Holder</div>
+        <div class="qfield-value" title="${esc(q.holder)}">${esc(q.holder || '—')}</div>
+      </div>
+      <div class="qfield">
+        <div class="qfield-label">tl · Time</div>
+        <div class="qfield-value" title="${esc(q.time)}">${esc(q.time || 'at time of review')}</div>
+      </div>
+    `;
+    quintList.appendChild(card);
+  });
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Copy JSON ─────────────────────────────────────────────────────────────────
+window.copyJSON = function() {
+  if (!lastJSON) return;
+  navigator.clipboard.writeText(JSON.stringify(lastJSON, null, 2)).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '⎘ Copy JSON', 1800);
+  });
+};
+
+// ── Toggle raw ────────────────────────────────────────────────────────────────
+window.toggleRaw = function() {
+  rawShown = !rawShown;
+  rawStream.style.display = rawShown ? 'block' : 'none';
+  document.getElementById('toggle-raw-btn').textContent = rawShown ? 'Hide raw JSON' : 'Show raw JSON';
+};
+
+// ── Keyboard shortcut ─────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    if (!extractBtn.disabled) extractBtn.click();
+  }
+});
+</script>
+
+</body>
+</html>
