@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experimentation & Metrics Simulator | PM Demo 01</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #07070e;
+      color: #e2e2f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── header ── */
+    #header {
+      background: #0a0a16;
+      border-bottom: 1px solid #1a1a30;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .back-link {
+      color: #404070;
+      text-decoration: none;
+      font-size: 12px;
+      flex-shrink: 0;
+      transition: color .2s;
+    }
+    .back-link:hover { color: #8080b0; }
+    #header h1 { font-size: 16px; font-weight: 700; flex: 1; }
+    .badge {
+      font-size: 10.5px; font-weight: 600; padding: 2px 10px; border-radius: 99px;
+      flex-shrink: 0;
+    }
+    .badge-indigo {
+      background: rgba(99,102,241,.15);
+      border: 1px solid rgba(99,102,241,.35);
+      color: #a5b4fc;
+    }
+    .badge-amber {
+      background: rgba(245,158,11,.12);
+      border: 1px solid rgba(245,158,11,.3);
+      color: #fcd34d;
+    }
+
+    /* ── use-case tabs ── */
+    #tabs-bar {
+      background: #0d0d1a;
+      border-bottom: 1px solid #1a1a30;
+      padding: 10px 20px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      background: rgba(255,255,255,.04);
+      border: 1px solid #1a1a30;
+      color: #8080b0;
+      padding: 6px 16px;
+      border-radius: 99px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .tab-btn:hover { background: rgba(99,102,241,.12); color: #a5b4fc; border-color: rgba(99,102,241,.3); }
+    .tab-btn.active {
+      background: rgba(99,102,241,.2);
+      border-color: rgba(99,102,241,.5);
+      color: #c7d2fe;
+    }
+
+    /* ── main workspace ── */
+    #workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 0;
+      overflow: hidden;
+    }
+    @media (max-width: 1024px) {
+      #workspace { grid-template-columns: 1fr; }
+    }
+
+    /* ── left panel ── */
+    #left-panel {
+      border-right: 1px solid #1a1a30;
+      overflow-y: auto;
+      padding: 0;
+    }
+    .panel-section {
+      border-bottom: 1px solid #1a1a30;
+      padding: 14px 16px;
+    }
+    .panel-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #4a4a80;
+      margin-bottom: 12px;
+    }
+
+    /* preset buttons */
+    .preset-row { display: flex; gap: 8px; }
+    .preset-btn {
+      flex: 1;
+      background: rgba(255,255,255,.04);
+      border: 1px solid #1a1a30;
+      color: #8080b0;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .preset-btn:hover { background: rgba(99,102,241,.12); color: #a5b4fc; border-color: rgba(99,102,241,.3); }
+    .preset-btn.active {
+      background: rgba(99,102,241,.2);
+      border-color: rgba(99,102,241,.5);
+      color: #c7d2fe;
+    }
+
+    /* sliders */
+    .slider-group { margin-bottom: 14px; }
+    .slider-group:last-child { margin-bottom: 0; }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+    .slider-label span:first-child { font-size: 12px; color: #b0b0d0; font-weight: 500; }
+    .slider-value {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6366f1;
+      font-variant-numeric: tabular-nums;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: #1a1a30;
+      border-radius: 99px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #6366f1;
+      box-shadow: 0 0 0 2px #07070e, 0 0 0 4px rgba(99,102,241,.3);
+      cursor: pointer;
+      transition: box-shadow .15s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      box-shadow: 0 0 0 2px #07070e, 0 0 0 6px rgba(99,102,241,.5);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #6366f1;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* review policy */
+    .radio-group { display: flex; flex-direction: column; gap: 8px; }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #b0b0d0;
+      cursor: pointer;
+    }
+    .radio-option input[type=radio] { accent-color: #6366f1; cursor: pointer; }
+    .radio-option.active { color: #c7d2fe; }
+
+    #band-sliders {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(99,102,241,.06);
+      border: 1px solid rgba(99,102,241,.15);
+      border-radius: 8px;
+      display: none;
+    }
+    #band-sliders.visible { display: block; }
+    #band-sliders .slider-group { margin-bottom: 10px; }
+    #band-sliders .slider-group:last-child { margin-bottom: 0; }
+
+    /* snapshot buttons */
+    .snapshot-row { display: flex; gap: 8px; }
+    .snap-btn {
+      flex: 1;
+      padding: 7px 10px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid;
+      transition: all .2s;
+    }
+    .snap-btn-a {
+      background: rgba(99,102,241,.1);
+      border-color: rgba(99,102,241,.3);
+      color: #a5b4fc;
+    }
+    .snap-btn-a:hover { background: rgba(99,102,241,.2); }
+    .snap-btn-a.saved {
+      background: rgba(99,102,241,.25);
+      border-color: #6366f1;
+      color: #e0e7ff;
+    }
+    .snap-btn-b {
+      background: rgba(34,197,94,.08);
+      border-color: rgba(34,197,94,.25);
+      color: #86efac;
+    }
+    .snap-btn-b:hover { background: rgba(34,197,94,.15); }
+    .snap-btn-b.saved {
+      background: rgba(34,197,94,.2);
+      border-color: #22c55e;
+      color: #dcfce7;
+    }
+
+    /* ── right panel ── */
+    #right-panel {
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* confusion matrix */
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #4a4a80;
+      margin-bottom: 10px;
+    }
+    #confusion-wrapper {
+      background: #0d0d1a;
+      border: 1px solid #1a1a30;
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .cm-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .cm-table th {
+      padding: 6px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #4a4a80;
+      text-align: center;
+    }
+    .cm-table td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #1a1a30;
+      border-radius: 4px;
+    }
+    .cm-label {
+      font-size: 11px;
+      color: #4a4a80;
+      font-weight: 600;
+      text-align: right !important;
+      background: transparent !important;
+      border: none !important;
+    }
+    .cell-tp { background: rgba(34,197,94,.1); }
+    .cell-fp { background: rgba(239,68,68,.1); }
+    .cell-fn { background: rgba(245,158,11,.1); }
+    .cell-tn { background: rgba(99,102,241,.08); }
+    .cell-count {
+      font-size: 18px;
+      font-weight: 700;
+      display: block;
+      font-variant-numeric: tabular-nums;
+    }
+    .cell-tp .cell-count { color: #22c55e; }
+    .cell-fp .cell-count { color: #ef4444; }
+    .cell-fn .cell-count { color: #f59e0b; }
+    .cell-tn .cell-count { color: #818cf8; }
+    .cell-pct {
+      font-size: 10px;
+      color: #6060a0;
+      display: block;
+      margin-top: 2px;
+    }
+    .cell-label-sm {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 3px;
+      opacity: .7;
+    }
+
+    /* metric cards */
+    .cards-row {
+      display: grid;
+      gap: 10px;
+    }
+    .cards-row-4 { grid-template-columns: repeat(4, 1fr); }
+    .cards-row-3 { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 700px) {
+      .cards-row-4, .cards-row-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    .metric-card {
+      background: #0d0d1a;
+      border: 1px solid #1a1a30;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .metric-card-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: #4a4a80;
+      margin-bottom: 6px;
+    }
+    .metric-card-value {
+      font-size: 22px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .metric-card-sub {
+      font-size: 10px;
+      color: #50508a;
+      margin-top: 4px;
+    }
+    .val-green { color: #22c55e; }
+    .val-amber { color: #f59e0b; }
+    .val-red   { color: #ef4444; }
+    .val-blue  { color: #818cf8; }
+    .val-indigo { color: #6366f1; }
+
+    /* explanation box */
+    #explanation-box {
+      background: #0d0d1a;
+      border: 1px solid #1a1a30;
+      border-left: 3px solid #6366f1;
+      border-radius: 0 10px 10px 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #c0c0e0;
+    }
+
+    /* comparison table */
+    #comparison-section {
+      background: #0d0d1a;
+      border: 1px solid #1a1a30;
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .cmp-table th {
+      padding: 6px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #4a4a80;
+      text-align: right;
+      border-bottom: 1px solid #1a1a30;
+    }
+    .cmp-table th:first-child { text-align: left; }
+    .cmp-table td {
+      padding: 7px 10px;
+      text-align: right;
+      border-bottom: 1px solid #0f0f1e;
+      font-variant-numeric: tabular-nums;
+    }
+    .cmp-table td:first-child { text-align: left; color: #8080b0; font-size: 11px; }
+    .cmp-better { color: #22c55e; font-weight: 700; }
+    .cmp-worse  { color: #ef4444; font-weight: 700; }
+    .cmp-same   { color: #8080b0; }
+
+    /* PM reflection box */
+    #reflection-bar {
+      background: #0d0d1a;
+      border-top: 1px solid #1a1a30;
+      flex-shrink: 0;
+    }
+    #reflection-toggle {
+      width: 100%;
+      background: #0a0a16;
+      border: none;
+      border-bottom: 1px solid #1a1a30;
+      color: #6060a0;
+      padding: 8px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color .2s;
+    }
+    #reflection-toggle:hover { color: #a0a0d0; }
+    #reflection-caret { transition: transform .25s; font-size: 10px; }
+    #reflection-caret.open { transform: rotate(180deg); }
+    #reflection-content {
+      display: none;
+      padding: 14px 20px;
+    }
+    #reflection-content.open { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (max-width: 800px) {
+      #reflection-content.open { grid-template-columns: 1fr; }
+    }
+    .reflection-card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid #1a1a30;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #9090c0;
+    }
+    .reflection-card strong { color: #c0c0e0; display: block; margin-bottom: 3px; font-size: 12px; }
+
+    /* footer */
+    #footer {
+      background: #0a0a16;
+      border-top: 1px solid #1a1a30;
+      padding: 8px 20px;
+      font-size: 11px;
+      color: #30305a;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1a1a30; border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2a2a44; }
+  </style>
+</head>
+<body>
+
+<!-- file:// warning banner -->
+<div id="fp-warn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#7c1c1c;color:#fecaca;padding:12px 20px;font-size:13px;font-weight:600;align-items:center;gap:12px;box-shadow:0 2px 12px #0008">
+  <span style="font-size:18px">⚠️</span>
+  <div style="flex:1">Cannot run as <code style="background:#0003;padding:1px 5px;border-radius:4px">file://</code> — open via <strong>start_demos.bat</strong> or <code>python -m http.server 8080</code> instead.</div>
+  <button onclick="document.getElementById('fp-warn').style.display='none'" style="background:none;border:1px solid #fecaca88;color:#fecaca;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:12px">✕</button>
+</div>
+<script>if(location.protocol==='file:'){document.getElementById('fp-warn').style.display='flex';}</script>
+
+<!-- header -->
+<div id="header">
+  <a class="back-link" href="../index.html">← PM Demos</a>
+  <h1>🧪 Experimentation &amp; Metrics Simulator</h1>
+  <span class="badge badge-indigo">PM Demo 01</span>
+  <span class="badge badge-amber">Sessions 10–12</span>
+</div>
+
+<!-- use-case tabs -->
+<div id="tabs-bar">
+  <button class="tab-btn active" data-uc="fraud" onclick="setUseCase('fraud',this)">🔒 Fraud Detection</button>
+  <button class="tab-btn" data-uc="support" onclick="setUseCase('support',this)">🎫 Support Ticket Routing</button>
+  <button class="tab-btn" data-uc="reco" onclick="setUseCase('reco',this)">✨ Recommendation Relevance</button>
+  <button class="tab-btn" data-uc="approval" onclick="setUseCase('approval',this)">🤖 AI Response Approval</button>
+</div>
+
+<!-- workspace -->
+<div id="workspace">
+
+  <!-- LEFT PANEL -->
+  <div id="left-panel">
+
+    <!-- presets -->
+    <div class="panel-section">
+      <div class="panel-section-title">Scenario Presets</div>
+      <div class="preset-row">
+        <button class="preset-btn" id="preset-conservative" onclick="applyPreset('conservative')">Conservative</button>
+        <button class="preset-btn active" id="preset-balanced" onclick="applyPreset('balanced')">Balanced</button>
+        <button class="preset-btn" id="preset-aggressive" onclick="applyPreset('aggressive')">Aggressive</button>
+      </div>
+    </div>
+
+    <!-- sliders -->
+    <div class="panel-section">
+      <div class="panel-section-title">Model &amp; Traffic Controls</div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Confidence Threshold</span>
+          <span class="slider-value" id="val-threshold">0.50</span>
+        </div>
+        <input type="range" id="sl-threshold" min="0" max="1" step="0.01" value="0.50"
+               oninput="onSliderChange()">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Traffic Allocation</span>
+          <span class="slider-value" id="val-traffic">20%</span>
+        </div>
+        <input type="range" id="sl-traffic" min="1" max="100" step="1" value="20"
+               oninput="onSliderChange()">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Human Review Capacity</span>
+          <span class="slider-value" id="val-capacity">1,000/day</span>
+        </div>
+        <input type="range" id="sl-capacity" min="100" max="5000" step="100" value="1000"
+               oninput="onSliderChange()">
+      </div>
+    </div>
+
+    <!-- cost sliders -->
+    <div class="panel-section">
+      <div class="panel-section-title">Cost Assumptions</div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>False Positive Cost</span>
+          <span class="slider-value" id="val-fpcost">$50</span>
+        </div>
+        <input type="range" id="sl-fpcost" min="0" max="500" step="5" value="50"
+               oninput="onSliderChange()">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>False Negative Cost</span>
+          <span class="slider-value" id="val-fncost">$200</span>
+        </div>
+        <input type="range" id="sl-fncost" min="0" max="2000" step="10" value="200"
+               oninput="onSliderChange()">
+      </div>
+    </div>
+
+    <!-- review policy -->
+    <div class="panel-section">
+      <div class="panel-section-title">Review Policy</div>
+      <div class="radio-group">
+        <label class="radio-option active" id="policy-label-auto-approve">
+          <input type="radio" name="policy" value="auto-approve" checked onchange="onPolicyChange()">
+          Auto-approve below threshold
+        </label>
+        <label class="radio-option" id="policy-label-auto-reject">
+          <input type="radio" name="policy" value="auto-reject" onchange="onPolicyChange()">
+          Auto-reject above threshold
+        </label>
+        <label class="radio-option" id="policy-label-band">
+          <input type="radio" name="policy" value="band" onchange="onPolicyChange()">
+          Human review band (lo–hi)
+        </label>
+      </div>
+      <div id="band-sliders">
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Band Low</span>
+            <span class="slider-value" id="val-band-lo">0.30</span>
+          </div>
+          <input type="range" id="sl-band-lo" min="0" max="0.99" step="0.01" value="0.30"
+                 oninput="onSliderChange()">
+        </div>
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Band High</span>
+            <span class="slider-value" id="val-band-hi">0.70</span>
+          </div>
+          <input type="range" id="sl-band-hi" min="0.01" max="1" step="0.01" value="0.70"
+                 oninput="onSliderChange()">
+        </div>
+      </div>
+    </div>
+
+    <!-- snapshots -->
+    <div class="panel-section">
+      <div class="panel-section-title">Scenario Comparison</div>
+      <div class="snapshot-row">
+        <button class="snap-btn snap-btn-a" id="snap-a-btn" onclick="saveSnapshot('A')">
+          💾 Save Scenario A
+        </button>
+        <button class="snap-btn snap-btn-b" id="snap-b-btn" onclick="saveSnapshot('B')">
+          💾 Save Scenario B
+        </button>
+      </div>
+      <div id="snap-status" style="font-size:11px;color:#50508a;margin-top:8px;"></div>
+    </div>
+
+  </div>
+  <!-- /LEFT PANEL -->
+
+  <!-- RIGHT PANEL -->
+  <div id="right-panel">
+
+    <!-- confusion matrix -->
+    <div id="confusion-wrapper">
+      <div class="section-title">Confusion Matrix <span style="color:#30305a;font-weight:400;text-transform:none;letter-spacing:0;font-size:10px" id="cm-scale-note"></span></div>
+      <table class="cm-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th colspan="2" style="color:#6060a0">Predicted</th>
+          </tr>
+          <tr>
+            <th></th>
+            <th>Positive</th>
+            <th>Negative</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cm-label">Actual<br>Positive</td>
+            <td class="cell-tp" id="cm-tp">
+              <span class="cell-label-sm">TP</span>
+              <span class="cell-count" id="cm-tp-count">—</span>
+              <span class="cell-pct" id="cm-tp-pct">—</span>
+            </td>
+            <td class="cell-fn" id="cm-fn">
+              <span class="cell-label-sm">FN</span>
+              <span class="cell-count" id="cm-fn-count">—</span>
+              <span class="cell-pct" id="cm-fn-pct">—</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="cm-label">Actual<br>Negative</td>
+            <td class="cell-fp" id="cm-fp">
+              <span class="cell-label-sm">FP</span>
+              <span class="cell-count" id="cm-fp-count">—</span>
+              <span class="cell-pct" id="cm-fp-pct">—</span>
+            </td>
+            <td class="cell-tn" id="cm-tn">
+              <span class="cell-label-sm">TN</span>
+              <span class="cell-count" id="cm-tn-count">—</span>
+              <span class="cell-pct" id="cm-tn-pct">—</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- metric cards row 1 -->
+    <div>
+      <div class="section-title">Classification Metrics</div>
+      <div class="cards-row cards-row-4">
+        <div class="metric-card">
+          <div class="metric-card-label">Precision</div>
+          <div class="metric-card-value" id="mc-precision">—</div>
+          <div class="metric-card-sub">TP / (TP + FP)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label">Recall</div>
+          <div class="metric-card-value" id="mc-recall">—</div>
+          <div class="metric-card-sub">TP / (TP + FN)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label">F1 Score</div>
+          <div class="metric-card-value" id="mc-f1">—</div>
+          <div class="metric-card-sub">Harmonic mean P&amp;R</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label">Review Queue</div>
+          <div class="metric-card-value" id="mc-queue">—</div>
+          <div class="metric-card-sub" id="mc-queue-sub">items/day</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- business impact row 2 -->
+    <div>
+      <div class="section-title">Business Impact</div>
+      <div class="cards-row cards-row-3">
+        <div class="metric-card">
+          <div class="metric-card-label">Daily Cost</div>
+          <div class="metric-card-value" id="mc-daily-cost">—</div>
+          <div class="metric-card-sub">FP + FN error costs</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label">Cost / 1k Decisions</div>
+          <div class="metric-card-value" id="mc-cost-1k">—</div>
+          <div class="metric-card-sub">Normalized cost</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label" id="kpi-label">KPI Proxy</div>
+          <div class="metric-card-value" id="mc-kpi">—</div>
+          <div class="metric-card-sub" id="mc-kpi-sub">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- explanation box -->
+    <div id="explanation-box">—</div>
+
+    <!-- comparison section -->
+    <div id="comparison-section" style="display:none">
+      <div class="section-title">Scenario Comparison — A vs B</div>
+      <table class="cmp-table" id="cmp-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Scenario A</th>
+            <th>Scenario B</th>
+            <th>Δ (B − A)</th>
+          </tr>
+        </thead>
+        <tbody id="cmp-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+  <!-- /RIGHT PANEL -->
+</div>
+<!-- /workspace -->
+
+<!-- PM Reflection box -->
+<div id="reflection-bar">
+  <button id="reflection-toggle" onclick="toggleReflection()">
+    <span id="reflection-caret">▲</span>
+    PM Reflection &amp; Classroom Prompts
+  </button>
+  <div id="reflection-content">
+    <div class="reflection-card">
+      <strong>🎯 What PM decision is being made?</strong>
+      Setting the confidence threshold that balances automation rate, review burden, and business cost. This tradeoff is central to any AI-assisted product decision.
+    </div>
+    <div class="reflection-card">
+      <strong>📊 What data is assumed?</strong>
+      Scenario curves are representative but synthetic. Real ROC curves are model- and dataset-specific, and can shift with distribution changes (seasonality, adversarial drift).
+    </div>
+    <div class="reflection-card">
+      <strong>⚠️ What can go wrong if you trust this tool too much?</strong>
+      Real review queue costs include agent time, tooling, and training overhead. This model ignores queue backlog effects, reviewer fatigue, and SLA penalties for delayed decisions.
+    </div>
+    <div class="reflection-card">
+      <strong>💡 What would a strong PM override here?</strong>
+      A PM might accept higher false-negative cost short-term to reduce review burden during team scaling. Or they might set asymmetric cost weights after consulting Legal on regulatory exposure.
+    </div>
+  </div>
+</div>
+
+<!-- footer -->
+<div id="footer">
+  PM Demo 01 · Experimentation &amp; Metrics Simulator · Professor Vinaya Sathyanarayana · KateelLearningDemosToStudents
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  SCENARIO DATA
+// ─────────────────────────────────────────────
+const SCENARIOS = {
+  fraud: {
+    name: 'Fraud Detection',
+    totalN: 1000,
+    truePositives: 50,
+    kpiLabel: 'Fraud Loss Avoided',
+    kpiUnit: '$',
+    kpiDesc: 'Estimated value of caught fraud',
+    curve: [[0.1,0.98,0.45],[0.3,0.94,0.32],[0.5,0.85,0.18],[0.7,0.72,0.08],[0.9,0.48,0.02]]
+  },
+  support: {
+    name: 'Support Ticket Routing',
+    totalN: 5000,
+    truePositives: 2000,
+    kpiLabel: 'SLA Hit Rate',
+    kpiUnit: '%',
+    kpiDesc: 'Est. tickets routed within SLA',
+    curve: [[0.1,0.96,0.55],[0.3,0.91,0.38],[0.5,0.83,0.22],[0.7,0.70,0.10],[0.9,0.50,0.03]]
+  },
+  reco: {
+    name: 'Recommendation Relevance',
+    totalN: 100000,
+    truePositives: 15000,
+    kpiLabel: 'Conversion Lift',
+    kpiUnit: '%',
+    kpiDesc: 'Est. incremental conversion',
+    curve: [[0.1,0.97,0.60],[0.3,0.92,0.40],[0.5,0.84,0.25],[0.7,0.71,0.12],[0.9,0.52,0.04]]
+  },
+  approval: {
+    name: 'AI Response Approval',
+    totalN: 10000,
+    truePositives: 8000,
+    kpiLabel: 'Approval Rate w/ Risk',
+    kpiUnit: '%',
+    kpiDesc: 'Approved & low-risk rate',
+    curve: [[0.1,0.99,0.70],[0.3,0.95,0.45],[0.5,0.88,0.28],[0.7,0.75,0.14],[0.9,0.55,0.05]]
+  }
+};
+
+const PRESETS = {
+  conservative: { threshold: 0.80, traffic: 10, capacity: 2000, fpcost: 100, fncost: 500, policy: 'auto-approve' },
+  balanced:     { threshold: 0.50, traffic: 20, capacity: 1000, fpcost:  50, fncost: 200, policy: 'auto-approve' },
+  aggressive:   { threshold: 0.25, traffic: 60, capacity:  500, fpcost:  20, fncost:  80, policy: 'auto-approve' }
+};
+
+let currentUC = 'fraud';
+let snapshotA = null;
+let snapshotB = null;
+
+// ─────────────────────────────────────────────
+//  INTERPOLATION
+// ─────────────────────────────────────────────
+function interpolate(curve, t) {
+  // curve: [[thresh, tp_rate, fp_rate], ...]
+  if (t <= curve[0][0]) return { tpRate: curve[0][1], fpRate: curve[0][2] };
+  if (t >= curve[curve.length-1][0]) {
+    const last = curve[curve.length-1];
+    return { tpRate: last[1], fpRate: last[2] };
+  }
+  for (let i = 0; i < curve.length - 1; i++) {
+    const [t0, tp0, fp0] = curve[i];
+    const [t1, tp1, fp1] = curve[i+1];
+    if (t >= t0 && t <= t1) {
+      const frac = (t - t0) / (t1 - t0);
+      return {
+        tpRate: tp0 + frac * (tp1 - tp0),
+        fpRate: fp0 + frac * (fp1 - fp0)
+      };
+    }
+  }
+  return { tpRate: 0.5, fpRate: 0.1 };
+}
+
+// ─────────────────────────────────────────────
+//  CORE COMPUTE
+// ─────────────────────────────────────────────
+function computeMetrics() {
+  const sc = SCENARIOS[currentUC];
+  const threshold = parseFloat(document.getElementById('sl-threshold').value);
+  const trafficPct = parseFloat(document.getElementById('sl-traffic').value) / 100;
+  const capacity   = parseFloat(document.getElementById('sl-capacity').value);
+  const fpCost     = parseFloat(document.getElementById('sl-fpcost').value);
+  const fnCost     = parseFloat(document.getElementById('sl-fncost').value);
+
+  const policy = document.querySelector('input[name=policy]:checked').value;
+  const bandLo = parseFloat(document.getElementById('sl-band-lo').value);
+  const bandHi = parseFloat(document.getElementById('sl-band-hi').value);
+
+  // Scale by traffic
+  const N  = sc.totalN * trafficPct;
+  const P  = sc.truePositives * trafficPct;   // true positives in population
+  const NG = N - P;                            // true negatives in population
+
+  const { tpRate, fpRate } = interpolate(sc.curve, threshold);
+
+  let TP = P * tpRate;
+  let FP = NG * fpRate;
+  let FN = P - TP;
+  let TN = NG - FP;
+
+  // Review queue: items the model is uncertain about
+  let reviewQueue;
+  if (policy === 'band') {
+    // Items in the confidence band go to review
+    const { tpRate: tpLo, fpRate: fpLo } = interpolate(sc.curve, bandLo);
+    const { tpRate: tpHi, fpRate: fpHi } = interpolate(sc.curve, bandHi);
+    const tpInBand = P * (tpLo - tpHi);
+    const fpInBand = NG * (fpLo - fpHi);
+    reviewQueue = Math.max(0, tpInBand + fpInBand);
+  } else if (policy === 'auto-reject') {
+    // Items above threshold are auto-rejected; items below go to review
+    reviewQueue = FN + TN; // below-threshold items needing human review
+  } else {
+    // auto-approve: flagged positives go to review (FPs + escalated FNs)
+    reviewQueue = FP + FN * 0.3; // FPs caught + some FNs escalated
+  }
+
+  // clamp to reasonable values
+  TP = Math.round(TP);
+  FP = Math.round(FP);
+  FN = Math.round(FN);
+  TN = Math.round(TN);
+  reviewQueue = Math.round(reviewQueue);
+  const total = TP + FP + FN + TN;
+
+  const precision = (TP + FP) > 0 ? TP / (TP + FP) : 0;
+  const recall    = (TP + FN) > 0 ? TP / (TP + FN) : 0;
+  const f1        = (precision + recall) > 0 ? 2 * precision * recall / (precision + recall) : 0;
+
+  const dailyCost  = FP * fpCost + FN * fnCost;
+  const cost1k     = total > 0 ? (dailyCost / total) * 1000 : 0;
+
+  // KPI proxy
+  let kpi;
+  if (currentUC === 'fraud') {
+    // Fraud loss avoided ≈ TP * avg_fraud_value (assume $1000 avg fraud)
+    kpi = TP * 1000;
+  } else if (currentUC === 'support') {
+    // SLA hit rate: TP / P (correctly routed)
+    kpi = P > 0 ? (TP / P) * 100 : 0;
+  } else if (currentUC === 'reco') {
+    // Conversion lift ≈ precision * 8% base conversion
+    kpi = precision * 8;
+  } else {
+    // AI Response: approval rate of truly safe items
+    kpi = total > 0 ? ((TP + TN) / total) * 100 : 0;
+  }
+
+  return { TP, FP, FN, TN, total, precision, recall, f1,
+           reviewQueue, capacity, dailyCost, cost1k, kpi,
+           threshold, trafficPct, policy, fpCost, fnCost };
+}
+
+// ─────────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────────
+function fmt(n)  { return Math.round(n).toLocaleString(); }
+function fmtD(n) { return n.toFixed(2); }
+function fmtPct(n) { return n.toFixed(1) + '%'; }
+
+function trafficColor(val) {
+  if (val > 0.70) return 'val-green';
+  if (val > 0.50) return 'val-amber';
+  return 'val-red';
+}
+
+function setEl(id, text, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  if (cls) {
+    el.className = 'metric-card-value ' + cls;
+  }
+}
+
+function render(m) {
+  const sc = SCENARIOS[currentUC];
+  const total = m.total;
+
+  // confusion matrix
+  document.getElementById('cm-tp-count').textContent = fmt(m.TP);
+  document.getElementById('cm-fp-count').textContent = fmt(m.FP);
+  document.getElementById('cm-fn-count').textContent = fmt(m.FN);
+  document.getElementById('cm-tn-count').textContent = fmt(m.TN);
+  document.getElementById('cm-tp-pct').textContent = total > 0 ? fmtPct(m.TP/total*100) : '—';
+  document.getElementById('cm-fp-pct').textContent = total > 0 ? fmtPct(m.FP/total*100) : '—';
+  document.getElementById('cm-fn-pct').textContent = total > 0 ? fmtPct(m.FN/total*100) : '—';
+  document.getElementById('cm-tn-pct').textContent = total > 0 ? fmtPct(m.TN/total*100) : '—';
+
+  const scaleNote = `(${fmt(Math.round(sc.totalN * m.trafficPct))} total daily decisions @ ${Math.round(m.trafficPct*100)}% traffic)`;
+  document.getElementById('cm-scale-note').textContent = scaleNote;
+
+  // metric cards
+  const pColor = m.precision > 0.70 ? 'val-green' : m.precision > 0.50 ? 'val-amber' : 'val-red';
+  const rColor = m.recall    > 0.70 ? 'val-green' : m.recall    > 0.50 ? 'val-amber' : 'val-red';
+  const fColor = m.f1        > 0.70 ? 'val-green' : m.f1        > 0.50 ? 'val-amber' : 'val-red';
+  const qColor = m.reviewQueue > m.capacity ? 'val-red' : m.reviewQueue > m.capacity * 0.8 ? 'val-amber' : 'val-green';
+
+  setEl('mc-precision', fmtD(m.precision), pColor);
+  setEl('mc-recall',    fmtD(m.recall),    rColor);
+  setEl('mc-f1',        fmtD(m.f1),        fColor);
+  setEl('mc-queue',     fmt(m.reviewQueue), qColor);
+
+  const qSub = document.getElementById('mc-queue-sub');
+  if (m.reviewQueue > m.capacity) {
+    qSub.textContent = `⚠ Over capacity by ${fmt(m.reviewQueue - m.capacity)}/day`;
+    qSub.style.color = '#ef4444';
+  } else {
+    qSub.textContent = `items/day (cap: ${fmt(m.capacity)})`;
+    qSub.style.color = '';
+  }
+
+  // business impact
+  setEl('mc-daily-cost', '$' + fmt(m.dailyCost), m.dailyCost > 50000 ? 'val-red' : m.dailyCost > 20000 ? 'val-amber' : 'val-green');
+  setEl('mc-cost-1k',    '$' + fmt(m.cost1k));
+
+  // kpi
+  const kpiEl = document.getElementById('mc-kpi');
+  const kpiSub = document.getElementById('mc-kpi-sub');
+  document.getElementById('kpi-label').textContent = sc.kpiLabel;
+  kpiSub.textContent = sc.kpiDesc;
+  if (sc.kpiUnit === '$') {
+    kpiEl.textContent = '$' + fmt(m.kpi);
+    kpiEl.className = 'metric-card-value val-green';
+  } else {
+    kpiEl.textContent = m.kpi.toFixed(1) + '%';
+    kpiEl.className = 'metric-card-value ' + (m.kpi > 75 ? 'val-green' : m.kpi > 50 ? 'val-amber' : 'val-red');
+  }
+
+  // explanation
+  buildExplanation(m);
+
+  // comparison
+  if (snapshotA && snapshotB) renderComparison();
+}
+
+function buildExplanation(m) {
+  const box = document.getElementById('explanation-box');
+  const parts = [];
+
+  const thr = (m.threshold * 100).toFixed(0) + '%';
+
+  if (m.reviewQueue > m.capacity) {
+    const over = fmt(m.reviewQueue - m.capacity);
+    parts.push(`⚠ Review queue (${fmt(m.reviewQueue)}/day) exceeds capacity by ${over} items — human reviewers will be overwhelmed.`);
+  } else {
+    parts.push(`Review queue (${fmt(m.reviewQueue)}/day) is within capacity (${fmt(m.capacity)}/day).`);
+  }
+
+  if (m.threshold < 0.35) {
+    parts.push(`Low threshold (${m.threshold.toFixed(2)}) boosts recall (${fmtD(m.recall)}) but inflates false positives, raising daily cost to $${fmt(m.dailyCost)}.`);
+  } else if (m.threshold > 0.70) {
+    parts.push(`High threshold (${m.threshold.toFixed(2)}) reduces false positives but misses ${fmt(m.FN)} true cases — recall drops to ${fmtD(m.recall)}.`);
+  } else {
+    parts.push(`Threshold at ${m.threshold.toFixed(2)} balances precision (${fmtD(m.precision)}) and recall (${fmtD(m.recall)}) with F1 = ${fmtD(m.f1)}.`);
+  }
+
+  if (m.trafficPct < 0.15) {
+    parts.push(`Only ${Math.round(m.trafficPct*100)}% of traffic is allocated — scale up to validate at production volumes before full rollout.`);
+  } else if (m.trafficPct > 0.70) {
+    parts.push(`${Math.round(m.trafficPct*100)}% traffic allocation means the AI system is handling the majority of decisions — monitor drift closely.`);
+  }
+
+  box.textContent = parts.join(' ');
+}
+
+// ─────────────────────────────────────────────
+//  EVENT HANDLERS
+// ─────────────────────────────────────────────
+function onSliderChange() {
+  // sync display values
+  const threshold = document.getElementById('sl-threshold').value;
+  const traffic   = document.getElementById('sl-traffic').value;
+  const capacity  = document.getElementById('sl-capacity').value;
+  const fpcost    = document.getElementById('sl-fpcost').value;
+  const fncost    = document.getElementById('sl-fncost').value;
+  const bandLo    = document.getElementById('sl-band-lo').value;
+  const bandHi    = document.getElementById('sl-band-hi').value;
+
+  document.getElementById('val-threshold').textContent = parseFloat(threshold).toFixed(2);
+  document.getElementById('val-traffic').textContent   = traffic + '%';
+  document.getElementById('val-capacity').textContent  = parseInt(capacity).toLocaleString() + '/day';
+  document.getElementById('val-fpcost').textContent    = '$' + fpcost;
+  document.getElementById('val-fncost').textContent    = '$' + fncost;
+  document.getElementById('val-band-lo').textContent   = parseFloat(bandLo).toFixed(2);
+  document.getElementById('val-band-hi').textContent   = parseFloat(bandHi).toFixed(2);
+
+  // clear active preset
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+
+  render(computeMetrics());
+}
+
+function onPolicyChange() {
+  const policy = document.querySelector('input[name=policy]:checked').value;
+  document.getElementById('band-sliders').classList.toggle('visible', policy === 'band');
+  document.querySelectorAll('.radio-option').forEach(el => el.classList.remove('active'));
+  const checked = document.querySelector('input[name=policy]:checked');
+  if (checked) checked.closest('.radio-option').classList.add('active');
+  render(computeMetrics());
+}
+
+function setUseCase(uc, btn) {
+  currentUC = uc;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render(computeMetrics());
+}
+
+function applyPreset(name) {
+  const p = PRESETS[name];
+  document.getElementById('sl-threshold').value = p.threshold;
+  document.getElementById('sl-traffic').value   = p.traffic;
+  document.getElementById('sl-capacity').value  = p.capacity;
+  document.getElementById('sl-fpcost').value    = p.fpcost;
+  document.getElementById('sl-fncost').value    = p.fncost;
+
+  // reset policy
+  document.querySelectorAll('input[name=policy]').forEach(r => {
+    r.checked = r.value === p.policy;
+  });
+  onPolicyChange();
+
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('preset-' + name).classList.add('active');
+
+  onSliderChange();
+}
+
+// ─────────────────────────────────────────────
+//  SNAPSHOTS & COMPARISON
+// ─────────────────────────────────────────────
+function captureSnapshot() {
+  const m = computeMetrics();
+  const sc = SCENARIOS[currentUC];
+  return {
+    uc: sc.name,
+    threshold: parseFloat(document.getElementById('sl-threshold').value),
+    traffic: parseFloat(document.getElementById('sl-traffic').value),
+    capacity: parseFloat(document.getElementById('sl-capacity').value),
+    fpCost: parseFloat(document.getElementById('sl-fpcost').value),
+    fnCost: parseFloat(document.getElementById('sl-fncost').value),
+    ...m
+  };
+}
+
+function saveSnapshot(which) {
+  const snap = captureSnapshot();
+  if (which === 'A') {
+    snapshotA = snap;
+    const btn = document.getElementById('snap-a-btn');
+    btn.textContent = '✅ Scenario A Saved';
+    btn.classList.add('saved');
+  } else {
+    snapshotB = snap;
+    const btn = document.getElementById('snap-b-btn');
+    btn.textContent = '✅ Scenario B Saved';
+    btn.classList.add('saved');
+  }
+  updateSnapStatus();
+  if (snapshotA && snapshotB) renderComparison();
+}
+
+function updateSnapStatus() {
+  const el = document.getElementById('snap-status');
+  const parts = [];
+  if (snapshotA) parts.push(`A: ${snapshotA.uc} @ t=${snapshotA.threshold.toFixed(2)}`);
+  if (snapshotB) parts.push(`B: ${snapshotB.uc} @ t=${snapshotB.threshold.toFixed(2)}`);
+  el.textContent = parts.join(' | ');
+}
+
+function renderComparison() {
+  const a = snapshotA, b = snapshotB;
+  document.getElementById('comparison-section').style.display = 'block';
+
+  // scroll into view gently
+  const rows = [
+    { label: 'Use Case',          va: a.uc,                          vb: b.uc,                          fmt: v => v,                    higherBetter: null },
+    { label: 'Threshold',         va: a.threshold,                   vb: b.threshold,                   fmt: v => v.toFixed(2),         higherBetter: null },
+    { label: 'Traffic %',         va: a.trafficPct*100,              vb: b.trafficPct*100,              fmt: v => v.toFixed(0)+'%',     higherBetter: true  },
+    { label: 'TP',                va: a.TP,                          vb: b.TP,                          fmt: v => fmt(v),               higherBetter: true  },
+    { label: 'FP',                va: a.FP,                          vb: b.FP,                          fmt: v => fmt(v),               higherBetter: false },
+    { label: 'FN',                va: a.FN,                          vb: b.FN,                          fmt: v => fmt(v),               higherBetter: false },
+    { label: 'TN',                va: a.TN,                          vb: b.TN,                          fmt: v => fmt(v),               higherBetter: true  },
+    { label: 'Precision',         va: a.precision,                   vb: b.precision,                   fmt: v => v.toFixed(3),         higherBetter: true  },
+    { label: 'Recall',            va: a.recall,                      vb: b.recall,                      fmt: v => v.toFixed(3),         higherBetter: true  },
+    { label: 'F1 Score',          va: a.f1,                          vb: b.f1,                          fmt: v => v.toFixed(3),         higherBetter: true  },
+    { label: 'Review Queue/day',  va: a.reviewQueue,                 vb: b.reviewQueue,                 fmt: v => fmt(v),               higherBetter: false },
+    { label: 'Daily Cost ($)',     va: a.dailyCost,                   vb: b.dailyCost,                   fmt: v => '$'+fmt(v),           higherBetter: false },
+    { label: 'Cost/1k Decisions', va: a.cost1k,                      vb: b.cost1k,                      fmt: v => '$'+fmt(v),           higherBetter: false },
+  ];
+
+  const tbody = document.getElementById('cmp-tbody');
+  tbody.innerHTML = '';
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    let deltaCell = '', bClass = 'cmp-same';
+    if (row.higherBetter !== null && typeof row.va === 'number' && typeof row.vb === 'number') {
+      const delta = row.vb - row.va;
+      const sign = delta >= 0 ? '+' : '';
+      if (Math.abs(delta) < 0.0001 * Math.max(Math.abs(row.va), 1)) {
+        deltaCell = '—';
+        bClass = 'cmp-same';
+      } else {
+        deltaCell = sign + (Math.abs(delta) < 1 ? delta.toFixed(3) : fmt(delta));
+        bClass = (delta > 0 && row.higherBetter) || (delta < 0 && !row.higherBetter) ? 'cmp-better' : 'cmp-worse';
+      }
+    } else {
+      deltaCell = '—';
+    }
+    tr.innerHTML = `
+      <td>${row.label}</td>
+      <td>${row.fmt(row.va)}</td>
+      <td class="${bClass}">${row.fmt(row.vb)}</td>
+      <td class="${bClass}">${deltaCell}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  REFLECTION TOGGLE
+// ─────────────────────────────────────────────
+function toggleReflection() {
+  const content = document.getElementById('reflection-content');
+  const caret   = document.getElementById('reflection-caret');
+  const isOpen  = content.classList.contains('open');
+  content.classList.toggle('open', !isOpen);
+  caret.classList.toggle('open', !isOpen);
+  caret.textContent = isOpen ? '▲' : '▼';
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  onSliderChange();
+});
+</script>
+</body>
+</html>

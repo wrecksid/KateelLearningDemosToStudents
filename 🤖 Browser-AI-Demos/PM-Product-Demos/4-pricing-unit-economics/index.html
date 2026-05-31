@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing & Unit Economics Explorer — PM Demo 04</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #07070e;
+      color: #e2e2f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 28px;
+      background: #0d0d1a;
+      border-bottom: 1px solid #1a1a30;
+      flex-wrap: wrap;
+    }
+    .back-link {
+      color: #7878a8;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .15s;
+    }
+    .back-link:hover { color: #a5b4fc; }
+    .nav-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #e2e2f0;
+      flex: 1;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 99px;
+      letter-spacing: .04em;
+    }
+    .badge-indigo { background: rgba(99,102,241,.18); border: 1px solid rgba(99,102,241,.5); color: #a5b4fc; }
+    .badge-amber  { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.4); color: #fcd34d; }
+
+    /* ── Main layout ── */
+    .page-wrap {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #4a4a7a;
+      margin-bottom: 10px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #0d0d1a;
+      border: 1px solid #1a1a30;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .card-header {
+      background: #0a0a16;
+      padding: 12px 18px;
+      border-bottom: 1px solid #1a1a30;
+      font-size: 13px;
+      font-weight: 700;
+      color: #9090c0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-body { padding: 18px; }
+
+    /* ── Product type selector ── */
+    .product-type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .product-card {
+      background: #0d0d1a;
+      border: 2px solid #1a1a30;
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      user-select: none;
+    }
+    .product-card:hover { border-color: #6366f1; background: rgba(99,102,241,.06); }
+    .product-card.active { border-color: #6366f1; background: rgba(99,102,241,.10); }
+    .product-card .pc-icon { font-size: 26px; margin-bottom: 6px; }
+    .product-card .pc-name { font-size: 13px; font-weight: 700; color: #e2e2f0; margin-bottom: 4px; }
+    .product-card .pc-desc { font-size: 11px; color: #5a5a8a; line-height: 1.4; }
+
+    /* ── Pricing model radio ── */
+    .pricing-model-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pm-radio {
+      display: none;
+    }
+    .pm-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid #1a1a30;
+      font-size: 12px;
+      font-weight: 600;
+      color: #7878a8;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .pm-radio:checked + .pm-label {
+      background: rgba(99,102,241,.15);
+      border-color: #6366f1;
+      color: #a5b4fc;
+    }
+    .pm-label:hover { border-color: #6366f1; color: #a5b4fc; }
+
+    /* ── Two-column main layout ── */
+    .main-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .main-cols { grid-template-columns: 1fr; }
+    }
+
+    /* ── Slider inputs ── */
+    .slider-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 700px) {
+      .slider-cols { grid-template-columns: 1fr; }
+    }
+    .slider-group { display: flex; flex-direction: column; gap: 6px; }
+    .slider-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #9090c0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .slider-val {
+      color: #a5b4fc;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(99,102,241,.12);
+      padding: 2px 8px;
+      border-radius: 5px;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #1a1a35;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #6366f1;
+      cursor: pointer;
+      border: 2px solid #a5b4fc;
+      transition: background .1s;
+    }
+    input[type=range]:hover::-webkit-slider-thumb { background: #818cf8; }
+
+    /* ── KPI cards ── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 700px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    .kpi-card {
+      background: #0a0a16;
+      border: 1px solid #1a1a30;
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .kpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #4a4a7a; }
+    .kpi-value { font-size: 22px; font-weight: 800; color: #e2e2f0; line-height: 1.1; }
+    .kpi-value.green { color: #22c55e; }
+    .kpi-value.red   { color: #ef4444; }
+    .kpi-value.amber { color: #f59e0b; }
+    .kpi-sub  { font-size: 11px; color: #4a4a7a; }
+
+    /* ── Margin gauge ── */
+    .gauge-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .gauge-svg { overflow: visible; }
+    .gauge-val-text { font-size: 18px; font-weight: 800; }
+
+    /* ── COGS bar ── */
+    .cogs-bar-wrap { margin-bottom: 16px; }
+    .cogs-bar {
+      display: flex;
+      height: 22px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .cogs-bar-seg { transition: width .3s; min-width: 0; }
+    .cogs-bar-labels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .cogs-bar-label { font-size: 11px; display: flex; align-items: center; gap: 5px; }
+    .cogs-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+    /* ── Breakeven ── */
+    .breakeven-box {
+      background: rgba(99,102,241,.07);
+      border: 1px solid rgba(99,102,241,.2);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: #9090c0;
+      margin-top: 4px;
+    }
+    .breakeven-box strong { color: #a5b4fc; font-size: 15px; }
+
+    /* ── Cohort table ── */
+    .cohort-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .cohort-table th {
+      text-align: left;
+      padding: 7px 10px;
+      color: #4a4a7a;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      border-bottom: 1px solid #1a1a30;
+    }
+    .cohort-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #12122a;
+      vertical-align: middle;
+    }
+    .cohort-table tr:last-child td { border-bottom: none; }
+    .cohort-name { font-weight: 700; color: #e2e2f0; }
+    .cohort-desc { color: #4a4a7a; font-size: 11px; }
+    .margin-good  { color: #22c55e; font-weight: 700; }
+    .margin-warn  { color: #f59e0b; font-weight: 700; }
+    .margin-bad   { color: #ef4444; font-weight: 700; }
+
+    /* ── Warning banners ── */
+    .warn-banner {
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      display: none;
+      margin-top: 10px;
+    }
+    .warn-banner.show { display: block; }
+    .warn-red {
+      background: rgba(239,68,68,.12);
+      border: 1px solid rgba(239,68,68,.35);
+      color: #fca5a5;
+    }
+    .warn-amber {
+      background: rgba(245,158,11,.10);
+      border: 1px solid rgba(245,158,11,.35);
+      color: #fcd34d;
+    }
+
+    /* ── Sensitivity table ── */
+    .sensitivity-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+    .sensitivity-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #12122a;
+    }
+    .sensitivity-table tr:last-child td { border-bottom: none; }
+    .sensitivity-table .scenario-name { color: #9090c0; }
+    .delta-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .delta-green { background: rgba(34,197,94,.15); color: #4ade80; border: 1px solid rgba(34,197,94,.3); }
+    .delta-red   { background: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+    .delta-amber { background: rgba(245,158,11,.12); color: #fcd34d; border: 1px solid rgba(245,158,11,.3); }
+
+    /* ── Risk flags ── */
+    .risk-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .risk-item {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 7px;
+      display: none;
+    }
+    .risk-item.show { display: block; }
+    .risk-red    { background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.25); color: #fca5a5; }
+    .risk-amber  { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); color: #fcd34d; }
+    .risk-blue   { background: rgba(99,102,241,.10); border: 1px solid rgba(99,102,241,.25); color: #a5b4fc; }
+    .risk-none   {
+      background: rgba(34,197,94,.07);
+      border: 1px solid rgba(34,197,94,.2);
+      color: #86efac;
+      display: block !important;
+    }
+
+    /* ── Scenario compare ── */
+    .scenario-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .snap-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #1a1a30;
+      background: #0a0a16;
+      color: #7878a8;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .snap-btn:hover { border-color: #6366f1; color: #a5b4fc; }
+    .snap-btn.saved { border-color: #22c55e; color: #4ade80; background: rgba(34,197,94,.07); }
+    .snap-btn.clear { border-color: #ef4444; color: #f87171; }
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      display: none;
+    }
+    .compare-table.show { display: table; }
+    .compare-table th {
+      padding: 7px 10px;
+      color: #4a4a7a;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      border-bottom: 1px solid #1a1a30;
+      text-align: left;
+    }
+    .compare-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #12122a;
+      color: #9090c0;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-metric { color: #e2e2f0; font-weight: 600; }
+    .cmp-better { color: #22c55e; font-weight: 700; }
+    .cmp-worse  { color: #ef4444; font-weight: 700; }
+    .cmp-same   { color: #7878a8; }
+    .no-compare {
+      color: #3a3a60;
+      font-size: 12px;
+      font-style: italic;
+      padding: 12px 0;
+    }
+
+    /* ── PM Reflection ── */
+    .reflection-toggle {
+      background: none;
+      border: none;
+      color: #9090c0;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+    .reflection-toggle:hover { color: #e2e2f0; }
+    .reflection-arrow { transition: transform .2s; display: inline-block; }
+    .reflection-arrow.open { transform: rotate(90deg); }
+    .reflection-body {
+      display: none;
+      padding: 16px 18px;
+      border-top: 1px solid #1a1a30;
+      display: none;
+    }
+    .reflection-body.open { display: block; }
+    .reflection-item {
+      display: flex;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #12122a;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #9090c0;
+    }
+    .reflection-item:last-child { border-bottom: none; }
+    .reflection-icon { flex-shrink: 0; font-size: 16px; }
+
+    /* ── Footer ── */
+    footer {
+      background: #0a0a16;
+      border-top: 1px solid #1a1a30;
+      padding: 14px 28px;
+      font-size: 11px;
+      color: #3a3a60;
+      text-align: center;
+    }
+
+    /* ── Util ── */
+    .divider { border: none; border-top: 1px solid #1a1a30; margin: 14px 0; }
+  </style>
+</head>
+<body>
+
+<!-- File:// Warning Banner -->
+<div id="fp-warn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#7c1c1c;color:#fecaca;padding:12px 20px;font-size:13px;font-weight:600;align-items:center;gap:12px;box-shadow:0 2px 12px #0008">
+  <span style="font-size:18px">⚠️</span>
+  <div style="flex:1">Cannot run as <code style="background:#0003;padding:1px 5px;border-radius:4px">file://</code> — open via <strong>start_demos.bat</strong> or <code>python -m http.server 8080</code> instead.</div>
+  <button onclick="document.getElementById('fp-warn').style.display='none'" style="background:none;border:1px solid #fecaca88;color:#fecaca;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:12px">✕</button>
+</div>
+<script>if(location.protocol==='file:'){document.getElementById('fp-warn').style.display='flex';}</script>
+
+<!-- Top Nav -->
+<nav class="top-nav">
+  <a href="../../index.html" class="back-link">← PM Demos</a>
+  <span class="nav-title">💰 Pricing &amp; Unit Economics Explorer</span>
+  <span class="badge badge-indigo">PM Demo 04</span>
+  <span class="badge badge-amber">Sessions 11, 13, 15</span>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- Product Type Selector -->
+  <div>
+    <div class="section-title">Product Type Preset</div>
+    <div class="product-type-grid" id="product-type-grid">
+      <div class="product-card active" data-type="saas" onclick="selectProductType(this)">
+        <div class="pc-icon">🤖</div>
+        <div class="pc-name">SaaS Copilot</div>
+        <div class="pc-desc">Subscription-first, heavy LLM inference, per-seat pricing</div>
+      </div>
+      <div class="product-card" data-type="api" onclick="selectProductType(this)">
+        <div class="pc-icon">🔌</div>
+        <div class="pc-name">API Product</div>
+        <div class="pc-desc">Usage-based, developer customers, token-driven revenue</div>
+      </div>
+      <div class="product-card" data-type="rec" onclick="selectProductType(this)">
+        <div class="pc-icon">🎯</div>
+        <div class="pc-name">Recommendation Engine</div>
+        <div class="pc-desc">High volume, low per-call cost, embedded in product</div>
+      </div>
+      <div class="product-card" data-type="doc" onclick="selectProductType(this)">
+        <div class="pc-icon">📄</div>
+        <div class="pc-name">Document AI Workflow</div>
+        <div class="pc-desc">Per-document pricing, enterprise, batch processing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing Model Selector -->
+  <div class="card">
+    <div class="card-header">📐 Pricing Model</div>
+    <div class="card-body">
+      <div class="pricing-model-row" id="pricing-model-row">
+        <input type="radio" name="pm" id="pm-sub" value="subscription" class="pm-radio" checked onchange="recalc()">
+        <label class="pm-label" for="pm-sub">💳 Subscription</label>
+
+        <input type="radio" name="pm" id="pm-usage" value="usage" class="pm-radio" onchange="recalc()">
+        <label class="pm-label" for="pm-usage">📊 Usage-Based</label>
+
+        <input type="radio" name="pm" id="pm-free" value="freemium" class="pm-radio" onchange="recalc()">
+        <label class="pm-label" for="pm-free">🆓 Freemium</label>
+
+        <input type="radio" name="pm" id="pm-hybrid" value="hybrid" class="pm-radio" onchange="recalc()">
+        <label class="pm-label" for="pm-hybrid">🔀 Hybrid</label>
+
+        <input type="radio" name="pm" id="pm-ent" value="enterprise" class="pm-radio" onchange="recalc()">
+        <label class="pm-label" for="pm-ent">🏢 Enterprise License</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sliders -->
+  <div class="card">
+    <div class="card-header">🎚️ Inputs</div>
+    <div class="card-body">
+      <div class="slider-cols">
+
+        <!-- Volume -->
+        <div>
+          <div class="section-title" style="margin-bottom:12px">Volume</div>
+
+          <div class="slider-group">
+            <div class="slider-label">
+              Monthly Active Accounts
+              <span class="slider-val" id="val-mau">10,000</span>
+            </div>
+            <input type="range" id="sl-mau" min="0" max="100" value="50" oninput="updateMAU()" />
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:#3a3a60;margin-top:2px">
+              <span>100</span><span>500K</span>
+            </div>
+          </div>
+
+          <div class="slider-group" style="margin-top:12px">
+            <div class="slider-label">
+              Avg Prompts / Transactions per User/mo
+              <span class="slider-val" id="val-prompts">100</span>
+            </div>
+            <input type="range" id="sl-prompts" min="1" max="5000" value="100" oninput="updateSlider('prompts')" />
+          </div>
+
+          <div class="slider-group" style="margin-top:12px">
+            <div class="slider-label">
+              Avg Tokens per Prompt (in+out)
+              <span class="slider-val" id="val-tokens">2,000</span>
+            </div>
+            <input type="range" id="sl-tokens" min="100" max="50000" value="2000" oninput="updateSlider('tokens')" />
+          </div>
+        </div>
+
+        <!-- Costs -->
+        <div>
+          <div class="section-title" style="margin-bottom:12px">Cost Inputs ($/unit)</div>
+
+          <div class="slider-group">
+            <div class="slider-label">
+              LLM Model Cost ($/1k tokens)
+              <span class="slider-val" id="val-modelcost">$0.008</span>
+            </div>
+            <input type="range" id="sl-modelcost" min="0.001" max="0.200" step="0.001" value="0.008" oninput="updateSlider('modelcost')" />
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:#3a3a60;margin-top:2px">
+              <span>$0.001</span><span>$0.200</span>
+            </div>
+          </div>
+
+          <div class="slider-group" style="margin-top:12px">
+            <div class="slider-label">
+              Infrastructure Overhead ($/MAU/mo)
+              <span class="slider-val" id="val-infra">$2.00</span>
+            </div>
+            <input type="range" id="sl-infra" min="0.10" max="20" step="0.10" value="2.00" oninput="updateSlider('infra')" />
+          </div>
+
+          <div class="slider-group" style="margin-top:12px">
+            <div class="slider-label">
+              Support &amp; CS Cost ($/MAU/mo)
+              <span class="slider-val" id="val-support">$3.00</span>
+            </div>
+            <input type="range" id="sl-support" min="0.50" max="30" step="0.50" value="3.00" oninput="updateSlider('support')" />
+          </div>
+        </div>
+
+        <!-- Pricing -->
+        <div>
+          <div class="section-title" style="margin-bottom:12px">Pricing Inputs</div>
+
+          <div class="slider-group">
+            <div class="slider-label">
+              Subscription Price ($/user/mo)
+              <span class="slider-val" id="val-subprice">$29</span>
+            </div>
+            <input type="range" id="sl-subprice" min="5" max="500" value="29" oninput="updateSlider('subprice')" />
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:#3a3a60;margin-top:2px">
+              <span>$5</span><span>$500</span>
+            </div>
+          </div>
+
+          <div class="slider-group" style="margin-top:12px">
+            <div class="slider-label">
+              Free Tier Users (% of MAU)
+              <span class="slider-val" id="val-freepct">30%</span>
+            </div>
+            <input type="range" id="sl-freepct" min="0" max="80" value="30" oninput="updateSlider('freepct')" />
+          </div>
+
+          <div class="slider-group" style="margin-top:12px">
+            <div class="slider-label">
+              Overage Rate ($/1k tokens above limit)
+              <span class="slider-val" id="val-overage">$0.020</span>
+            </div>
+            <input type="range" id="sl-overage" min="0" max="0.50" step="0.001" value="0.02" oninput="updateSlider('overage')" />
+          </div>
+        </div>
+
+        <!-- Target -->
+        <div>
+          <div class="section-title" style="margin-bottom:12px">Target</div>
+
+          <div class="slider-group">
+            <div class="slider-label">
+              Target Gross Margin
+              <span class="slider-val" id="val-targetmargin">70%</span>
+            </div>
+            <input type="range" id="sl-targetmargin" min="30" max="90" value="70" oninput="updateSlider('targetmargin')" />
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:#3a3a60;margin-top:2px">
+              <span>30%</span><span>90%</span>
+            </div>
+          </div>
+
+          <!-- Target gap indicator -->
+          <div id="target-gap" style="margin-top:14px;background:#0a0a16;border:1px solid #1a1a30;border-radius:8px;padding:12px;font-size:12px;color:#7878a8;">
+            Target gap loading…
+          </div>
+        </div>
+
+      </div><!-- /slider-cols -->
+    </div>
+  </div>
+
+  <!-- Main 2-col: Dashboard + Cohort -->
+  <div class="main-cols">
+
+    <!-- LEFT: Unit Economics Dashboard -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- KPI Cards -->
+      <div>
+        <div class="section-title">Unit Economics Dashboard</div>
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-label">Monthly Revenue</div>
+            <div class="kpi-value" id="kpi-revenue">—</div>
+            <div class="kpi-sub" id="kpi-rev-sub">loading…</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Total COGS</div>
+            <div class="kpi-value" id="kpi-cogs">—</div>
+            <div class="kpi-sub" id="kpi-cogs-sub">loading…</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Gross Profit</div>
+            <div class="kpi-value" id="kpi-gp">—</div>
+            <div class="kpi-sub" id="kpi-gp-sub">loading…</div>
+          </div>
+          <div class="kpi-card" style="align-items:center;">
+            <div class="kpi-label">Gross Margin</div>
+            <div class="gauge-wrap">
+              <svg class="gauge-svg" width="80" height="80" viewBox="0 0 80 80">
+                <!-- bg track -->
+                <circle cx="40" cy="40" r="30" fill="none" stroke="#1a1a30" stroke-width="7"/>
+                <!-- value arc -->
+                <circle id="gauge-arc" cx="40" cy="40" r="30" fill="none"
+                  stroke="#22c55e" stroke-width="7"
+                  stroke-linecap="round"
+                  stroke-dasharray="188.5"
+                  stroke-dashoffset="188.5"
+                  transform="rotate(-90 40 40)"
+                  style="transition: stroke-dashoffset .4s, stroke .4s;"
+                />
+                <text id="gauge-text" x="40" y="45" text-anchor="middle"
+                  font-size="15" font-weight="800" fill="#e2e2f0" class="gauge-val-text">0%</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- COGS breakdown bar -->
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header">💸 COGS Breakdown</div>
+          <div class="card-body">
+            <div class="cogs-bar-wrap">
+              <div class="cogs-bar" id="cogs-bar">
+                <div id="cb-llm" class="cogs-bar-seg" style="background:#6366f1;width:50%"></div>
+                <div id="cb-infra" class="cogs-bar-seg" style="background:#f59e0b;width:30%"></div>
+                <div id="cb-support" class="cogs-bar-seg" style="background:#22c55e;width:20%"></div>
+              </div>
+              <div class="cogs-bar-labels">
+                <div class="cogs-bar-label">
+                  <span class="cogs-dot" style="background:#6366f1;"></span>
+                  <span>LLM: <strong id="cbl-llm">—</strong></span>
+                </div>
+                <div class="cogs-bar-label">
+                  <span class="cogs-dot" style="background:#f59e0b;"></span>
+                  <span>Infra: <strong id="cbl-infra">—</strong></span>
+                </div>
+                <div class="cogs-bar-label">
+                  <span class="cogs-dot" style="background:#22c55e;"></span>
+                  <span>Support: <strong id="cbl-support">—</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Break-even -->
+            <div class="breakeven-box">
+              Break-even at <strong id="breakeven-num">—</strong> paying users
+              <div id="breakeven-sub" style="margin-top:4px;font-size:11px;color:#4a4a7a;">calculating…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /left col -->
+
+    <!-- RIGHT: Cohort Analysis + Sensitivity + Risk -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- Cohort Analysis -->
+      <div class="card">
+        <div class="card-header">👥 Cohort Cost Analysis</div>
+        <div class="card-body" style="padding-top:8px;">
+          <table class="cohort-table">
+            <thead>
+              <tr>
+                <th>Cohort</th>
+                <th>Tokens/mo</th>
+                <th>Cost/User</th>
+                <th>Margin</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="cohort-tbody">
+              <tr>
+                <td colspan="5" style="color:#3a3a60;font-style:italic;padding:14px 10px;">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Margin collapse warning -->
+          <div id="warn-collapse" class="warn-banner warn-red">
+            ⚠️ <strong>Margin Collapse Risk</strong> — Your heaviest users cost more to serve than they pay. Consider usage caps or tiered pricing.
+          </div>
+          <div id="warn-thin" class="warn-banner warn-amber">
+            ⚠️ Heavy users are only marginally profitable. Usage caps or tier differentiation is recommended.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sensitivity Analysis -->
+      <div class="card">
+        <div class="card-header">🔬 Sensitivity Analysis</div>
+        <div class="card-body" style="padding-top:6px;">
+          <div style="font-size:11px;color:#4a4a7a;margin-bottom:6px;">Impact on gross margin vs current baseline</div>
+          <table class="sensitivity-table" id="sensitivity-table">
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pricing Risk Flags -->
+      <div class="card">
+        <div class="card-header">🚩 Pricing Risk Flags</div>
+        <div class="card-body" style="padding-top:8px;">
+          <div class="risk-list" id="risk-list">
+            <div class="risk-item show risk-blue">Analyzing…</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /right col -->
+
+  </div><!-- /main-cols -->
+
+  <!-- Scenario Compare -->
+  <div class="card">
+    <div class="card-header">⚖️ Scenario Comparison</div>
+    <div class="card-body">
+      <div class="scenario-row">
+        <button class="snap-btn" id="snap-a-btn" onclick="saveSnapshot('A')">📌 Save Snapshot A</button>
+        <button class="snap-btn" id="snap-b-btn" onclick="saveSnapshot('B')">📌 Save Snapshot B</button>
+        <button class="snap-btn clear" onclick="clearSnapshots()" style="margin-left:auto;">🗑️ Clear</button>
+      </div>
+      <div id="compare-placeholder" class="no-compare">Save two snapshots to compare scenarios side-by-side.</div>
+      <table class="compare-table" id="compare-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Snapshot A</th>
+            <th>Snapshot B</th>
+            <th>Delta</th>
+          </tr>
+        </thead>
+        <tbody id="compare-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PM Reflection Box -->
+  <div class="card">
+    <div class="card-body" style="padding:14px 18px;">
+      <button class="reflection-toggle" onclick="toggleReflection()">
+        <span class="reflection-arrow" id="refl-arrow">▶</span>
+        PM Reflection &amp; Assumptions
+      </button>
+    </div>
+    <div class="reflection-body" id="reflection-body">
+      <div class="reflection-item">
+        <span class="reflection-icon">🎯</span>
+        <div><strong style="color:#e2e2f0;">Decision:</strong> How to price an AI product without destroying margin at scale.</div>
+      </div>
+      <div class="reflection-item">
+        <span class="reflection-icon">📊</span>
+        <div><strong style="color:#e2e2f0;">Assumed:</strong> Costs are fixed-rate per token. Real inference costs vary by model, provider, and batching efficiency. Volume discounts and reserved capacity can cut LLM costs 30–60%.</div>
+      </div>
+      <div class="reflection-item">
+        <span class="reflection-icon">⚠️</span>
+        <div><strong style="color:#e2e2f0;">Risk:</strong> Heavy users destroy unit economics. This model uses a 4× multiplier — real power users can be 20–50× average. The distribution matters more than the mean.</div>
+      </div>
+      <div class="reflection-item">
+        <span class="reflection-icon">💡</span>
+        <div><strong style="color:#e2e2f0;">Override:</strong> A strong PM would validate heavy-user behavior from actual usage logs before setting pricing tiers. Never ship a pricing model based purely on spreadsheet assumptions.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<footer>
+  PM Demo 04 &nbsp;·&nbsp; Pricing &amp; Unit Economics Explorer &nbsp;·&nbsp; Professor Vinaya Sathyanarayana &nbsp;·&nbsp; KateelLearningDemosToStudents
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────
+const state = {
+  mau: 10000,
+  prompts: 100,
+  tokensPerPrompt: 2000,
+  modelCost: 0.008,
+  infraCost: 2.00,
+  supportCost: 3.00,
+  subPrice: 29,
+  freePct: 30,
+  overageRate: 0.02,
+  targetMargin: 70,
+  pricingModel: 'subscription'
+};
+
+let snapA = null, snapB = null;
+
+// ─────────────────────────────────────────────────────────────
+// Formatting helpers
+// ─────────────────────────────────────────────────────────────
+function fmt$(n) {
+  const abs = Math.abs(n);
+  let s;
+  if (abs >= 1e6)      s = '$' + (n/1e6).toFixed(2) + 'M';
+  else if (abs >= 1e3) s = '$' + (n/1e3).toFixed(1) + 'K';
+  else                 s = '$' + n.toFixed(0);
+  return n < 0 ? '-' + s.replace('$','$') : s;
+}
+function fmtN(n) {
+  if (n >= 1e6)      return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3)      return (n/1e3).toFixed(0) + 'K';
+  return Math.round(n).toLocaleString();
+}
+function fmtPct(n) { return n.toFixed(1) + '%'; }
+function colorClass(v, lo, hi) {
+  if (v >= hi) return 'margin-good';
+  if (v >= lo) return 'margin-warn';
+  return 'margin-bad';
+}
+function statusDot(v) {
+  if (v >= 40) return '🟢';
+  if (v >= 0)  return '🟡';
+  return '🔴';
+}
+
+// ─────────────────────────────────────────────────────────────
+// Core compute
+// ─────────────────────────────────────────────────────────────
+function compute(s) {
+  const paying_users = s.mau * (1 - s.freePct / 100);
+  const free_users   = s.mau * (s.freePct / 100);
+
+  let revenue;
+  if (s.pricingModel === 'subscription') {
+    revenue = paying_users * s.subPrice;
+  } else if (s.pricingModel === 'usage') {
+    const tokens_per_user = s.prompts * s.tokensPerPrompt;
+    revenue = s.mau * (tokens_per_user / 1000) * s.overageRate * 50;
+  } else if (s.pricingModel === 'freemium') {
+    revenue = paying_users * s.subPrice * 0.85;
+  } else if (s.pricingModel === 'hybrid') {
+    revenue = paying_users * s.subPrice * 0.7
+            + paying_users * s.prompts * s.tokensPerPrompt / 1000 * s.overageRate * 30;
+  } else { // enterprise
+    revenue = paying_users * s.subPrice * 1.5;
+  }
+
+  const tokens_total  = s.mau * s.prompts * s.tokensPerPrompt;
+  const llm_cost      = (tokens_total / 1000) * s.modelCost;
+  const infra_cost    = s.mau * s.infraCost;
+  const support_cost  = s.mau * s.supportCost;
+  const total_cogs    = llm_cost + infra_cost + support_cost;
+
+  const gross_profit  = revenue - total_cogs;
+  const gross_margin  = revenue > 0 ? (gross_profit / revenue) * 100 : 0;
+
+  const fixed_overhead    = 5000;
+  const margin_per_user   = revenue / s.mau - total_cogs / s.mau;
+  const breakeven_users   = fixed_overhead / Math.max(margin_per_user, 0.01);
+
+  const avg_cost_per_user = total_cogs / s.mau;
+  const avg_rev_per_user  = revenue / s.mau;
+  const light_cost    = avg_cost_per_user * 0.2;
+  const medium_cost   = avg_cost_per_user * 1.0;
+  const heavy_cost    = avg_cost_per_user * 4.0;
+
+  const safeMargin = (rev, cost) => rev > 0 ? (rev - cost) / rev * 100 : -999;
+  const light_margin  = safeMargin(avg_rev_per_user, light_cost);
+  const medium_margin = safeMargin(avg_rev_per_user, medium_cost);
+  const heavy_margin  = safeMargin(avg_rev_per_user, heavy_cost);
+
+  const light_tokens  = s.prompts * s.tokensPerPrompt * 0.2;
+  const medium_tokens = s.prompts * s.tokensPerPrompt;
+  const heavy_tokens  = s.prompts * s.tokensPerPrompt * 4;
+
+  return {
+    revenue, total_cogs, gross_profit, gross_margin,
+    breakeven_users, llm_cost, infra_cost, support_cost,
+    light_cost, medium_cost, heavy_cost,
+    light_margin, medium_margin, heavy_margin,
+    light_tokens, medium_tokens, heavy_tokens,
+    avg_rev_per_user, avg_cost_per_user,
+    paying_users, free_users,
+    tokens_total
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+// MAU — log scale slider
+// ─────────────────────────────────────────────────────────────
+function mauFromSlider(v) {
+  // 0→100 maps log 100→500000
+  const min = Math.log10(100), max = Math.log10(500000);
+  return Math.round(Math.pow(10, min + (v / 100) * (max - min)));
+}
+function sliderFromMAU(mau) {
+  const min = Math.log10(100), max = Math.log10(500000);
+  return ((Math.log10(mau) - min) / (max - min)) * 100;
+}
+function updateMAU() {
+  const v = +document.getElementById('sl-mau').value;
+  state.mau = mauFromSlider(v);
+  document.getElementById('val-mau').textContent = fmtN(state.mau);
+  recalc();
+}
+
+// ─────────────────────────────────────────────────────────────
+// Generic slider update
+// ─────────────────────────────────────────────────────────────
+function updateSlider(key) {
+  const map = {
+    prompts:     ['sl-prompts',     'val-prompts',     v => Math.round(v),           v => v.toLocaleString()],
+    tokens:      ['sl-tokens',      'val-tokens',      v => Math.round(v),           v => fmtN(v)],
+    modelcost:   ['sl-modelcost',   'val-modelcost',   v => parseFloat(v),           v => '$' + v.toFixed(3)],
+    infra:       ['sl-infra',       'val-infra',       v => parseFloat(v),           v => '$' + v.toFixed(2)],
+    support:     ['sl-support',     'val-support',     v => parseFloat(v),           v => '$' + v.toFixed(2)],
+    subprice:    ['sl-subprice',    'val-subprice',    v => Math.round(v),           v => '$' + Math.round(v)],
+    freepct:     ['sl-freepct',     'val-freepct',     v => Math.round(v),           v => Math.round(v) + '%'],
+    overage:     ['sl-overage',     'val-overage',     v => parseFloat(v),           v => '$' + v.toFixed(3)],
+    targetmargin:['sl-targetmargin','val-targetmargin',v => Math.round(v),           v => Math.round(v) + '%'],
+  };
+  const [slId, valId, parse, fmt] = map[key];
+  const raw = +document.getElementById(slId).value;
+  const val = parse(raw);
+  document.getElementById(valId).textContent = fmt(val);
+
+  if (key === 'prompts')      state.prompts       = val;
+  if (key === 'tokens')       state.tokensPerPrompt = val;
+  if (key === 'modelcost')    state.modelCost     = val;
+  if (key === 'infra')        state.infraCost     = val;
+  if (key === 'support')      state.supportCost   = val;
+  if (key === 'subprice')     state.subPrice      = val;
+  if (key === 'freepct')      state.freePct       = val;
+  if (key === 'overage')      state.overageRate   = val;
+  if (key === 'targetmargin') state.targetMargin  = val;
+
+  recalc();
+}
+
+// ─────────────────────────────────────────────────────────────
+// Pricing model change
+// ─────────────────────────────────────────────────────────────
+function getPricingModel() {
+  return document.querySelector('input[name="pm"]:checked')?.value || 'subscription';
+}
+
+// ─────────────────────────────────────────────────────────────
+// Product type presets
+// ─────────────────────────────────────────────────────────────
+const PRESETS = {
+  saas: {
+    mau: 5000, prompts: 200, tokensPerPrompt: 3000,
+    modelCost: 0.008, infraCost: 3, supportCost: 5,
+    subPrice: 29, freePct: 30, overageRate: 0.02, targetMargin: 70,
+    pricingModel: 'subscription'
+  },
+  api: {
+    mau: 2000, prompts: 1000, tokensPerPrompt: 5000,
+    modelCost: 0.004, infraCost: 1.5, supportCost: 1,
+    subPrice: 0, freePct: 0, overageRate: 0.015, targetMargin: 60,
+    pricingModel: 'usage'
+  },
+  rec: {
+    mau: 100000, prompts: 500, tokensPerPrompt: 200,
+    modelCost: 0.001, infraCost: 0.5, supportCost: 0.5,
+    subPrice: 5, freePct: 60, overageRate: 0.005, targetMargin: 65,
+    pricingModel: 'freemium'
+  },
+  doc: {
+    mau: 800, prompts: 50, tokensPerPrompt: 20000,
+    modelCost: 0.012, infraCost: 5, supportCost: 8,
+    subPrice: 149, freePct: 10, overageRate: 0.05, targetMargin: 75,
+    pricingModel: 'enterprise'
+  }
+};
+
+function selectProductType(el) {
+  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const p = PRESETS[el.dataset.type];
+  Object.assign(state, p);
+  applyStateToSliders();
+  recalc();
+}
+
+function applyStateToSliders() {
+  // MAU log slider
+  document.getElementById('sl-mau').value = sliderFromMAU(state.mau);
+  document.getElementById('val-mau').textContent = fmtN(state.mau);
+
+  const pairs = [
+    ['sl-prompts',      'val-prompts',      state.prompts,        v => v.toLocaleString()],
+    ['sl-tokens',       'val-tokens',       state.tokensPerPrompt,v => fmtN(v)],
+    ['sl-modelcost',    'val-modelcost',    state.modelCost,      v => '$' + v.toFixed(3)],
+    ['sl-infra',        'val-infra',        state.infraCost,      v => '$' + v.toFixed(2)],
+    ['sl-support',      'val-support',      state.supportCost,    v => '$' + v.toFixed(2)],
+    ['sl-subprice',     'val-subprice',     state.subPrice,       v => '$' + Math.round(v)],
+    ['sl-freepct',      'val-freepct',      state.freePct,        v => Math.round(v) + '%'],
+    ['sl-overage',      'val-overage',      state.overageRate,    v => '$' + v.toFixed(3)],
+    ['sl-targetmargin', 'val-targetmargin', state.targetMargin,   v => Math.round(v) + '%'],
+  ];
+  pairs.forEach(([slId, valId, val, fmt]) => {
+    document.getElementById(slId).value = val;
+    document.getElementById(valId).textContent = fmt(val);
+  });
+
+  // Set pricing model radio
+  const pmRadio = document.querySelector(`input[name="pm"][value="${state.pricingModel}"]`);
+  if (pmRadio) pmRadio.checked = true;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Main recalc + render
+// ─────────────────────────────────────────────────────────────
+function recalc() {
+  state.pricingModel = getPricingModel();
+  const r = compute(state);
+
+  // KPIs
+  document.getElementById('kpi-revenue').textContent = fmt$(r.revenue);
+  document.getElementById('kpi-revenue').className   = 'kpi-value';
+  document.getElementById('kpi-rev-sub').textContent = fmtN(Math.round(state.mau * (1 - state.freePct/100))) + ' paying users';
+
+  document.getElementById('kpi-cogs').textContent    = fmt$(r.total_cogs);
+  document.getElementById('kpi-cogs').className      = 'kpi-value amber';
+  document.getElementById('kpi-cogs-sub').textContent= fmt$(r.avg_cost_per_user) + '/user avg';
+
+  const gpEl = document.getElementById('kpi-gp');
+  gpEl.textContent = fmt$(r.gross_profit);
+  gpEl.className   = 'kpi-value ' + (r.gross_profit >= 0 ? 'green' : 'red');
+  document.getElementById('kpi-gp-sub').textContent  = fmt$(r.avg_rev_per_user) + ' revenue/user';
+
+  // Gauge
+  const circ = 2 * Math.PI * 30; // 188.5
+  const clampedPct = Math.max(0, Math.min(100, r.gross_margin));
+  const offset = circ - (clampedPct / 100) * circ;
+  const gaugeArc  = document.getElementById('gauge-arc');
+  const gaugeText = document.getElementById('gauge-text');
+  gaugeArc.style.strokeDashoffset = offset;
+  gaugeArc.style.stroke = r.gross_margin >= 60 ? '#22c55e'
+                        : r.gross_margin >= 40 ? '#f59e0b' : '#ef4444';
+  gaugeText.textContent = Math.round(r.gross_margin) + '%';
+  gaugeText.style.fill  = r.gross_margin >= 60 ? '#4ade80'
+                        : r.gross_margin >= 40 ? '#fcd34d' : '#f87171';
+
+  // COGS bar
+  const tot = r.total_cogs || 1;
+  const llmPct  = (r.llm_cost / tot * 100).toFixed(1);
+  const infPct  = (r.infra_cost / tot * 100).toFixed(1);
+  const supPct  = (r.support_cost / tot * 100).toFixed(1);
+  document.getElementById('cb-llm').style.width     = llmPct + '%';
+  document.getElementById('cb-infra').style.width   = infPct + '%';
+  document.getElementById('cb-support').style.width = supPct + '%';
+  document.getElementById('cbl-llm').textContent     = fmt$(r.llm_cost) + ' (' + llmPct + '%)';
+  document.getElementById('cbl-infra').textContent   = fmt$(r.infra_cost) + ' (' + infPct + '%)';
+  document.getElementById('cbl-support').textContent = fmt$(r.support_cost) + ' (' + supPct + '%)';
+
+  // Break-even
+  const be = Math.ceil(r.breakeven_users);
+  document.getElementById('breakeven-num').textContent = fmtN(be);
+  const beVsMAU = state.mau > 0 ? (be / state.mau * 100).toFixed(0) : '—';
+  document.getElementById('breakeven-sub').textContent =
+    `You need ${fmtN(be)} users to cover fixed costs (${beVsMAU}% of current MAU)`;
+
+  // Target gap
+  const gap = r.gross_margin - state.targetMargin;
+  const tgEl = document.getElementById('target-gap');
+  if (Math.abs(gap) < 1) {
+    tgEl.style.color = '#4ade80';
+    tgEl.innerHTML = `✅ <strong>On target</strong> — gross margin within 1pp of ${state.targetMargin}% goal.`;
+  } else if (gap > 0) {
+    tgEl.style.color = '#4ade80';
+    tgEl.innerHTML = `✅ Above target by <strong>+${gap.toFixed(1)}pp</strong> — ${fmtPct(r.gross_margin)} vs ${state.targetMargin}% goal.`;
+  } else {
+    tgEl.style.color = '#f87171';
+    tgEl.innerHTML = `❌ Below target by <strong>${gap.toFixed(1)}pp</strong> — ${fmtPct(r.gross_margin)} vs ${state.targetMargin}% goal. Need to raise price or cut cost.`;
+  }
+
+  // Cohort table
+  const rows = [
+    { name:'Light',  desc:'20% avg usage',  tokens:r.light_tokens,  cost:r.light_cost,  margin:r.light_margin  },
+    { name:'Medium', desc:'100% avg usage', tokens:r.medium_tokens, cost:r.medium_cost, margin:r.medium_margin },
+    { name:'Heavy',  desc:'400% avg usage', tokens:r.heavy_tokens,  cost:r.heavy_cost,  margin:r.heavy_margin  },
+  ];
+  const tbody = document.getElementById('cohort-tbody');
+  tbody.innerHTML = rows.map(row => `
+    <tr>
+      <td>
+        <div class="cohort-name">${row.name}</div>
+        <div class="cohort-desc">${row.desc}</div>
+      </td>
+      <td style="color:#7878a8">${fmtN(Math.round(row.tokens))}</td>
+      <td>${fmt$(row.cost)}</td>
+      <td class="${colorClass(row.margin, 20, 40)}">${fmtPct(row.margin)}</td>
+      <td>${statusDot(row.margin)}</td>
+    </tr>
+  `).join('');
+
+  // Margin collapse warnings
+  const warnCollapse = document.getElementById('warn-collapse');
+  const warnThin     = document.getElementById('warn-thin');
+  if (r.heavy_margin < 0) {
+    warnCollapse.classList.add('show');
+    warnThin.classList.remove('show');
+  } else if (r.heavy_margin < 20) {
+    warnCollapse.classList.remove('show');
+    warnThin.classList.add('show');
+  } else {
+    warnCollapse.classList.remove('show');
+    warnThin.classList.remove('show');
+  }
+
+  // Sensitivity analysis
+  const scenarios = [
+    {
+      label: 'If model cost doubles',
+      fn: () => compute({ ...state, modelCost: state.modelCost * 2 }).gross_margin
+    },
+    {
+      label: 'If MAU grows 10×',
+      fn: () => compute({ ...state, mau: state.mau * 10 }).gross_margin
+    },
+    {
+      label: 'If 50% more users go free tier',
+      fn: () => compute({ ...state, freePct: Math.min(80, state.freePct + state.freePct * 0.5) }).gross_margin
+    },
+    {
+      label: 'If subscription price +25%',
+      fn: () => compute({ ...state, subPrice: state.subPrice * 1.25 }).gross_margin
+    },
+    {
+      label: 'If infra cost halved',
+      fn: () => compute({ ...state, infraCost: state.infraCost / 2 }).gross_margin
+    },
+  ];
+  const sensTbody = document.querySelector('#sensitivity-table tbody');
+  sensTbody.innerHTML = scenarios.map(sc => {
+    const newMargin = sc.fn();
+    const delta = newMargin - r.gross_margin;
+    const cls   = delta > 1 ? 'delta-green' : delta < -1 ? 'delta-red' : 'delta-amber';
+    const sign  = delta >= 0 ? '+' : '';
+    return `<tr>
+      <td class="scenario-name">${sc.label}</td>
+      <td>${fmtPct(newMargin)}</td>
+      <td><span class="delta-badge ${cls}">${sign}${delta.toFixed(1)}pp</span></td>
+    </tr>`;
+  }).join('');
+
+  // Risk flags
+  renderRiskFlags(r);
+
+  // Update compare if both snapshots saved
+  renderCompare();
+}
+
+// ─────────────────────────────────────────────────────────────
+// Risk flags
+// ─────────────────────────────────────────────────────────────
+function renderRiskFlags(r) {
+  const pm = state.pricingModel;
+  const flags = [];
+
+  if (pm === 'freemium' && state.freePct > 50 && r.gross_margin < 50) {
+    flags.push({ cls: 'risk-red', text: '⚠️ Freemium with >50% free users and thin margin — conversion funnel needs work before scaling.' });
+  }
+  if ((pm === 'usage' || pm === 'hybrid') && state.tokensPerPrompt > 10000) {
+    flags.push({ cls: 'risk-amber', text: '📊 Usage-based with high token usage — revenue ceiling risk if customers optimize prompt length.' });
+  }
+  if (pm === 'subscription' && r.heavy_margin < 10) {
+    flags.push({ cls: 'risk-red', text: '💀 Subscription with very heavy users — margin collapse risk. Consider adding usage caps or a fair-use policy.' });
+  }
+  if (pm === 'enterprise' && state.mau < 500) {
+    flags.push({ cls: 'risk-blue', text: '🏢 Enterprise pricing with low MAU — unit economics look great but this model won\'t scale without significant sales headcount.' });
+  }
+  if (r.gross_margin < 0) {
+    flags.push({ cls: 'risk-red', text: '🔴 Negative gross margin — you are paying to serve customers. Immediate pricing or cost action required.' });
+  }
+  if (r.llm_cost / r.total_cogs > 0.8) {
+    flags.push({ cls: 'risk-amber', text: '🤖 LLM costs are >80% of COGS — consider smaller models, caching, or batching to diversify your cost base.' });
+  }
+  if (r.breakeven_users > state.mau * 3) {
+    flags.push({ cls: 'risk-amber', text: '📉 Break-even requires 3× your current user base — growth pressure is high before this model is sustainable.' });
+  }
+
+  const el = document.getElementById('risk-list');
+  if (flags.length === 0) {
+    el.innerHTML = '<div class="risk-item risk-none">✅ No critical risk flags detected with current parameters.</div>';
+  } else {
+    el.innerHTML = flags.map(f => `<div class="risk-item show ${f.cls}">${f.text}</div>`).join('');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Scenario snapshots
+// ─────────────────────────────────────────────────────────────
+function snapshotData() {
+  const r = compute(state);
+  return {
+    label: `${state.pricingModel} / ${fmtN(state.mau)} MAU`,
+    revenue: r.revenue,
+    total_cogs: r.total_cogs,
+    gross_profit: r.gross_profit,
+    gross_margin: r.gross_margin,
+    breakeven_users: r.breakeven_users,
+    llm_cost: r.llm_cost,
+    heavy_margin: r.heavy_margin,
+    mau: state.mau,
+    subPrice: state.subPrice,
+    pricingModel: state.pricingModel
+  };
+}
+
+function saveSnapshot(which) {
+  const data = snapshotData();
+  if (which === 'A') {
+    snapA = data;
+    const btn = document.getElementById('snap-a-btn');
+    btn.textContent = `✅ A: ${data.label}`;
+    btn.classList.add('saved');
+  } else {
+    snapB = data;
+    const btn = document.getElementById('snap-b-btn');
+    btn.textContent = `✅ B: ${data.label}`;
+    btn.classList.add('saved');
+  }
+  renderCompare();
+}
+
+function clearSnapshots() {
+  snapA = snapB = null;
+  const btnA = document.getElementById('snap-a-btn');
+  const btnB = document.getElementById('snap-b-btn');
+  btnA.textContent = '📌 Save Snapshot A'; btnA.classList.remove('saved');
+  btnB.textContent = '📌 Save Snapshot B'; btnB.classList.remove('saved');
+  renderCompare();
+}
+
+function renderCompare() {
+  const tbl = document.getElementById('compare-table');
+  const ph  = document.getElementById('compare-placeholder');
+  if (!snapA || !snapB) {
+    tbl.classList.remove('show');
+    ph.style.display = 'block';
+    return;
+  }
+  tbl.classList.add('show');
+  ph.style.display = 'none';
+
+  const metrics = [
+    { label: 'Monthly Revenue',     ka: 'revenue',       fmt: fmt$,    higherBetter: true  },
+    { label: 'Total COGS',          ka: 'total_cogs',    fmt: fmt$,    higherBetter: false },
+    { label: 'Gross Profit',        ka: 'gross_profit',  fmt: fmt$,    higherBetter: true  },
+    { label: 'Gross Margin %',      ka: 'gross_margin',  fmt: fmtPct,  higherBetter: true  },
+    { label: 'Break-even Users',    ka: 'breakeven_users',fmt: v => fmtN(Math.ceil(v)), higherBetter: false },
+    { label: 'LLM Cost',            ka: 'llm_cost',      fmt: fmt$,    higherBetter: false },
+    { label: 'Heavy User Margin',   ka: 'heavy_margin',  fmt: fmtPct,  higherBetter: true  },
+  ];
+
+  const tbody = document.getElementById('compare-tbody');
+  tbody.innerHTML = metrics.map(m => {
+    const va = snapA[m.ka], vb = snapB[m.ka];
+    const delta = vb - va;
+    let deltaClass = 'cmp-same';
+    if (Math.abs(delta) > 0.01) {
+      deltaClass = (delta > 0) === m.higherBetter ? 'cmp-better' : 'cmp-worse';
+    }
+    const sign = delta >= 0 ? '+' : '';
+    const deltaFmt = m.fmt === fmtPct ? sign + delta.toFixed(1) + 'pp' :
+                     m.fmt === fmt$   ? (delta >= 0 ? '+' : '') + fmt$(Math.abs(delta)) :
+                     sign + fmtN(Math.abs(Math.ceil(delta)));
+    return `<tr>
+      <td class="compare-metric">${m.label}</td>
+      <td>${m.fmt(va)}</td>
+      <td>${m.fmt(vb)}</td>
+      <td class="${deltaClass}">${deltaFmt}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
+// PM Reflection toggle
+// ─────────────────────────────────────────────────────────────
+function toggleReflection() {
+  const body  = document.getElementById('reflection-body');
+  const arrow = document.getElementById('refl-arrow');
+  const open  = body.classList.toggle('open');
+  arrow.classList.toggle('open', open);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Initial render
+// ─────────────────────────────────────────────────────────────
+applyStateToSliders();
+recalc();
+</script>
+</body>
+</html>

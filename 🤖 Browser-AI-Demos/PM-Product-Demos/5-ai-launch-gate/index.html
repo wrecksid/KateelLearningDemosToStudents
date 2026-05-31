@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AI Launch Gate · PM Demo 05</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#07070e;color:#e2e2f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:13px;min-height:100vh;display:flex;flex-direction:column}
+a{color:#6366f1;text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:'Courier New',monospace}
+
+/* FILE:// WARN */
+#fp-warn{display:none}
+
+/* HEADER */
+.top-bar{background:#0a0a16;border-bottom:1px solid #1a1a30;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.back-link{color:#6366f1;font-size:12px;font-weight:600;white-space:nowrap}
+.top-bar-title{font-size:16px;font-weight:700;color:#e2e2f0;flex:1}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700}
+.badge-indigo{background:#312e81;color:#a5b4fc}
+.badge-amber{background:#451a03;color:#fcd34d}
+.badge-green{background:#052e16;color:#4ade80}
+.badge-red{background:#450a0a;color:#fca5a5}
+.badge-cyan{background:#083344;color:#67e8f9}
+.badge-grey{background:#1e1e2e;color:#94a3b8}
+
+/* SCENARIO SELECTOR */
+.scenario-bar{background:#0d0d1a;border-bottom:1px solid #1a1a30;padding:10px 20px;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.scenario-label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-right:4px;padding-top:6px;white-space:nowrap}
+.scenario-cards{display:flex;flex-wrap:wrap;gap:8px;flex:1}
+.scenario-card{border:1px solid #1a1a30;background:#0a0a16;color:#94a3b8;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;max-width:180px;text-align:left}
+.scenario-card:hover{border-color:#6366f1;color:#a5b4fc;background:#0f0f1e}
+.scenario-card.active{background:#1e1b4b;border-color:#6366f1;color:#a5b4fc}
+.scenario-card-name{font-weight:700;margin-bottom:2px}
+.scenario-card-desc{font-size:10px;font-weight:400;color:#6b7280;line-height:1.4}
+.scenario-card.active .scenario-card-desc{color:#818cf8}
+
+/* READINESS DASHBOARD */
+.readiness-bar{background:#0d0d1a;border-bottom:1px solid #1a1a30;padding:10px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.readiness-label{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
+.ev-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600;border:1px solid transparent}
+.ev-pill-green{background:#052e16;border-color:#16a34a;color:#4ade80}
+.ev-pill-amber{background:#1c1003;border-color:#92400e;color:#fbbf24}
+.ev-pill-red{background:#1c0606;border-color:#7f1d1d;color:#f87171}
+.overall-score{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700}
+
+/* MAIN LAYOUT */
+.main-body{display:flex;flex:1;overflow:hidden}
+.pane-left{flex:1;overflow:auto;border-right:1px solid #1a1a30;display:flex;flex-direction:column}
+.pane-right{width:400px;min-width:320px;overflow:auto;display:flex;flex-direction:column}
+
+/* PANEL HEADERS */
+.panel-hdr{background:#0a0a16;border-bottom:1px solid #1a1a30;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:10}
+.panel-hdr-title{font-size:12px;font-weight:700;color:#a5b4fc;text-transform:uppercase;letter-spacing:.06em}
+
+/* EVIDENCE TABS */
+.ev-tabs{display:flex;flex-wrap:wrap;gap:2px;padding:10px 14px 0;background:#0a0a16;border-bottom:1px solid #1a1a30;position:sticky;top:42px;z-index:9}
+.ev-tab{padding:6px 12px;border-radius:6px 6px 0 0;cursor:pointer;font-size:11px;font-weight:600;color:#6b7280;background:#12122a;border:1px solid #1a1a30;border-bottom:none;transition:all .15s;display:flex;align-items:center;gap:5px}
+.ev-tab:hover{color:#a5b4fc;background:#1e1b4b}
+.ev-tab.active{background:#0d0d1a;color:#e2e2f0;border-color:#1a1a30;border-bottom-color:#0d0d1a;margin-bottom:-1px;padding-bottom:7px}
+.ev-tab .tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tl-green{background:#22c55e}
+.tl-amber{background:#f59e0b}
+.tl-red{background:#ef4444}
+
+/* EVIDENCE BODY */
+.ev-body{flex:1;padding:16px 18px;overflow:auto}
+.ev-content{display:none}
+.ev-content.active{display:block}
+.ev-top{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.ev-status-badge{padding:5px 14px;border-radius:99px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.ev-status-green{background:#052e16;border:1px solid #16a34a;color:#4ade80}
+.ev-status-amber{background:#1c1003;border:1px solid #92400e;color:#fbbf24}
+.ev-status-red{background:#1c0606;border:1px solid #7f1d1d;color:#f87171}
+.ev-score-circle{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0}
+.ev-score-green{background:#052e16;border:3px solid #22c55e;color:#4ade80}
+.ev-score-amber{background:#1c1003;border:3px solid #f59e0b;color:#fbbf24}
+.ev-score-red{background:#1c0606;border:3px solid #ef4444;color:#f87171}
+.ev-detail{font-size:12px;color:#94a3b8;line-height:1.7;background:#0a0a16;border:1px solid #1a1a30;border-radius:8px;padding:12px 14px}
+.blocker-badge{display:inline-flex;align-items:center;gap:6px;background:#1c0606;border:1px solid #7f1d1d;color:#f87171;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;margin-top:12px}
+
+/* BLOCKING ISSUES BANNER */
+.blocking-banner{margin:12px 16px;background:#1c0606;border:1px solid #7f1d1d;border-radius:8px;padding:12px 14px}
+.blocking-banner-title{font-size:12px;font-weight:700;color:#f87171;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.blocking-item{font-size:11px;color:#fca5a5;padding:3px 0;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.blocking-item::before{content:"•";color:#ef4444;flex-shrink:0;margin-top:1px}
+
+/* RIGHT PANEL */
+.objections-section{padding:14px}
+.objection-card{background:#0d0d1a;border:1px solid #1a1a30;border-radius:8px;padding:12px;margin-bottom:10px}
+.objection-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.objection-icon{font-size:16px}
+.objection-role{font-size:12px;font-weight:700}
+.objection-text{font-size:11px;color:#94a3b8;line-height:1.6}
+
+/* DECISION BUTTONS */
+.decision-section{padding:14px;border-top:1px solid #1a1a30}
+.decision-title{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.decision-btn-grid{display:flex;flex-direction:column;gap:8px}
+.decision-btn{width:100%;padding:12px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;transition:all .15s;text-align:left}
+.decision-btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-launch{background:#166534;border:1px solid #22c55e;color:#4ade80}
+.btn-launch:hover:not(:disabled){background:#15803d;color:#86efac}
+.btn-launch.has-blockers{background:#1e1e2e;border:1px solid #374151;color:#6b7280}
+.btn-launch.has-blockers:hover:not(:disabled){background:#262630;color:#94a3b8}
+.btn-beta{background:#1e1b4b;border:1px solid #6366f1;color:#a5b4fc}
+.btn-beta:hover:not(:disabled){background:#312e81;color:#c7d2fe}
+.btn-human{background:#451a03;border:1px solid #f59e0b;color:#fcd34d}
+.btn-human:hover:not(:disabled){background:#78350f;color:#fde68a}
+.btn-delay{background:#1e1e2e;border:1px solid #475569;color:#94a3b8}
+.btn-delay:hover:not(:disabled){background:#293040;color:#cbd5e1}
+.decision-btn .btn-icon{font-size:18px;flex-shrink:0}
+.decision-btn .btn-label{flex:1}
+.decision-btn .btn-sub{font-size:10px;font-weight:400;opacity:.75;margin-top:1px}
+.blocker-warning{font-size:10px;color:#f87171;background:#1c0606;border:1px solid #7f1d1d;border-radius:4px;padding:4px 8px;margin-bottom:8px;display:none}
+.blocker-warning.show{display:block}
+
+/* OUTCOME PANEL */
+.outcome-panel{position:absolute;inset:0;background:#07070e;z-index:20;overflow:auto;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.outcome-panel.visible{opacity:1;pointer-events:all}
+.outcome-inner{padding:20px;flex:1}
+.outcome-score-row{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.outcome-score-circle{width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0;border:4px solid transparent}
+.outcome-score-green{background:#052e16;border-color:#22c55e;color:#4ade80}
+.outcome-score-amber{background:#1c1003;border-color:#f59e0b;color:#fbbf24}
+.outcome-score-red{background:#1c0606;border-color:#ef4444;color:#f87171}
+.outcome-score-label{font-size:10px;font-weight:600;opacity:.7;margin-top:2px}
+.outcome-headline{font-size:16px;font-weight:700;color:#e2e2f0;line-height:1.4}
+.outcome-detail{font-size:12px;color:#94a3b8;line-height:1.7;background:#0d0d1a;border:1px solid #1a1a30;border-radius:8px;padding:14px;margin-bottom:14px}
+.outcome-section-title{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;margin-top:14px}
+.outcome-ideal-box{background:#0f0f20;border:1px solid #4338ca;border-radius:8px;padding:12px}
+.outcome-ideal-name{font-size:13px;font-weight:700;color:#a5b4fc;margin-bottom:4px}
+.outcome-pm-note{font-size:12px;color:#94a3b8;line-height:1.6}
+.reset-btn{width:100%;margin-top:16px;padding:11px;border-radius:8px;background:#1e1b4b;border:1px solid #6366f1;color:#a5b4fc;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.reset-btn:hover{background:#312e81;color:#c7d2fe}
+
+/* RIGHT PANE WRAPPER (for outcome overlay) */
+.pane-right-inner{position:relative;flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* PM REFLECTION */
+.reflection-section{padding:14px;border-top:1px solid #1a1a30}
+.reflection-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;padding:4px 0}
+.reflection-toggle:hover{color:#a5b4fc}
+.reflection-toggle .chevron{transition:transform .2s;font-size:10px}
+.reflection-toggle.open .chevron{transform:rotate(180deg)}
+.reflection-body{display:none;margin-top:10px}
+.reflection-body.open{display:block}
+.reflection-item{font-size:11px;color:#94a3b8;line-height:1.6;padding:6px 0;border-bottom:1px solid #12122a;display:flex;gap:8px}
+.reflection-item:last-child{border-bottom:none}
+.reflection-item .ri-icon{flex-shrink:0;width:18px}
+
+/* BOTTOM BAR */
+.bottom-bar{background:#0a0a16;border-top:1px solid #1a1a30;padding:8px 20px;font-size:11px;color:#4b5563;text-align:center}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#07070e}
+::-webkit-scrollbar-thumb{background:#1a1a30;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#312e81}
+</style>
+</head>
+<body>
+
+<!-- FILE:// WARNING BANNER -->
+<div id="fp-warn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#7c1c1c;color:#fecaca;padding:12px 20px;font-size:13px;font-weight:600;align-items:center;gap:12px;box-shadow:0 2px 12px #0008">
+  <span style="font-size:18px">⚠️</span>
+  <div style="flex:1">Cannot run as <code style="background:#0003;padding:1px 5px;border-radius:4px">file://</code> — open via <strong>start_demos.bat</strong> or <code>python -m http.server 8080</code> instead.</div>
+  <button onclick="document.getElementById('fp-warn').style.display='none'" style="background:none;border:1px solid #fecaca88;color:#fecaca;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:12px">✕</button>
+</div>
+<script>if(location.protocol==='file:'){document.getElementById('fp-warn').style.display='flex';}</script>
+
+<!-- HEADER -->
+<div class="top-bar">
+  <a class="back-link" href="../../index.html">← PM Demos</a>
+  <div class="top-bar-title">🚀 AI Launch Gate</div>
+  <span class="badge badge-indigo">PM Demo 05</span>
+  <span class="badge badge-amber">Sessions 11–12, 15</span>
+</div>
+
+<!-- SCENARIO SELECTOR -->
+<div class="scenario-bar">
+  <div class="scenario-label">Scenario</div>
+  <div class="scenario-cards" id="scenarioCards"></div>
+</div>
+
+<!-- READINESS DASHBOARD -->
+<div class="readiness-bar" id="readinessBar">
+  <div class="readiness-label">Evidence</div>
+  <span style="font-size:11px;color:#4b5563;font-style:italic">Select a scenario</span>
+</div>
+
+<!-- MAIN -->
+<div class="main-body">
+
+  <!-- LEFT PANE: Evidence -->
+  <div class="pane-left">
+    <div class="panel-hdr">
+      <span class="panel-hdr-title">Evidence Review</span>
+      <span id="scenarioNameBadge" class="badge badge-cyan" style="display:none"></span>
+    </div>
+    <!-- Evidence Tabs -->
+    <div class="ev-tabs" id="evTabs"></div>
+    <!-- Evidence Body -->
+    <div class="ev-body" id="evBody">
+      <div style="color:#4b5563;font-size:12px;padding:30px;text-align:center">Select a scenario above to load evidence dimensions.</div>
+    </div>
+    <!-- Blocking Issues Banner -->
+    <div id="blockingBanner" style="display:none"></div>
+  </div>
+
+  <!-- RIGHT PANE: Decision -->
+  <div class="pane-right">
+    <div class="panel-hdr">
+      <span class="panel-hdr-title">Decision Panel</span>
+    </div>
+    <div class="pane-right-inner" id="paneRightInner">
+
+      <!-- Scrollable content -->
+      <div id="rightContent" style="overflow:auto;flex:1;display:flex;flex-direction:column">
+
+        <!-- Role Objections -->
+        <div class="objections-section">
+          <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Role Objections</div>
+          <div id="objectionsContainer">
+            <div style="color:#4b5563;font-size:12px;padding:20px 0;text-align:center">Select a scenario to see role objections.</div>
+          </div>
+        </div>
+
+        <!-- Decision Buttons -->
+        <div class="decision-section">
+          <div class="decision-title">Your Launch Decision</div>
+          <div id="blockerWarning" class="blocker-warning"></div>
+          <div class="decision-btn-grid">
+            <button class="decision-btn btn-launch" id="btnLaunch" onclick="makeDecision('launch_now')" disabled>
+              <span class="btn-icon">🚀</span>
+              <div class="btn-label">Launch Now<div class="btn-sub">Full production rollout</div></div>
+            </button>
+            <button class="decision-btn btn-beta" id="btnBeta" onclick="makeDecision('limited_beta')" disabled>
+              <span class="btn-icon">🔬</span>
+              <div class="btn-label">Limited Beta<div class="btn-sub">Controlled rollout, monitor closely</div></div>
+            </button>
+            <button class="decision-btn btn-human" id="btnHuman" onclick="makeDecision('human_reviewed')" disabled>
+              <span class="btn-icon">👁️</span>
+              <div class="btn-label">Human-Reviewed Rollout<div class="btn-sub">All outputs reviewed before use</div></div>
+            </button>
+            <button class="decision-btn btn-delay" id="btnDelay" onclick="makeDecision('delay')" disabled>
+              <span class="btn-icon">⏸️</span>
+              <div class="btn-label">Delay Launch<div class="btn-sub">Resolve blockers first</div></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- PM Reflection -->
+        <div class="reflection-section">
+          <div class="reflection-toggle" id="reflectionToggle" onclick="toggleReflection()">
+            <span>🎓 PM Reflection</span>
+            <span style="flex:1"></span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="reflection-body" id="reflectionBody">
+            <div class="reflection-item"><span class="ri-icon">🎯</span><span><strong>Decision:</strong> Launch now / limited beta / human-reviewed / delay — weighing governance, risk, and velocity.</span></div>
+            <div class="reflection-item"><span class="ri-icon">📊</span><span><strong>Assumed:</strong> Evidence scores are synthetic. Real launch gates require actual audit reports, not self-assessed scores.</span></div>
+            <div class="reflection-item"><span class="ri-icon">⚠️</span><span><strong>Risk:</strong> Pressure to ship can cause teams to rationalise around blocking issues. The tool shows what a blocking issue looks like.</span></div>
+            <div class="reflection-item"><span class="ri-icon">💡</span><span><strong>Override:</strong> A strong PM accepts a lower overall readiness score if one specific blocker has a clear resolution path and timeline.</span></div>
+          </div>
+        </div>
+
+      </div><!-- /rightContent -->
+
+      <!-- OUTCOME OVERLAY -->
+      <div class="outcome-panel" id="outcomePanel">
+        <div class="panel-hdr" style="position:sticky;top:0">
+          <span class="panel-hdr-title">Launch Decision Outcome</span>
+        </div>
+        <div class="outcome-inner" id="outcomeInner"></div>
+      </div>
+
+    </div><!-- /pane-right-inner -->
+  </div><!-- /pane-right -->
+
+</div><!-- /main-body -->
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">PM Demo 05 · AI Launch Gate · Professor Vinaya Sathyanarayana · KateelLearningDemosToStudents</div>
+
+<script>
+// ============================================================
+// SCENARIO DATA
+// ============================================================
+const SCENARIOS = {
+  support_copilot: {
+    name: "Support Copilot",
+    description: "AI drafts replies to customer support tickets. Agents review before sending.",
+    evidence: {
+      model_quality: { label:"Model Quality", score:78, detail:"Accuracy 78% on held-out test set. Hallucination rate 4.2%. ROUGE-2 0.41 vs human baseline.", status:"amber" },
+      red_team: { label:"Red Team", score:62, detail:"3 jailbreak vectors found. 1 fixed. 2 mitigated by output filter. No PII leakage in 500 probes.", status:"amber" },
+      fairness: { label:"Bias & Fairness", score:85, detail:"No significant disparity across language groups. Slight formality bias for non-native English. No protected attribute leakage.", status:"green" },
+      privacy: { label:"Privacy", score:72, detail:"Customer PII is in prompts. DPA signed with model provider. Data retention 30 days. No training on customer data.", status:"amber" },
+      incident: { label:"Incident Readiness", score:88, detail:"Kill switch tested. Rollback < 4 min. On-call rota defined. Incident runbook approved.", status:"green" },
+      fallback: { label:"Human Fallback", score:90, detail:"All drafts require agent approval before sending. Fallback = agent writes from scratch. 100% coverage.", status:"green" },
+      legal: { label:"Legal & Compliance", score:70, detail:"Terms of service updated. AI disclosure to customers pending. GDPR Article 22 exemption documented.", status:"amber" },
+      economics: { label:"Unit Economics", score:82, detail:"Projected 40% ticket handle time reduction. Cost per ticket down $1.20. Positive ROI at 3 months.", status:"green" }
+    },
+    blocking_issues: ["AI disclosure to customers not yet published"],
+    defensible_decisions: ["limited_beta","human_reviewed"],
+    ideal_decision: "limited_beta",
+    consequences: {
+      launch_now: { score:45, headline:"Risky launch — customer disclosure missing", detail:"Without AI disclosure, you face regulatory exposure in EU markets. The 4.2% hallucination rate on live traffic equals ~180 bad drafts/day. Agents may miss errors at high volume." },
+      limited_beta: { score:90, headline:"Strong choice — controlled risk", detail:"Beta with 500 tickets/day lets you validate real-world accuracy and fix the disclosure gap before broad rollout. Revenue impact minimal, risk exposure contained." },
+      human_reviewed: { score:78, headline:"Safe but costly", detail:"100% human review adds $0.80/ticket overhead. Sustainable short-term while disclosure and accuracy gaps are resolved. Slows the ROI case." },
+      delay: { score:40, headline:"Delay not well justified", detail:"Blocking issues are resolvable in 1-2 weeks. Delay risks losing competitive ground and team momentum without addressing a hard blocker." }
+    }
+  },
+  lending_assistant: {
+    name: "Lending Assistant",
+    description: "AI recommends loan approval/rejection. Human officer makes final decision.",
+    evidence: {
+      model_quality: { label:"Model Quality", score:85, detail:"AUC 0.87 on test set. Default prediction accuracy 84%. Calibration curve well-fit. Shadow deployment for 6 weeks.", status:"green" },
+      red_team: { label:"Red Team", score:55, detail:"Adversarial inputs can shift borderline decisions. No direct manipulation vector found. Prompt injection mitigated.", status:"amber" },
+      fairness: { label:"Bias & Fairness", score:48, detail:"Disparate impact detected: approval rate 23% lower for applicants from postal codes correlated with minority demographics. Root cause under investigation.", status:"red" },
+      privacy: { label:"Privacy", score:80, detail:"No raw PII in model input (hashed IDs). Financial data stays in VPC. No external API calls during inference.", status:"green" },
+      incident: { label:"Incident Readiness", score:75, detail:"Rollback plan exists. No live incident drill completed yet. On-call coverage 9am-6pm only.", status:"amber" },
+      fallback: { label:"Human Fallback", score:85, detail:"All recommendations reviewed by human officer. Applicants can request human-only review. Documented in T&Cs.", status:"green" },
+      legal: { label:"Legal & Compliance", score:40, detail:"Fair lending legal review incomplete. ECOA / Equal Credit Opportunity Act compliance not confirmed. Regulator pre-notification not filed.", status:"red" },
+      economics: { label:"Unit Economics", score:70, detail:"Projected 30% faster processing. $4.50 savings per application. Default rate model predicts 0.8% improvement.", status:"green" }
+    },
+    blocking_issues: ["Disparate impact in approval rates — potential ECOA violation","Fair lending legal review not complete","Regulator notification not filed"],
+    defensible_decisions: ["delay"],
+    ideal_decision: "delay",
+    consequences: {
+      launch_now: { score:5, headline:"Critical error — regulatory and legal exposure", detail:"Launching with detected disparate impact and incomplete legal review exposes the company to ECOA violation, CFPB enforcement action, class action lawsuit, and reputational damage. This is a blocking issue, not a trade-off." },
+      limited_beta: { score:15, headline:"Still exposes to legal risk", detail:"Even a beta launch with a fairness gap detected and legal review incomplete creates evidentiary problems. Regulators treat any live deployment as a signal of intent." },
+      human_reviewed: { score:20, headline:"Human review does not fix fairness gap", detail:"Human officers reviewing biased AI recommendations may anchor on those recommendations, perpetuating the disparity. This is not a sufficient mitigation for detected disparate impact." },
+      delay: { score:95, headline:"Correct — delay until fairness and legal gaps resolved", detail:"Fix the disparate impact root cause, complete fair lending legal review, file pre-notification with regulator. Expected timeline: 6-8 weeks. Revenue impact: low. Risk avoidance: very high." }
+    }
+  },
+  hiring_screen: {
+    name: "AI Hiring Screener",
+    description: "AI scores resumes and ranks candidates. Recruiter reviews top 20%.",
+    evidence: {
+      model_quality: { label:"Model Quality", score:72, detail:"Correlation with 12-month performance review: 0.31. Benchmark against senior recruiter: 74% agreement. Validation set n=240.", status:"amber" },
+      red_team: { label:"Red Team", score:60, detail:"Name-swap test shows 8% scoring disparity by apparent gender. University prestige bias confirmed. No direct salary leak.", status:"amber" },
+      fairness: { label:"Bias & Fairness", score:35, detail:"Gender scoring gap 8%. Racial proxy signals in university/zip code fields. Audit incomplete. No intersectionality analysis done.", status:"red" },
+      privacy: { label:"Privacy", score:65, detail:"Candidate consent obtained for AI screening. GDPR Article 22 requires meaningful human review — documented. Data retention policy unclear.", status:"amber" },
+      incident: { label:"Incident Readiness", score:55, detail:"No rollback procedure for batch-scored candidates. Manual override process informal. No SLA defined for candidate complaints.", status:"amber" },
+      fallback: { label:"Human Fallback", score:60, detail:"Top 20% reviewed by recruiter. Bottom 80% auto-rejected — no human review. Candidate appeal process not yet defined.", status:"amber" },
+      legal: { label:"Legal & Compliance", score:25, detail:"Title VII / EEOC compliance review not started. NYC Local Law 144 (AI hiring audit) compliance uncertain. Legal counsel not engaged.", status:"red" },
+      economics: { label:"Unit Economics", score:78, detail:"60% faster screening. Cost per hire down $280. Recruiter capacity freed for interviews.", status:"green" }
+    },
+    blocking_issues: ["Gender and proxy bias gaps not resolved","EEOC / Title VII legal review not started","80% of candidates auto-rejected with no human review or appeal path","NYC Local Law 144 audit not completed"],
+    defensible_decisions: ["delay"],
+    ideal_decision: "delay",
+    consequences: {
+      launch_now: { score:3, headline:"High legal and ethical risk — multiple blockers", detail:"Auto-rejecting 80% of candidates without appeal, with confirmed gender bias and no legal review, is a significant EEOC and Title VII exposure. NYC companies also face Local Law 144 audit requirements." },
+      limited_beta: { score:20, headline:"Beta does not resolve the blockers", detail:"Running a beta with confirmed bias and no legal review still creates legal evidentiary risk and potential harm to real candidates." },
+      human_reviewed: { score:35, headline:"Full human review on all candidates would reduce risk, but bias is still in the scoring signal", detail:"If recruiters can see the AI score, anchoring bias applies. Better than nothing, but incomplete without fixing the fairness gaps." },
+      delay: { score:92, headline:"Correct — multiple hard blockers must be resolved first", detail:"Complete EEOC/Title VII legal review, fix gender gap, implement appeal path for all candidates, complete NYC LL144 audit. Estimated 8-12 weeks. Significant risk avoidance justifies delay." }
+    }
+  },
+  recommendation_engine: {
+    name: "Recommendation Engine",
+    description: "ML model surfaces content/product recommendations. Users can dismiss.",
+    evidence: {
+      model_quality: { label:"Model Quality", score:88, detail:"CTR lift +34% vs baseline. NDCG@10 0.71. A/B test n=250k users, 3 weeks. Novelty and diversity acceptable.", status:"green" },
+      red_team: { label:"Red Team", score:80, detail:"No manipulation vectors found. Filter bubble effect moderate — acceptable within editorial policy. No adversarial content surfaced.", status:"green" },
+      fairness: { label:"Bias & Fairness", score:75, detail:"Popularity bias present — new creators underrepresented. Mitigation: 10% exploration slot. No protected attribute correlation found.", status:"amber" },
+      privacy: { label:"Privacy", score:82, detail:"Behavioral data used. GDPR consent refresh completed. Opt-out mechanism active. No third-party data used.", status:"green" },
+      incident: { label:"Incident Readiness", score:85, detail:"Feature flag ready. 10-min rollback tested. Monitoring dashboards live. On-call team trained.", status:"green" },
+      fallback: { label:"Human Fallback", score:70, detail:"Fallback is collaborative filter (old system). Editorial override capability exists for breaking news/sensitivity. Not automated.", status:"amber" },
+      legal: { label:"Legal & Compliance", score:88, detail:"DSA Article 27 transparency compliance done. EU AI Act risk classification: limited risk. Privacy impact assessment complete.", status:"green" },
+      economics: { label:"Unit Economics", score:90, detail:"Revenue uplift $280k/month estimated. Infra cost increase $18k/month. 6-week payback.", status:"green" }
+    },
+    blocking_issues: [],
+    defensible_decisions: ["launch_now","limited_beta"],
+    ideal_decision: "launch_now",
+    consequences: {
+      launch_now: { score:90, headline:"Well-prepared launch — strong evidence package", detail:"No blocking issues. Strong A/B test, legal compliance complete, rollback tested. Minor popularity bias is mitigated. Full launch is defensible and well-prepared." },
+      limited_beta: { score:78, headline:"Overly cautious — evidence supports full launch", detail:"Beta is defensible but leaves significant revenue on the table ($280k/mo × ramp-up time) without a clear additional risk mitigation benefit." },
+      human_reviewed: { score:50, headline:"Unnecessarily restricts value at scale", detail:"Recommendation engines don't warrant human review at scale — the fallback system handles edge cases. This decision underweights the quality of the evidence package." },
+      delay: { score:20, headline:"Not justified — evidence package is strong", detail:"No blocking issues identified. Delay without a clear reason to fix would signal poor PM judgment and miss business value." }
+    }
+  },
+  healthcare_intake: {
+    name: "Healthcare Intake",
+    description: "AI collects symptoms and pre-populates intake forms. Clinician reviews before use.",
+    evidence: {
+      model_quality: { label:"Model Quality", score:80, detail:"Field extraction accuracy 82%. Symptom categorization F1: 0.79. Tested on 500 synthetic and 200 de-identified real cases.", status:"green" },
+      red_team: { label:"Red Team", score:65, detail:"Hallucination rate 2.1% on rare symptom combinations. Medication interaction errors in 3/500 cases. All caught by clinical reviewer in test.", status:"amber" },
+      fairness: { label:"Bias & Fairness", score:70, detail:"Performance gap: 6% lower extraction accuracy for non-English speakers. Mitigation: multilingual expansion Q3. No clinical outcome disparity detected.", status:"amber" },
+      privacy: { label:"Privacy", score:60, detail:"PHI in model prompts. BAA with model provider signed. HIPAA risk assessment in progress — not complete. De-identification pipeline not yet validated.", status:"amber" },
+      incident: { label:"Incident Readiness", score:72, detail:"Manual fallback (paper intake form) available. Incident notification path to CMO defined. EHR integration can be disabled in 2 min.", status:"amber" },
+      fallback: { label:"Human Fallback", score:88, detail:"100% clinician review of AI output before any clinical use. No autonomous decisions. Explicit policy: AI cannot modify EHR without clinician approval.", status:"green" },
+      legal: { label:"Legal & Compliance", score:50, detail:"HIPAA risk assessment incomplete. State medical AI regulations vary — 3 states require additional disclosure not yet implemented. FDA SaMD classification pending.", status:"amber" },
+      economics: { label:"Unit Economics", score:75, detail:"15 min saved per intake. At $0.40/min clinician time, $6 savings per patient. Positive ROI at 500 patients/month.", status:"green" }
+    },
+    blocking_issues: ["HIPAA risk assessment incomplete","De-identification pipeline not validated","FDA SaMD classification pending — may require 510(k) review"],
+    defensible_decisions: ["delay","human_reviewed"],
+    ideal_decision: "human_reviewed",
+    consequences: {
+      launch_now: { score:25, headline:"Regulatory blockers not resolved", detail:"Launching before HIPAA risk assessment and FDA SaMD classification determination is reckless in a regulated healthcare context. Even with human fallback, the compliance gaps are blocking issues." },
+      limited_beta: { score:55, headline:"Defensible only if IRB and compliance oversight in place", detail:"A tightly controlled pilot (single clinic, IRB oversight, compliance team embedded) can be defended while clearing the HIPAA and FDA blockers. Requires explicit compliance scaffolding." },
+      human_reviewed: { score:80, headline:"Defensible with caveats — compliance path must be active", detail:"Given 100% clinician review, the clinical risk is low. This is acceptable IF the HIPAA assessment and FDA classification work is actively in progress with a firm deadline." },
+      delay: { score:72, headline:"Also defensible — clears all blockers before any patient exposure", detail:"Delay until HIPAA and FDA questions resolved protects both patients and the company. Timeline: 4-6 weeks. Trade-off: slower access to efficiency gains." }
+    }
+  }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let currentScenarioKey = null;
+let currentScenario = null;
+let activeTab = null;
+
+// ============================================================
+// GENERATE OBJECTIONS (dynamic from evidence)
+// ============================================================
+function generateObjections(scenario) {
+  const ev = scenario.evidence;
+  return [
+    {
+      role: "Legal",
+      icon: "🏛️",
+      color: "#f59e0b",
+      text: ev.legal.score < 60
+        ? `Legal review is incomplete (score: ${ev.legal.score}/100). ${ev.legal.detail} We need to resolve this before any deployment.`
+        : `Legal score is ${ev.legal.score}/100. ${ev.legal.detail} Manageable risk.`
+    },
+    {
+      role: "Data Science",
+      icon: "🔬",
+      color: "#6366f1",
+      text: ev.model_quality.score < 75
+        ? `Model quality (${ev.model_quality.score}/100) is below our 80-point launch threshold. ${ev.model_quality.detail}`
+        : `Model quality is ${ev.model_quality.score}/100 — within acceptable range. ${ev.red_team.detail}`
+    },
+    {
+      role: "Engineering",
+      icon: "⚙️",
+      color: "#06b6d4",
+      text: ev.incident.score < 70
+        ? `Incident readiness gap (${ev.incident.score}/100): ${ev.incident.detail} Rollback capability needs validation.`
+        : `Incident readiness ${ev.incident.score}/100 is solid. ${ev.incident.detail}`
+    },
+    {
+      role: "Customer Experience",
+      icon: "👥",
+      color: "#a855f7",
+      text: ev.fairness.score < 60
+        ? `Fairness indicators are concerning (${ev.fairness.score}/100): ${ev.fairness.detail} Customer trust risk is real.`
+        : ev.fairness.score < 80
+        ? `Fairness is ${ev.fairness.score}/100 — acceptable but worth monitoring. ${ev.fairness.detail}`
+        : `Fairness looks good at ${ev.fairness.score}/100. ${ev.fairness.detail}`
+    }
+  ];
+}
+
+// ============================================================
+// LOAD SCENARIO
+// ============================================================
+function loadScenario(key) {
+  currentScenarioKey = key;
+  currentScenario = SCENARIOS[key];
+
+  // Update scenario card active state
+  document.querySelectorAll('.scenario-card').forEach(c => {
+    c.classList.toggle('active', c.dataset.key === key);
+  });
+
+  // Badge
+  const badge = document.getElementById('scenarioNameBadge');
+  badge.textContent = currentScenario.name;
+  badge.style.display = 'inline-block';
+
+  // Render readiness dashboard
+  renderReadiness();
+
+  // Render evidence tabs
+  renderEvTabs();
+
+  // Render objections
+  renderObjections();
+
+  // Update decision buttons
+  updateDecisionButtons();
+
+  // Hide outcome
+  hideOutcome();
+
+  // Activate first tab
+  const firstKey = Object.keys(currentScenario.evidence)[0];
+  activateTab(firstKey);
+}
+
+// ============================================================
+// READINESS DASHBOARD
+// ============================================================
+function renderReadiness() {
+  const bar = document.getElementById('readinessBar');
+  const ev = currentScenario.evidence;
+  const keys = Object.keys(ev);
+  let total = 0;
+  keys.forEach(k => total += ev[k].score);
+  const avg = Math.round(total / keys.length);
+
+  let overallLabel, overallClass;
+  if (avg >= 80) { overallLabel = '🟢 Strong launch evidence'; overallClass = 'badge-green'; }
+  else if (avg >= 60) { overallLabel = '🟡 Conditional readiness — review flags'; overallClass = 'badge-amber'; }
+  else { overallLabel = '🔴 Significant gaps — consider delay'; overallClass = 'badge-red'; }
+
+  let html = '<div class="readiness-label">Evidence</div>';
+  keys.forEach(k => {
+    const dim = ev[k];
+    const cls = 'ev-pill-' + dim.status;
+    const dot = dim.status === 'green' ? '🟢' : dim.status === 'amber' ? '🟡' : '🔴';
+    html += `<span class="ev-pill ${cls}" title="${dim.detail}">${dim.label} ${dim.score} ${dot}</span>`;
+  });
+  html += `<span class="overall-score"><span class="badge ${overallClass}">${overallLabel}</span><span style="color:#4b5563">Avg: ${avg}/100</span></span>`;
+  bar.innerHTML = html;
+}
+
+// ============================================================
+// EVIDENCE TABS
+// ============================================================
+function renderEvTabs() {
+  const tabs = document.getElementById('evTabs');
+  const body = document.getElementById('evBody');
+  const ev = currentScenario.evidence;
+  const keys = Object.keys(ev);
+
+  let tabHtml = '';
+  let bodyHtml = '';
+
+  keys.forEach(k => {
+    const dim = ev[k];
+    const dotCls = 'tl-' + dim.status;
+    tabHtml += `<div class="ev-tab" data-key="${k}" id="tab-${k}" onclick="activateTab('${k}')">
+      <span class="tl-dot ${dotCls}"></span>${dim.label}
+    </div>`;
+
+    const scoreCls = 'ev-score-' + dim.status;
+    const statusCls = 'ev-status-' + dim.status;
+    const statusLabel = dim.status === 'green' ? '🟢 Acceptable' : dim.status === 'amber' ? '🟡 Monitor' : '🔴 Blocking Risk';
+    const blockerBadge = dim.status === 'red' ? '<div class="blocker-badge">🚨 Blocking Issue</div>' : '';
+
+    // tint background for red
+    const bgTint = dim.status === 'red' ? 'background:#120a0a;' : dim.status === 'amber' ? 'background:#0d0b05;' : '';
+
+    bodyHtml += `<div class="ev-content" id="ev-${k}" style="${bgTint}border-radius:8px;padding:4px">
+      <div class="ev-top">
+        <div class="ev-score-circle ${scoreCls}">${dim.score}<div style="font-size:8px;font-weight:600;opacity:.7">/100</div></div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;color:#e2e2f0;margin-bottom:6px">${dim.label}</div>
+          <span class="ev-status-badge ${statusCls}">${statusLabel}</span>
+        </div>
+      </div>
+      <div class="ev-detail">${dim.detail}</div>
+      ${blockerBadge}
+    </div>`;
+  });
+
+  tabs.innerHTML = tabHtml;
+  body.innerHTML = bodyHtml;
+
+  // Render blocking banner
+  renderBlockingBanner();
+}
+
+function activateTab(key) {
+  activeTab = key;
+  document.querySelectorAll('.ev-tab').forEach(t => t.classList.toggle('active', t.dataset.key === key));
+  document.querySelectorAll('.ev-content').forEach(c => c.classList.toggle('active', c.id === 'ev-' + key));
+}
+
+// ============================================================
+// BLOCKING BANNER
+// ============================================================
+function renderBlockingBanner() {
+  const banner = document.getElementById('blockingBanner');
+  const issues = currentScenario.blocking_issues;
+  if (!issues || issues.length === 0) {
+    banner.style.display = 'none';
+    return;
+  }
+  let html = '<div class="blocking-banner"><div class="blocking-banner-title">🚨 Blocking Issues (' + issues.length + ')</div>';
+  issues.forEach(iss => {
+    html += `<div class="blocking-item">${iss}</div>`;
+  });
+  html += '</div>';
+  banner.innerHTML = html;
+  banner.style.display = 'block';
+}
+
+// ============================================================
+// OBJECTIONS
+// ============================================================
+function renderObjections() {
+  const container = document.getElementById('objectionsContainer');
+  const objections = generateObjections(currentScenario);
+  let html = '';
+  objections.forEach(obj => {
+    html += `<div class="objection-card" style="border-left:3px solid ${obj.color}">
+      <div class="objection-header">
+        <span class="objection-icon">${obj.icon}</span>
+        <span class="objection-role" style="color:${obj.color}">${obj.role}</span>
+      </div>
+      <div class="objection-text">${obj.text}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+// ============================================================
+// DECISION BUTTONS
+// ============================================================
+function updateDecisionButtons() {
+  const hasBlockers = currentScenario.blocking_issues && currentScenario.blocking_issues.length > 0;
+  const warn = document.getElementById('blockerWarning');
+
+  ['btnLaunch','btnBeta','btnHuman','btnDelay'].forEach(id => {
+    document.getElementById(id).disabled = false;
+  });
+
+  const launchBtn = document.getElementById('btnLaunch');
+  if (hasBlockers) {
+    launchBtn.classList.add('has-blockers');
+    warn.textContent = '⚠️ ' + currentScenario.blocking_issues.length + ' blocking issue(s) detected — Launch Now is high risk.';
+    warn.classList.add('show');
+  } else {
+    launchBtn.classList.remove('has-blockers');
+    warn.classList.remove('show');
+  }
+}
+
+// ============================================================
+// MAKE DECISION
+// ============================================================
+function makeDecision(decision) {
+  const scenario = currentScenario;
+  const consequence = scenario.consequences[decision];
+  const idealKey = scenario.ideal_decision;
+  const idealConsequence = scenario.consequences[idealKey];
+
+  const score = consequence.score;
+  let scoreClass, scoreLabel;
+  if (score >= 75) { scoreClass = 'outcome-score-green'; scoreLabel = 'Strong'; }
+  else if (score >= 45) { scoreClass = 'outcome-score-amber'; scoreLabel = 'Moderate'; }
+  else { scoreClass = 'outcome-score-red'; scoreLabel = 'Poor'; }
+
+  const decisionLabels = {
+    launch_now: '🚀 Launch Now',
+    limited_beta: '🔬 Limited Beta',
+    human_reviewed: '👁️ Human-Reviewed Rollout',
+    delay: '⏸️ Delay Launch'
+  };
+
+  // PM override note
+  let pmNote;
+  const isIdeal = decision === idealKey;
+  if (isIdeal) {
+    pmNote = "This matches what a strong PM would choose. Good judgment on balancing evidence, risk, and velocity.";
+  } else if (scenario.defensible_decisions.includes(decision)) {
+    pmNote = "This is a defensible choice, though not the single ideal decision. A strong PM could justify this with the right caveats and a clear resolution plan.";
+  } else if (score < 20) {
+    pmNote = "A strong PM would not make this call — the blocking issues here are genuine hard blockers, not trade-offs to rationalise around.";
+  } else {
+    pmNote = "A strong PM might consider this, but the evidence suggests a different decision is more defensible given the risk profile and blocking issues.";
+  }
+
+  const isIdealSame = decision === idealKey;
+  const idealDecisionLabel = decisionLabels[idealKey];
+
+  let html = `
+    <div class="outcome-score-row">
+      <div class="outcome-score-circle ${scoreClass}">
+        ${score}
+        <div class="outcome-score-label">${scoreLabel}</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Your Decision</div>
+        <div style="font-size:13px;font-weight:700;color:#e2e2f0;margin-bottom:4px">${decisionLabels[decision]}</div>
+        <div style="font-size:11px;color:#6b7280">Decision Quality: <strong style="color:${score>=75?'#4ade80':score>=45?'#fbbf24':'#f87171'}">${score}/100</strong></div>
+      </div>
+    </div>
+    <div style="font-size:15px;font-weight:700;color:#e2e2f0;margin-bottom:12px;line-height:1.4">${consequence.headline}</div>
+    <div class="outcome-detail">${consequence.detail}</div>
+    <div class="outcome-section-title">Ideal Decision</div>
+    <div class="outcome-ideal-box">
+      <div class="outcome-ideal-name">${idealDecisionLabel} <span style="font-size:11px;color:#818cf8;font-weight:400">(Score: ${idealConsequence.score}/100)</span></div>
+      <div class="outcome-pm-note" style="margin-top:4px">${idealConsequence.headline}</div>
+    </div>
+    <div class="outcome-section-title">Would a strong PM override here?</div>
+    <div class="outcome-detail">${pmNote}</div>
+    <button class="reset-btn" onclick="resetDecision()">↩ Try another decision</button>
+  `;
+
+  document.getElementById('outcomeInner').innerHTML = html;
+  showOutcome();
+}
+
+// ============================================================
+// OUTCOME PANEL
+// ============================================================
+function showOutcome() {
+  const panel = document.getElementById('outcomePanel');
+  panel.classList.add('visible');
+}
+
+function hideOutcome() {
+  const panel = document.getElementById('outcomePanel');
+  panel.classList.remove('visible');
+}
+
+function resetDecision() {
+  hideOutcome();
+}
+
+// ============================================================
+// PM REFLECTION TOGGLE
+// ============================================================
+function toggleReflection() {
+  const toggle = document.getElementById('reflectionToggle');
+  const body = document.getElementById('reflectionBody');
+  toggle.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+// ============================================================
+// BUILD SCENARIO CARDS
+// ============================================================
+function buildScenarioCards() {
+  const container = document.getElementById('scenarioCards');
+  let html = '';
+  Object.entries(SCENARIOS).forEach(([key, scenario]) => {
+    html += `<div class="scenario-card" data-key="${key}" onclick="loadScenario('${key}')">
+      <div class="scenario-card-name">${scenario.name}</div>
+      <div class="scenario-card-desc">${scenario.description}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+buildScenarioCards();
+// Auto-load first scenario
+loadScenario('support_copilot');
+</script>
+</body>
+</html>

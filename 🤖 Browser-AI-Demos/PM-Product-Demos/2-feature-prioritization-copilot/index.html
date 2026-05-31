@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Feature Prioritization Copilot · PM Demo 02</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#07070e;color:#e2e2f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:13px;min-height:100vh;display:flex;flex-direction:column}
+a{color:#6366f1;text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:'Courier New',monospace}
+
+/* HEADER */
+.top-bar{background:#0a0a16;border-bottom:1px solid #1a1a30;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.back-link{color:#6366f1;font-size:12px;font-weight:600;white-space:nowrap}
+.top-bar-title{font-size:16px;font-weight:700;color:#e2e2f0;flex:1}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700}
+.badge-indigo{background:#312e81;color:#a5b4fc}
+.badge-amber{background:#451a03;color:#fcd34d}
+.badge-green{background:#052e16;color:#4ade80}
+.badge-red{background:#450a0a;color:#fca5a5}
+.badge-blue{background:#0c1a45;color:#7dd3fc}
+.badge-purple{background:#2e1065;color:#d8b4fe}
+.badge-grey{background:#1e1e2e;color:#94a3b8}
+.badge-override{background:#7c2d12;color:#fdba74;font-size:10px}
+
+/* SCENARIO BAR */
+.scenario-bar{background:#0d0d1a;border-bottom:1px solid #1a1a30;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.scenario-label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
+.pill{border:1px solid #1a1a30;background:#0a0a16;color:#94a3b8;padding:5px 14px;border-radius:99px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.pill:hover{border-color:#6366f1;color:#a5b4fc}
+.pill.active{background:#312e81;border-color:#6366f1;color:#a5b4fc}
+
+/* LAYOUT */
+.main{display:flex;flex:1;overflow:hidden;gap:0}
+.pane-left{flex:1;overflow:auto;border-right:1px solid #1a1a30;display:flex;flex-direction:column}
+.pane-right{width:380px;min-width:300px;overflow:auto;display:flex;flex-direction:column}
+
+/* PANEL HEADERS */
+.panel-hdr{background:#0a0a16;border-bottom:1px solid #1a1a30;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:10}
+.panel-hdr-title{font-size:12px;font-weight:700;color:#a5b4fc;text-transform:uppercase;letter-spacing:.06em}
+
+/* FEATURE TABLE */
+.feature-table-wrap{overflow:auto;flex:1}
+table{width:100%;border-collapse:collapse}
+thead th{background:#0a0a16;color:#6b7280;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:8px 8px;border-bottom:1px solid #1a1a30;white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0}
+thead th:hover{color:#a5b4fc}
+thead th.sort-asc::after{content:' ↑'}
+thead th.sort-desc::after{content:' ↓'}
+tbody tr{border-bottom:1px solid #12122a;transition:background .1s}
+tbody tr:hover{background:#0d0d1a}
+tbody tr.highlight-row{background:#1e1b4b !important;transition:background 0s}
+td{padding:6px 8px;vertical-align:middle}
+td.td-name{max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;color:#e2e2f0}
+td.td-num{text-align:center;color:#c4b5fd;font-variant-numeric:tabular-nums}
+td.td-edit{text-align:center}
+
+/* INLINE EDIT */
+.inline-num{width:46px;background:#12122a;border:1px solid #312e81;color:#a5b4fc;border-radius:4px;text-align:center;padding:2px 4px;font-size:12px}
+.inline-num:focus{outline:none;border-color:#6366f1}
+.icon-btn{background:none;border:none;cursor:pointer;padding:3px 5px;border-radius:4px;font-size:13px;transition:background .1s;color:#6b7280}
+.icon-btn:hover{background:#1a1a30;color:#e2e2f0}
+.add-btn{background:#312e81;border:1px solid #6366f1;color:#a5b4fc;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.add-btn:hover{background:#4338ca;color:#fff}
+.risk-select,select.inline-select{background:#12122a;border:1px solid #1a1a30;color:#e2e2f0;border-radius:4px;padding:2px 4px;font-size:11px}
+
+/* RANKING LIST */
+.rank-list{flex:1;overflow:auto;padding:10px}
+.rank-card{background:#0d0d1a;border:1px solid #1a1a30;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s;position:relative}
+.rank-card:hover{border-color:#6366f1;background:#0f0f20}
+.rank-card.active-card{border-color:#6366f1;background:#0f0f20}
+.rank-card.top3{border-left:3px solid #6366f1}
+.rank-card.bottom2{border-left:3px solid #374151;opacity:.85}
+.rank-card-row1{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.rank-num{width:24px;height:24px;background:#1e1b4b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#a5b4fc;flex-shrink:0}
+.rank-name{font-size:12px;font-weight:700;color:#e2e2f0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-scores{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;padding-left:32px}
+.score-chip{font-size:10px;color:#94a3b8;background:#12122a;padding:1px 6px;border-radius:4px}
+.rank-badges{display:flex;gap:4px;flex-wrap:wrap;padding-left:32px;margin-top:4px}
+.rank-move-btns{display:flex;gap:2px;position:absolute;right:8px;top:8px}
+.move-btn{background:#1a1a30;border:none;color:#94a3b8;width:20px;height:20px;border-radius:3px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0}
+.move-btn:hover{background:#312e81;color:#a5b4fc}
+
+/* TRADE-OFF PANEL */
+.tradeoff-panel{border-top:1px solid #1a1a30;padding:14px;background:#080812}
+.tradeoff-title{font-size:11px;font-weight:700;color:#a5b4fc;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.tradeoff-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;font-size:12px}
+.tradeoff-label{color:#6b7280;min-width:90px;font-weight:600;flex-shrink:0}
+.tradeoff-val{color:#e2e2f0;line-height:1.5}
+.tradeoff-empty{color:#4b5563;font-size:12px;font-style:italic}
+
+/* OVERRIDE PANEL */
+.override-panel{border-top:1px solid #1a1a30;padding:14px;background:#080812}
+.override-title{font-size:11px;font-weight:700;color:#a5b4fc;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.override-row{background:#0d0d1a;border:1px solid #1a1a30;border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:12px}
+.override-ranks{display:flex;gap:10px;margin-bottom:4px;color:#94a3b8}
+.override-ranks span{font-weight:700;color:#fcd34d}
+.override-justify{width:100%;background:#07070e;border:1px solid #1a1a30;border-radius:4px;color:#e2e2f0;padding:4px 8px;font-size:11px;resize:vertical;margin-top:4px}
+.override-justify:focus{outline:none;border-color:#6366f1}
+
+/* EXPORT */
+.export-section{border-top:1px solid #1a1a30;padding:14px}
+.export-btn{background:#064e3b;border:1px solid #22c55e;color:#4ade80;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;width:100%;margin-bottom:8px;transition:all .15s}
+.export-btn:hover{background:#065f46;color:#86efac}
+.export-ta{width:100%;background:#07070e;border:1px solid #1a1a30;border-radius:6px;color:#a5b4fc;padding:10px;font-family:'Courier New',monospace;font-size:11px;resize:vertical;min-height:120px;display:none}
+
+/* REFLECTION BOX */
+.reflection-section{border-top:1px solid #1a1a30}
+.reflection-toggle{width:100%;background:#0a0a16;border:none;border-bottom:1px solid #1a1a30;color:#94a3b8;padding:10px 14px;text-align:left;cursor:pointer;font-size:12px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.reflection-toggle:hover{color:#e2e2f0}
+.reflection-body{background:#07070e;padding:14px 16px;display:none}
+.reflection-body.open{display:block}
+.reflection-item{margin-bottom:10px;font-size:12px;line-height:1.6;color:#9ca3af}
+.reflection-item strong{color:#e2e2f0}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:#0007;z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#0d0d1a;border:1px solid #1a1a30;border-radius:12px;padding:20px;width:440px;max-width:96vw}
+.modal-title{font-size:14px;font-weight:700;color:#e2e2f0;margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.form-full{grid-column:1/-1}
+.form-group label{display:block;font-size:11px;font-weight:600;color:#6b7280;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.form-group input,.form-group select{width:100%;background:#07070e;border:1px solid #1a1a30;border-radius:5px;color:#e2e2f0;padding:6px 8px;font-size:12px}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:#6366f1}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.modal-cancel{background:#1a1a30;border:none;color:#94a3b8;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px}
+.modal-save{background:#312e81;border:1px solid #6366f1;color:#a5b4fc;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700}
+.modal-cancel:hover{background:#252535}
+.modal-save:hover{background:#4338ca;color:#fff}
+
+/* FOOTER */
+.footer{background:#0a0a16;border-top:1px solid #1a1a30;padding:8px 20px;text-align:center;color:#374151;font-size:11px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- FILE:// WARNING BANNER -->
+<div id="fp-warn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#7c1c1c;color:#fecaca;padding:12px 20px;font-size:13px;font-weight:600;align-items:center;gap:12px;box-shadow:0 2px 12px #0008">
+  <span style="font-size:18px">⚠️</span>
+  <div style="flex:1">Cannot run as <code style="background:#0003;padding:1px 5px;border-radius:4px">file://</code> — open via <strong>start_demos.bat</strong> or <code>python -m http.server 8080</code> instead.</div>
+  <button onclick="document.getElementById('fp-warn').style.display='none'" style="background:none;border:1px solid #fecaca88;color:#fecaca;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:12px">✕</button>
+</div>
+<script>if(location.protocol==='file:'){document.getElementById('fp-warn').style.display='flex';}</script>
+
+<!-- HEADER -->
+<div class="top-bar">
+  <a class="back-link" href="../index.html">← PM Demos</a>
+  <div class="top-bar-title">📋 Feature Prioritization Copilot</div>
+  <span class="badge badge-indigo">PM Demo 02</span>
+  <span class="badge badge-amber">Sessions 03–04</span>
+</div>
+
+<!-- SCENARIO BAR -->
+<div class="scenario-bar">
+  <span class="scenario-label">Strategic Focus:</span>
+  <button class="pill active" data-scenario="growth">Growth</button>
+  <button class="pill" data-scenario="retention">Retention</button>
+  <button class="pill" data-scenario="ops">Ops Efficiency</button>
+  <button class="pill" data-scenario="compliance">Compliance</button>
+</div>
+
+<!-- MAIN 2-COLUMN LAYOUT -->
+<div class="main">
+  <!-- LEFT: FEATURE INPUT TABLE -->
+  <div class="pane-left">
+    <div class="panel-hdr">
+      <span class="panel-hdr-title">Feature Candidates</span>
+      <button class="add-btn" id="addFeatureBtn">+ Add Feature</button>
+    </div>
+    <div class="feature-table-wrap">
+      <table id="featureTable">
+        <thead>
+          <tr>
+            <th data-col="id">#</th>
+            <th data-col="name">Feature Name</th>
+            <th data-col="segment">Segment</th>
+            <th data-col="reach">Reach</th>
+            <th data-col="impact">Impact</th>
+            <th data-col="confidence">Conf%</th>
+            <th data-col="effort">Effort</th>
+            <th data-col="risk">Risk</th>
+            <th data-col="aiUncertainty">AI Uncertainty</th>
+            <th data-col="strategic">Strategic</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="featureTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RIGHT: RANKING + PANELS -->
+  <div class="pane-right">
+    <div class="panel-hdr">
+      <span class="panel-hdr-title">Ranking Dashboard</span>
+      <span id="scenarioBadge" class="badge badge-indigo">Growth</span>
+    </div>
+    <div class="rank-list" id="rankList"></div>
+
+    <!-- TRADE-OFF EXPLANATION -->
+    <div class="tradeoff-panel" id="tradeoffPanel">
+      <div class="tradeoff-title">Trade-off Explanation</div>
+      <div id="tradeoffContent"><span class="tradeoff-empty">Click a ranked feature to see its scoring breakdown.</span></div>
+    </div>
+
+    <!-- OVERRIDE PANEL -->
+    <div class="override-panel" id="overridePanel" style="display:none">
+      <div class="override-title">PM Overrides</div>
+      <div id="overrideList"></div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="export-section">
+      <button class="export-btn" id="exportBtn">📄 Export Prioritization Memo (Markdown)</button>
+      <textarea class="export-ta" id="exportTa" rows="8" readonly></textarea>
+    </div>
+
+    <!-- REFLECTION BOX -->
+    <div class="reflection-section">
+      <button class="reflection-toggle" id="reflectionToggle">
+        <span>🎯 PM Reflection — Why These Numbers?</span>
+        <span id="reflectionArrow">▼</span>
+      </button>
+      <div class="reflection-body" id="reflectionBody">
+        <div class="reflection-item"><strong>🎯 Decision:</strong> Which features to build next quarter, given constraints and strategic focus.</div>
+        <div class="reflection-item"><strong>📊 Data assumed:</strong> Reach / Impact / Confidence estimates are team inputs — their quality determines the output quality. Garbage in, garbage out.</div>
+        <div class="reflection-item"><strong>⚠️ Risk:</strong> RICE rewards high-reach features. Low-reach infrastructure work (SSO, compliance) is systematically undervalued — the model does not know about contractual obligations or enterprise deals in the pipeline.</div>
+        <div class="reflection-item"><strong>💡 PM override:</strong> A strong PM overrides the model for regulatory requirements, CEO commitments, or dependencies that unblock other teams. Use the override arrows above and add your written justification.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD FEATURE MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">Add New Feature</div>
+    <div class="form-grid">
+      <div class="form-group form-full">
+        <label>Feature Name</label>
+        <input id="m_name" type="text" placeholder="e.g. Push notifications"/>
+      </div>
+      <div class="form-group form-full">
+        <label>Segment</label>
+        <input id="m_segment" type="text" placeholder="e.g. All users"/>
+      </div>
+      <div class="form-group form-full">
+        <label>Problem Statement</label>
+        <input id="m_problem" type="text" placeholder="e.g. Users miss important updates"/>
+      </div>
+      <div class="form-group">
+        <label>Reach (1–10)</label>
+        <input id="m_reach" type="number" min="1" max="10" value="5"/>
+      </div>
+      <div class="form-group">
+        <label>Impact (1–10)</label>
+        <input id="m_impact" type="number" min="1" max="10" value="5"/>
+      </div>
+      <div class="form-group">
+        <label>Confidence %</label>
+        <input id="m_confidence" type="number" min="10" max="100" value="70"/>
+      </div>
+      <div class="form-group">
+        <label>Effort (1–10)</label>
+        <input id="m_effort" type="number" min="1" max="10" value="5"/>
+      </div>
+      <div class="form-group">
+        <label>Strategic Fit (1–10)</label>
+        <input id="m_strategic" type="number" min="1" max="10" value="5"/>
+      </div>
+      <div class="form-group">
+        <label>Dependency (1–10)</label>
+        <input id="m_dependency" type="number" min="1" max="10" value="2"/>
+      </div>
+      <div class="form-group">
+        <label>Risk</label>
+        <select id="m_risk">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>AI Uncertainty</label>
+        <select id="m_aiUncertainty">
+          <option value="none" selected>None</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Kano Type</label>
+        <select id="m_kanoType">
+          <option value="basic">Basic (Must-have)</option>
+          <option value="performance" selected>Performance</option>
+          <option value="delighter">Delighter</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" id="modalCancel">Cancel</button>
+      <button class="modal-save" id="modalSave">Add Feature</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">PM Demo 02 · Feature Prioritization Copilot · Professor Vinaya Sathyanarayana · KateelLearningDemosToStudents</div>
+
+<script>
+// =====================================================================
+// DATA
+// =====================================================================
+const FEATURES_SEED = [
+  { id:1, name:"AI-powered search autocomplete", segment:"All users", problem:"Users can't find products quickly", reach:8, impact:7, confidence:80, effort:5, risk:"medium", strategic:8, dependency:2, aiUncertainty:"medium", kanoType:"performance" },
+  { id:2, name:"Real-time fraud detection (ML)", segment:"Finance team", problem:"Manual review misses 15% of fraud", reach:3, impact:10, confidence:60, effort:8, risk:"high", strategic:9, dependency:5, aiUncertainty:"high", kanoType:"basic" },
+  { id:3, name:"Dark mode", segment:"Power users", problem:"Eye strain in night use", reach:6, impact:3, confidence:95, effort:2, risk:"low", strategic:2, dependency:1, aiUncertainty:"none", kanoType:"delighter" },
+  { id:4, name:"Bulk CSV export", segment:"Enterprise ops", problem:"Manual data extraction wastes hours", reach:4, impact:6, confidence:90, effort:3, risk:"low", strategic:5, dependency:1, aiUncertainty:"none", kanoType:"performance" },
+  { id:5, name:"Recommendation engine v2", segment:"All users", problem:"Current recs are irrelevant (CTR 1.2%)", reach:9, impact:8, confidence:50, effort:9, risk:"high", strategic:8, dependency:3, aiUncertainty:"high", kanoType:"performance" },
+  { id:6, name:"SSO / SAML integration", segment:"Enterprise IT", problem:"Onboarding takes 2 weeks", reach:3, impact:9, confidence:85, effort:4, risk:"low", strategic:7, dependency:2, aiUncertainty:"none", kanoType:"basic" },
+  { id:7, name:"In-app guided onboarding tour", segment:"New users", problem:"60-day activation rate only 34%", reach:7, impact:7, confidence:75, effort:3, risk:"low", strategic:6, dependency:1, aiUncertainty:"none", kanoType:"performance" },
+  { id:8, name:"AI meeting summariser (beta)", segment:"Sales / CS teams", problem:"Meeting notes take 30 min each", reach:5, impact:6, confidence:40, effort:6, risk:"medium", strategic:5, dependency:4, aiUncertainty:"high", kanoType:"delighter" }
+];
+
+// =====================================================================
+// SCORING
+// =====================================================================
+const SCENARIO_WEIGHTS = {
+  growth:     { strategic:1.4, reach:1.2, impact:1.0, confidence:0.9, effort:0.8 },
+  retention:  { strategic:1.2, reach:0.8, impact:1.3, confidence:1.0, effort:1.0 },
+  ops:        { strategic:1.0, reach:0.7, impact:1.1, confidence:1.2, effort:1.4 },
+  compliance: { strategic:1.5, reach:0.6, impact:1.0, confidence:1.3, effort:0.9 }
+};
+const SCENARIO_LABELS = { growth:'Growth', retention:'Retention', ops:'Ops Efficiency', compliance:'Compliance' };
+
+function riceScore(f) {
+  return (f.reach * f.impact * f.confidence) / (f.effort * 100);
+}
+function compositeScore(f, scenario) {
+  const w = SCENARIO_WEIGHTS[scenario];
+  const base = riceScore(f);
+  const strat = (f.strategic / 10) * w.strategic;
+  const aiPenalty = f.aiUncertainty === 'high' ? 0.75 : f.aiUncertainty === 'medium' ? 0.90 : 1.0;
+  const riskPenalty = f.risk === 'high' ? 0.80 : f.risk === 'medium' ? 0.92 : 1.0;
+  return base * strat * aiPenalty * riskPenalty;
+}
+function sequenceScore(f) {
+  return (10 - f.dependency) + (f.risk === 'low' ? 3 : f.risk === 'medium' ? 1 : 0);
+}
+function getMoscow(rank, total) {
+  const pct = rank / total;
+  if (pct <= 0.25) return 'Must';
+  if (pct <= 0.60) return 'Should';
+  if (pct <= 0.85) return 'Could';
+  return "Won't";
+}
+function getKanoLabel(kanoType) {
+  return kanoType === 'basic' ? 'Basic' : kanoType === 'performance' ? 'Performance' : 'Delighter';
+}
+function aiPenaltyLabel(f) {
+  if (f.aiUncertainty === 'high') return '×0.75 — high AI uncertainty';
+  if (f.aiUncertainty === 'medium') return '×0.90 — medium AI uncertainty';
+  return 'none';
+}
+function riskPenaltyLabel(f) {
+  if (f.risk === 'high') return '×0.80 — high risk';
+  if (f.risk === 'medium') return '×0.92 — medium risk';
+  return 'none';
+}
+
+// =====================================================================
+// STATE
+// =====================================================================
+let features = FEATURES_SEED.map(f => ({...f}));
+let nextId = 9;
+let scenario = 'growth';
+let sortCol = null, sortDir = 1;
+let rankedOrder = []; // array of feature ids in PM order
+let overrides = {};   // { id: { justification: '', machineRank: n } }
+let selectedFeatureId = null;
+
+// =====================================================================
+// COMPUTE RANKED ORDER
+// =====================================================================
+function computeMachineRanking() {
+  const scored = features.map(f => ({ id: f.id, score: compositeScore(f, scenario) }));
+  scored.sort((a, b) => b.score - a.score);
+  return scored.map(s => s.id);
+}
+function initOrUpdateRankedOrder() {
+  const machine = computeMachineRanking();
+  // Preserve PM overrides: keep user-moved items in their PM positions,
+  // slot new/un-overridden items in their machine order
+  const overriddenIds = new Set(Object.keys(overrides).map(Number));
+  const pmOrdered = [...rankedOrder].filter(id => features.find(f => f.id === id));
+  const newFeatureIds = machine.filter(id => !pmOrdered.includes(id));
+  // Insert new feature ids at their machine-suggested positions among non-overridden slots
+  if (newFeatureIds.length > 0) {
+    newFeatureIds.forEach(id => { if (!pmOrdered.includes(id)) pmOrdered.push(id); });
+  }
+  // Remove deleted features
+  rankedOrder = pmOrdered.filter(id => features.find(f => f.id === id));
+  // If no overrides, just use machine ranking
+  if (Object.keys(overrides).length === 0) {
+    rankedOrder = machine;
+  }
+}
+
+// =====================================================================
+// RENDER FEATURE TABLE
+// =====================================================================
+function renderTable() {
+  const tbody = document.getElementById('featureTbody');
+  let rows = [...features];
+  if (sortCol) {
+    rows.sort((a, b) => {
+      let av = a[sortCol], bv = b[sortCol];
+      if (typeof av === 'string') av = av.toLowerCase(), bv = bv.toLowerCase();
+      return (av < bv ? -1 : av > bv ? 1 : 0) * sortDir;
+    });
+  }
+  tbody.innerHTML = '';
+  rows.forEach(f => {
+    const tr = document.createElement('tr');
+    tr.id = `row-${f.id}`;
+    tr.innerHTML = `
+      <td class="td-num">${f.id}</td>
+      <td class="td-name" title="${escHtml(f.name)}">${escHtml(f.name)}</td>
+      <td style="color:#6b7280;font-size:11px;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis" title="${escHtml(f.segment)}">${escHtml(f.segment)}</td>
+      <td class="td-edit"><input class="inline-num" data-id="${f.id}" data-field="reach" type="number" min="1" max="10" value="${f.reach}"/></td>
+      <td class="td-edit"><input class="inline-num" data-id="${f.id}" data-field="impact" type="number" min="1" max="10" value="${f.impact}"/></td>
+      <td class="td-edit"><input class="inline-num" data-id="${f.id}" data-field="confidence" type="number" min="10" max="100" value="${f.confidence}" style="width:52px"/></td>
+      <td class="td-edit"><input class="inline-num" data-id="${f.id}" data-field="effort" type="number" min="1" max="10" value="${f.effort}"/></td>
+      <td class="td-edit">${riskBadge(f.risk, f.id)}</td>
+      <td class="td-edit">${aiUncBadge(f.aiUncertainty, f.id)}</td>
+      <td class="td-edit"><input class="inline-num" data-id="${f.id}" data-field="strategic" type="number" min="1" max="10" value="${f.strategic}"/></td>
+      <td><button class="icon-btn" onclick="deleteFeature(${f.id})" title="Delete">🗑</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  // Attach change listeners
+  tbody.querySelectorAll('.inline-num').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const id = +inp.dataset.id, field = inp.dataset.field;
+      let val = +inp.value;
+      if (field === 'confidence') val = Math.max(10, Math.min(100, val));
+      else val = Math.max(1, Math.min(10, val));
+      inp.value = val;
+      const f = features.find(x => x.id === id);
+      if (f) { f[field] = val; onDataChange(); }
+    });
+  });
+}
+
+function riskBadge(risk, id) {
+  const cls = risk === 'low' ? 'badge-green' : risk === 'medium' ? 'badge-amber' : 'badge-red';
+  const opts = ['low','medium','high'].map(v => `<option value="${v}"${v===risk?' selected':''}>${v.charAt(0).toUpperCase()+v.slice(1)}</option>`).join('');
+  return `<select class="inline-select ${cls}" data-id="${id}" data-field="risk" onchange="onSelectChange(this)">${opts}</select>`;
+}
+function aiUncBadge(unc, id) {
+  const cls = unc === 'none' ? 'badge-grey' : 'badge-amber';
+  const label = unc === 'high' ? '⚠️ High' : unc === 'medium' ? '~ Med' : 'None';
+  const opts = ['none','medium','high'].map(v => {
+    const lbl = v === 'high' ? '⚠️ High' : v === 'medium' ? '~ Med' : 'None';
+    return `<option value="${v}"${v===unc?' selected':''}>${lbl}</option>`;
+  }).join('');
+  return `<select class="inline-select ${cls}" data-id="${id}" data-field="aiUncertainty" onchange="onSelectChange(this)">${opts}</select>`;
+}
+function onSelectChange(sel) {
+  const id = +sel.dataset.id, field = sel.dataset.field;
+  const f = features.find(x => x.id === id);
+  if (f) { f[field] = sel.value; onDataChange(); }
+}
+
+// =====================================================================
+// RENDER RANKING
+// =====================================================================
+function renderRanking() {
+  const list = document.getElementById('rankList');
+  const n = rankedOrder.length;
+  list.innerHTML = '';
+  rankedOrder.forEach((fid, idx) => {
+    const f = features.find(x => x.id === fid);
+    if (!f) return;
+    const rank = idx + 1;
+    const rice = riceScore(f).toFixed(2);
+    const comp = compositeScore(f, scenario).toFixed(3);
+    const moscow = getMoscow(rank, n);
+    const seqPos = getSequencePosition(fid);
+    const isTop3 = rank <= 3;
+    const isBottom2 = rank > n - 2;
+    const isOverride = overrides[fid] !== undefined;
+    const isActive = fid === selectedFeatureId;
+
+    const div = document.createElement('div');
+    div.className = `rank-card${isTop3?' top3':''}${isBottom2?' bottom2':''}${isActive?' active-card':''}`;
+    div.dataset.fid = fid;
+    div.innerHTML = `
+      <div class="rank-move-btns">
+        ${rank > 1 ? `<button class="move-btn" onclick="moveFeature(${fid},-1,event)" title="Move up">▲</button>` : '<button class="move-btn" style="visibility:hidden">▲</button>'}
+        ${rank < n ? `<button class="move-btn" onclick="moveFeature(${fid},1,event)" title="Move down">▼</button>` : '<button class="move-btn" style="visibility:hidden">▼</button>'}
+      </div>
+      <div class="rank-card-row1">
+        <div class="rank-num">${rank}</div>
+        <div class="rank-name" title="${escHtml(f.name)}">${escHtml(f.name)}</div>
+      </div>
+      <div class="rank-scores">
+        <span class="score-chip">RICE ${rice}</span>
+        <span class="score-chip">Comp ${comp}</span>
+        <span class="score-chip">Seq #${seqPos}</span>
+      </div>
+      <div class="rank-badges">
+        ${moscowBadge(moscow)}
+        ${kanoBadge(f.kanoType)}
+        ${riskInlineBadge(f.risk)}
+        ${isOverride ? '<span class="badge badge-override">PM Override</span>' : ''}
+      </div>
+    `;
+    div.addEventListener('click', () => selectFeature(fid));
+    list.appendChild(div);
+  });
+}
+function getSequencePosition(fid) {
+  const scored = features.map(f => ({ id:f.id, seq: sequenceScore(f) }));
+  scored.sort((a,b) => b.seq - a.seq);
+  return scored.findIndex(s => s.id === fid) + 1;
+}
+function moscowBadge(moscow) {
+  const cls = moscow === 'Must' ? 'badge-red' : moscow === 'Should' ? 'badge-amber' : moscow === 'Could' ? 'badge-blue' : 'badge-grey';
+  return `<span class="badge ${cls}">${moscow}</span>`;
+}
+function kanoBadge(kt) {
+  const cls = kt === 'basic' ? 'badge-blue' : kt === 'performance' ? 'badge-indigo' : 'badge-purple';
+  return `<span class="badge ${cls}">${getKanoLabel(kt)}</span>`;
+}
+function riskInlineBadge(risk) {
+  const cls = risk === 'low' ? 'badge-green' : risk === 'medium' ? 'badge-amber' : 'badge-red';
+  return `<span class="badge ${cls}">${risk.charAt(0).toUpperCase()+risk.slice(1)} Risk</span>`;
+}
+
+// =====================================================================
+// FEATURE SELECTION & TRADE-OFF
+// =====================================================================
+function selectFeature(fid) {
+  selectedFeatureId = fid;
+  renderRanking();
+  renderTradeoff(fid);
+  // Scroll + highlight table row
+  const tr = document.getElementById(`row-${fid}`);
+  if (tr) {
+    tr.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    tr.classList.add('highlight-row');
+    setTimeout(() => tr.classList.remove('highlight-row'), 1200);
+  }
+}
+function renderTradeoff(fid) {
+  const f = features.find(x => x.id === fid);
+  if (!f) return;
+  const rank = rankedOrder.indexOf(fid) + 1;
+  const n = rankedOrder.length;
+  const moscow = getMoscow(rank, n);
+  const rice = riceScore(f);
+  const comp = compositeScore(f, scenario);
+  const aiPen = f.aiUncertainty === 'high' ? 0.75 : f.aiUncertainty === 'medium' ? 0.90 : 1.0;
+  const riskPen = f.risk === 'high' ? 0.80 : f.risk === 'medium' ? 0.92 : 1.0;
+
+  let aboveNote = '', belowNote = '';
+  if (rank > 1) {
+    const aboveF = features.find(x => x.id === rankedOrder[rank-2]);
+    if (aboveF) {
+      const aboveComp = compositeScore(aboveF, scenario);
+      aboveNote = `Ranks below <strong>${escHtml(aboveF.name)}</strong> (score ${aboveComp.toFixed(3)} vs ${comp.toFixed(3)}) — difference driven by ${aboveComp > comp ? higherDimension(aboveF, f) : ''}.`;
+    }
+  }
+  if (rank < n) {
+    const belowF = features.find(x => x.id === rankedOrder[rank]);
+    if (belowF) {
+      const belowComp = compositeScore(belowF, scenario);
+      belowNote = `Ranks above <strong>${escHtml(belowF.name)}</strong> (score ${belowComp.toFixed(3)} vs ${comp.toFixed(3)}).`;
+    }
+  }
+
+  const moscowWhy = moscow === 'Must'
+    ? 'Top 25% of composite scores — highest strategic value in this scenario.'
+    : moscow === 'Should'
+    ? '25–60th percentile — meaningful value, second-priority work.'
+    : moscow === 'Could'
+    ? '60–85th percentile — nice-to-have; only if capacity allows.'
+    : 'Bottom 15% — defer or descope given current strategic focus.';
+
+  document.getElementById('tradeoffContent').innerHTML = `
+    <div class="tradeoff-row"><span class="tradeoff-label">Feature</span><span class="tradeoff-val"><strong>${escHtml(f.name)}</strong> (${escHtml(f.segment)})</span></div>
+    <div class="tradeoff-row"><span class="tradeoff-label">RICE Formula</span><span class="tradeoff-val">${f.reach} × ${f.impact} × ${f.confidence}% / ${f.effort} = <strong>${rice.toFixed(3)}</strong></span></div>
+    <div class="tradeoff-row"><span class="tradeoff-label">Strategic Fit</span><span class="tradeoff-val">${f.strategic}/10 × ${SCENARIO_WEIGHTS[scenario].strategic} (${SCENARIO_LABELS[scenario]} weight) = ${(f.strategic/10*SCENARIO_WEIGHTS[scenario].strategic).toFixed(2)}</span></div>
+    <div class="tradeoff-row"><span class="tradeoff-label">AI Penalty</span><span class="tradeoff-val">${aiPenaltyLabel(f)}</span></div>
+    <div class="tradeoff-row"><span class="tradeoff-label">Risk Penalty</span><span class="tradeoff-val">${riskPenaltyLabel(f)}</span></div>
+    <div class="tradeoff-row"><span class="tradeoff-label">Composite Score</span><span class="tradeoff-val"><strong>${comp.toFixed(4)}</strong></span></div>
+    <div class="tradeoff-row"><span class="tradeoff-label">MoSCoW</span><span class="tradeoff-val">${moscowBadge(moscow)} — ${moscowWhy}</span></div>
+    <div class="tradeoff-row"><span class="tradeoff-label">Kano</span><span class="tradeoff-val">${kanoBadge(f.kanoType)} — ${kanoExplain(f.kanoType)}</span></div>
+    <div class="tradeoff-row"><span class="tradeoff-label">Dependency</span><span class="tradeoff-val">Level ${f.dependency}/10 — ${f.dependency >= 4 ? 'has significant upstream dependencies; sequence carefully.' : 'relatively independent; can be sequenced early.'}</span></div>
+    ${aboveNote ? `<div class="tradeoff-row"><span class="tradeoff-label">vs. Above</span><span class="tradeoff-val">${aboveNote}</span></div>` : ''}
+    ${belowNote ? `<div class="tradeoff-row"><span class="tradeoff-label">vs. Below</span><span class="tradeoff-val">${belowNote}</span></div>` : ''}
+  `;
+}
+function kanoExplain(kt) {
+  if (kt === 'basic') return 'Users expect this; absence causes dissatisfaction regardless of other features.';
+  if (kt === 'performance') return 'More is better — directly correlates with satisfaction. Core competitive differentiator.';
+  return 'Unexpected delight — disproportionate positive surprise if delivered, but not missed if absent.';
+}
+function higherDimension(winner, loser) {
+  const dims = ['reach','impact','strategic'];
+  let biggest = '', biggestDiff = 0;
+  dims.forEach(d => {
+    const diff = Math.abs((winner[d]||0) - (loser[d]||0));
+    if (diff > biggestDiff) { biggestDiff = diff; biggest = d; }
+  });
+  return biggest || 'multiple dimensions';
+}
+
+// =====================================================================
+// MOVE / OVERRIDE
+// =====================================================================
+function moveFeature(fid, dir, evt) {
+  evt.stopPropagation();
+  const idx = rankedOrder.indexOf(fid);
+  if (idx < 0) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= rankedOrder.length) return;
+  // Swap
+  [rankedOrder[idx], rankedOrder[newIdx]] = [rankedOrder[newIdx], rankedOrder[idx]];
+  // Mark as override
+  const machine = computeMachineRanking();
+  const machineRank = machine.indexOf(fid) + 1;
+  const pmRank = rankedOrder.indexOf(fid) + 1;
+  if (machineRank !== pmRank) {
+    if (!overrides[fid]) overrides[fid] = { justification: '', machineRank };
+    overrides[fid].machineRank = machineRank;
+  } else {
+    delete overrides[fid];
+  }
+  renderRanking();
+  renderOverrides();
+  if (selectedFeatureId) renderTradeoff(selectedFeatureId);
+}
+
+function renderOverrides() {
+  const panel = document.getElementById('overridePanel');
+  const list = document.getElementById('overrideList');
+  const keys = Object.keys(overrides).map(Number).filter(id => features.find(f => f.id === id));
+  if (keys.length === 0) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  list.innerHTML = '';
+  keys.forEach(fid => {
+    const f = features.find(x => x.id === fid);
+    const ov = overrides[fid];
+    const pmRank = rankedOrder.indexOf(fid) + 1;
+    const div = document.createElement('div');
+    div.className = 'override-row';
+    div.innerHTML = `
+      <div class="override-ranks">Machine rank: <span>#${ov.machineRank}</span> → PM rank: <span>#${pmRank}</span> — ${escHtml(f.name)}</div>
+      <textarea class="override-justify" rows="2" placeholder="Justification (e.g. CEO commitment, unblocks Q2 migration…)" data-fid="${fid}">${escHtml(ov.justification||'')}</textarea>
+    `;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('.override-justify').forEach(ta => {
+    ta.addEventListener('input', () => {
+      const fid = +ta.dataset.fid;
+      if (overrides[fid]) overrides[fid].justification = ta.value;
+    });
+  });
+}
+
+// =====================================================================
+// SCENARIO CHANGE
+// =====================================================================
+document.querySelectorAll('.pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    scenario = btn.dataset.scenario;
+    document.getElementById('scenarioBadge').textContent = SCENARIO_LABELS[scenario];
+    if (Object.keys(overrides).length === 0) {
+      rankedOrder = computeMachineRanking();
+    }
+    renderAll();
+  });
+});
+
+// =====================================================================
+// SORT TABLE
+// =====================================================================
+document.querySelectorAll('thead th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    document.querySelectorAll('thead th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
+    if (sortCol === col) { sortDir *= -1; }
+    else { sortCol = col; sortDir = 1; }
+    th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+    renderTable();
+  });
+});
+
+// =====================================================================
+// DELETE FEATURE
+// =====================================================================
+function deleteFeature(id) {
+  if (features.length <= 2) { alert('Keep at least 2 features.'); return; }
+  features = features.filter(f => f.id !== id);
+  delete overrides[id];
+  rankedOrder = rankedOrder.filter(fid => fid !== id);
+  if (selectedFeatureId === id) {
+    selectedFeatureId = null;
+    document.getElementById('tradeoffContent').innerHTML = '<span class="tradeoff-empty">Click a ranked feature to see its scoring breakdown.</span>';
+  }
+  onDataChange();
+}
+
+// =====================================================================
+// ADD FEATURE MODAL
+// =====================================================================
+document.getElementById('addFeatureBtn').addEventListener('click', () => {
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('m_name').focus();
+});
+document.getElementById('modalCancel').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === document.getElementById('modalOverlay')) closeModal(); });
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+document.getElementById('modalSave').addEventListener('click', () => {
+  const name = document.getElementById('m_name').value.trim();
+  if (!name) { document.getElementById('m_name').focus(); return; }
+  const newF = {
+    id: nextId++,
+    name,
+    segment: document.getElementById('m_segment').value.trim() || 'All users',
+    problem: document.getElementById('m_problem').value.trim() || '',
+    reach: clamp(+document.getElementById('m_reach').value, 1, 10),
+    impact: clamp(+document.getElementById('m_impact').value, 1, 10),
+    confidence: clamp(+document.getElementById('m_confidence').value, 10, 100),
+    effort: clamp(+document.getElementById('m_effort').value, 1, 10),
+    strategic: clamp(+document.getElementById('m_strategic').value, 1, 10),
+    dependency: clamp(+document.getElementById('m_dependency').value, 1, 10),
+    risk: document.getElementById('m_risk').value,
+    aiUncertainty: document.getElementById('m_aiUncertainty').value,
+    kanoType: document.getElementById('m_kanoType').value
+  };
+  features.push(newF);
+  closeModal();
+  onDataChange();
+  // Clear modal
+  ['m_name','m_segment','m_problem'].forEach(id => document.getElementById(id).value = '');
+});
+function clamp(v,mn,mx) { return Math.max(mn, Math.min(mx, v||mn)); }
+
+// =====================================================================
+// EXPORT
+// =====================================================================
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const ta = document.getElementById('exportTa');
+  const now = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const n = rankedOrder.length;
+  let lines = [
+    '# Feature Prioritization Summary',
+    `Scenario: ${SCENARIO_LABELS[scenario]}`,
+    `Generated: ${now}`,
+    '',
+    '## Recommended Sequence',
+    ''
+  ];
+  rankedOrder.forEach((fid, idx) => {
+    const f = features.find(x => x.id === fid);
+    if (!f) return;
+    const rank = idx + 1;
+    const rice = riceScore(f).toFixed(2);
+    const moscow = getMoscow(rank, n);
+    const seqPos = getSequencePosition(fid);
+    lines.push(`${rank}. **${f.name}** — RICE: ${rice}, MoSCoW: ${moscow}, Kano: ${getKanoLabel(f.kanoType)}, Seq: #${seqPos}`);
+    lines.push(`   - Segment: ${f.segment}`);
+    if (f.problem) lines.push(`   - Problem: ${f.problem}`);
+    lines.push(`   - Risk: ${f.risk} | AI Uncertainty: ${f.aiUncertainty} | Strategic Fit: ${f.strategic}/10`);
+    lines.push('');
+  });
+  const overrideKeys = Object.keys(overrides).map(Number).filter(id => features.find(f => f.id === id));
+  if (overrideKeys.length > 0) {
+    lines.push('## PM Overrides', '');
+    overrideKeys.forEach(fid => {
+      const f = features.find(x => x.id === fid);
+      const ov = overrides[fid];
+      const pmRank = rankedOrder.indexOf(fid) + 1;
+      const just = ov.justification ? ov.justification.trim() : '(no justification provided)';
+      lines.push(`- **${f.name}**: moved from machine rank #${ov.machineRank} to PM rank #${pmRank}. Reason: ${just}`);
+    });
+    lines.push('');
+  }
+  lines.push('---');
+  lines.push('_Generated by PM Demo 02 · Feature Prioritization Copilot · KateelLearningDemosToStudents_');
+  ta.value = lines.join('\n');
+  ta.style.display = 'block';
+  ta.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  ta.select();
+});
+
+// =====================================================================
+// REFLECTION TOGGLE
+// =====================================================================
+document.getElementById('reflectionToggle').addEventListener('click', () => {
+  const body = document.getElementById('reflectionBody');
+  const arrow = document.getElementById('reflectionArrow');
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+});
+
+// =====================================================================
+// MAIN ORCHESTRATION
+// =====================================================================
+function onDataChange() {
+  initOrUpdateRankedOrder();
+  renderAll();
+}
+function renderAll() {
+  renderTable();
+  renderRanking();
+  renderOverrides();
+  if (selectedFeatureId && features.find(f => f.id === selectedFeatureId)) {
+    renderTradeoff(selectedFeatureId);
+  }
+}
+
+// =====================================================================
+// HELPERS
+// =====================================================================
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// =====================================================================
+// INIT
+// =====================================================================
+rankedOrder = computeMachineRanking();
+renderAll();
+</script>
+</body>
+</html>
