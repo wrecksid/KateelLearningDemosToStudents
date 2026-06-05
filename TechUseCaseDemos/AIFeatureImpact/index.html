@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AI Feature Impact</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AI Feature Impact</h1>
+      <p class="subtitle">Prioritize features by business impact</p>
+    </header>
+    <main>
+      <section class="input-section">
+        <h2>Add Feature</h2>
+        <form id="featureForm">
+          <div class="field">
+            <label for="name">Feature Name</label>
+            <input type="text" id="name" placeholder="e.g., Voice Search" required/>
+          </div>
+          <div class="grid">
+            <div class="field">
+              <label for="impact">Business Impact (1-10)</label>
+              <input type="range" id="impact" min="1" max="10" value="5"/>
+              <span id="impactVal">5</span>
+            </div>
+            <div class="field">
+              <label for="effort">Development Effort (1-10)</label>
+              <input type="range" id="effort" min="1" max="10" value="5"/>
+              <span id="effortVal">5</span>
+            </div>
+          </div>
+          <button type="submit">Add Feature</button>
+        </form>
+      </section>
+      <section class="results-section">
+        <h2>Feature Priority Matrix</h2>
+        <div class="matrix" id="matrix"></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
