@@ -195,7 +195,7 @@ or Edge 113+ (WebGPU support required, enabled by default in modern versions).
 | Management of AI Products | [CourseCatalogs/Management_of_AI_Products_Catalog.md](CourseCatalogs/Management_of_AI_Products_Catalog.md) | Product strategy, risk, governance |
 | Public Policy & Governance | [CourseCatalogs/PublicPolicyGovernance/README.md](CourseCatalogs/PublicPolicyGovernance/README.md) | Resource allocation, AI compliance |
 | Data Mining | [CourseCatalogs/DataMining/README.md](CourseCatalogs/DataMining/README.md) | Classification, clustering, forecasting, pattern mining |
-| Natural Language Processing | [CourseCatalogs/NLP/README.md](CourseCatalogs/NLP/README.md) | Text processing, entity recognition, sentiment analysis |
+| Natural Language Processing | [CourseCatalogs/NLP/README.md](CourseCatalogs/NLP/README.md) | Text processing, entity recognition, sentiment analysis, RAG |
 
 ---
 
