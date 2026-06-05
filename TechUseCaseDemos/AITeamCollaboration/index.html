@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AI Team Collaboration</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AI Team Collaboration</h1>
+      <p class="subtitle">RACI matrix for AI projects</p>
+    </header>
+    <main>
+      <section class="roles-section">
+        <h2>RACI Matrix</h2>
+        <div class="matrix-container" id="matrix"></div>
+      </section>
+      <section class="add-section">
+        <h2>Add Team Member</h2>
+        <form id="memberForm">
+          <div class="grid">
+            <div class="field">
+              <label for="name">Name</label>
+              <input type="text" id="name" required/>
+            </div>
+            <div class="field">
+              <label for="role">Role</label>
+              <select id="role">
+                <option value="ML Engineer">ML Engineer</option>
+                <option value="Data Scientist">Data Scientist</option>
+                <option value="Product Manager">Product Manager</option>
+                <option value="Ethics Lead">Ethics Lead</option>
+                <option value="Compliance">Compliance</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Responsibilities</label>
+            <div class="checkboxes">
+              <label><input type="checkbox" value="R"> Responsible</label>
+              <label><input type="checkbox" value="A"> Accountable</label>
+              <label><input type="checkbox" value="C"> Consulted</label>
+              <label><input type="checkbox" value="I"> Informed</label>
+            </div>
+          </div>
+          <button type="submit">Add Member</button>
+        </form>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
