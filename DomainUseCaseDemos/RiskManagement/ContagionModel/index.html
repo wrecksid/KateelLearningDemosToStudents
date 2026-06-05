@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Financial Contagion Model</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>🔗 Financial Contagion</h1>
+      <p class="subtitle">Network Risk Simulation</p>
+    </header>
+
+    <main>
+      <section class="controls">
+        <div class="control-group">
+          <label>Network Size: <span id="size-val">20</span></label>
+          <input type="range" id="network-size" min="5" max="50" value="20">
+        </div>
+        <div class="control-group">
+          <label>Connection Probability: <span id="prob-val">30%</span></label>
+          <input type="range" id="conn-prob" min="5" max="95" value="30">
+        </div>
+        <div class="control-group">
+          <label>Initial Defaults: <span id="default-val">2</span></label>
+          <input type="range" id="init-defaults" min="1" max="10" value="2">
+        </div>
+        <button id="run-sim" class="primary-btn">Run Simulation</button>
+      </section>
+
+      <section class="results">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="total-nodes">20</div>
+            <div class="stat-label">Total Nodes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="defaulted">2</div>
+            <div class="stat-label">Defaulted</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="contagion">0%</div>
+            <div class="stat-label">Contagion Rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="threshold">0.3</div>
+            <div class="stat-label">Threshold</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="visualization">
+        <h2>Network Graph</h2>
+        <canvas id="network-canvas" width="500" height="400"></canvas>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

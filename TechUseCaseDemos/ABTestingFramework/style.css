@@ -1,0 +1,161 @@
+/* A/B Testing Framework */
+
+:root {
+  --primary: #059669;
+  --primary-light: #10b981;
+  --success: #10b981;
+  --error: #ef4444;
+  --surface: #ffffff;
+  --surface-alt: #f0fdf4;
+  --on-surface: #0f172a;
+  --on-surface-secondary: #64748b;
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  min-height: 100vh;
+  color: var(--on-surface);
+}
+
+.app-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+header h1 {
+  font-size: 2rem;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--on-surface-secondary);
+  font-size: 0.9rem;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Config Section */
+.config-section, .results-section, .power-section {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.config-section h2, .results-section h2, .power-section h2 {
+  margin-bottom: 20px;
+  color: var(--primary);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.input-group input[type="range"] {
+  width: 100%;
+}
+
+.primary-btn {
+  padding: 12px 24px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.primary-btn:hover {
+  background: var(--primary-light);
+}
+
+/* Results */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.result-card {
+  background: var(--surface-alt);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+}
+
+.result-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.result-label {
+  font-size: 0.8rem;
+  color: var(--on-surface-secondary);
+}
+
+.conclusion {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-weight: 600;
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Power Analysis */
+.power-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.calc-result {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calc-label {
+  font-size: 0.8rem;
+  color: var(--on-surface-secondary);
+}
+
+.calc-value {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--primary);
+}

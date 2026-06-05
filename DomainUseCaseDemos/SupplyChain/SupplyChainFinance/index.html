@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Supply Chain Finance - Trade Credit</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>🚚 Supply Chain Finance</h1>
+      <p class="subtitle">Trade Credit Optimization</p>
+    </header>
+
+    <main>
+      <section class="inputs">
+        <h2>Company Parameters</h2>
+        <div class="input-grid">
+          <div class="input-group">
+            <label>Annual Revenue: $<span id="revenue-val">100M</span></label>
+            <input type="range" id="revenue" min="10" max="1000" value="100">
+          </div>
+          <div class="input-group">
+            <label>DSO (Days): <span id="dso-val">45</span></label>
+            <input type="range" id="dso" min="10" max="120" value="45">
+          </div>
+          <div class="input-group">
+            <label>Supplier Count: <span id="suppliers-val">50</span></label>
+            <input type="range" id="suppliers" min="10" max="200" value="50">
+          </div>
+          <div class="input-group">
+            <label>Average Payment Term: <span id="terms-val">30</span> days</label>
+            <input type="range" id="payment-terms" min="15" max="90" value="30">
+          </div>
+        </div>
+      </section>
+
+      <section class="results">
+        <h2>Financial Impact</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <div class="result-value" id="cash-flow">$2.5M</div>
+            <div class="result-label">Cash Flow Release</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="discount">2.5%</div>
+            <div class="result-label">Discount Rate</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="savings">$188K</div>
+            <div class="result-label">Annual Savings</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="roi">8.2%</div>
+            <div class="result-label">ROI</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="benefits">
+        <h2>Stakeholder Benefits</h2>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <h3>Buyer</h3>
+            <ul>
+              <li>Improved cash flow</li>
+              <li>Extended payment terms</li>
+              <li>Reduced working capital</li>
+            </ul>
+          </div>
+          <div class="benefit-card">
+            <h3>Supplier</h3>
+            <ul>
+              <li>Earlier payments</li>
+              <li>Improved cash flow</li>
+              <li>Better terms with buyer</li>
+            </ul>
+          </div>
+          <div class="benefit-card">
+            <h3>Bank</h3>
+            <ul>
+              <li>Fee income</li>
+              <li>Risk mitigation</li>
+              <li>Relationship banking</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A/B Testing Framework - Product Demo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>🧪 A/B Testing Framework</h1>
+      <p class="subtitle">Statistical Significance Calculator</p>
+    </header>
+
+    <main>
+      <!-- Test Configuration -->
+      <section class="config-section">
+        <h2>Test Configuration</h2>
+        <div class="config-grid">
+          <div class="input-group">
+            <label>Control Conversion: <span id="control-rate">5%</span></label>
+            <input type="range" id="control-input" min="1" max="20" value="5" step="0.5">
+          </div>
+          <div class="input-group">
+            <label>Treatment Conversion: <span id="treatment-rate">6%</span></label>
+            <input type="range" id="treatment-input" min="1" max="20" value="6" step="0.5">
+          </div>
+          <div class="input-group">
+            <label>Sample Size per Variant: <span id="sample-size">10000</span></label>
+            <input type="range" id="sample-input" min="100" max="100000" value="10000" step="100">
+          </div>
+        </div>
+        <button id="calculate-btn" class="primary-btn">Calculate Significance</button>
+      </section>
+
+      <!-- Results -->
+      <section class="results-section">
+        <h2>Results</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <div class="result-value" id="p-value">0.042</div>
+            <div class="result-label">P-value</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="confidence">95%</div>
+            <div class="result-label">Confidence Level</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="lift">20%</div>
+            <div class="result-label">Relative Lift</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="significant">Yes</div>
+            <div class="result-label">Significant?</div>
+          </div>
+        </div>
+        <div class="conclusion" id="conclusion">Result: Statistically significant difference detected (p < 0.05)</div>
+      </section>
+
+      <!-- Power Analysis -->
+      <section class="power-section">
+        <h2>Sample Size Calculator</h2>
+        <div class="power-grid">
+          <div class="input-group">
+            <label>Minimum Detectable Effect: <span id="mde-value">10%</span></label>
+            <input type="range" id="mde-input" min="1" max="50" value="10" step="1">
+          </div>
+          <div class="input-group">
+            <label>Baseline Conversion: <span id="baseline-value">5%</span></label>
+            <input type="range" id="baseline-input" min="1" max="20" value="5" step="0.5">
+          </div>
+          <div class="calculated">
+            <div class="calc-result">
+              <span class="calc-label">Required Sample Size:</span>
+              <span class="calc-value" id="required-sample">8,000</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

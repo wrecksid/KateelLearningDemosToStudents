@@ -27,6 +27,7 @@ This file is a curated index of the most useful demos in the repository.
 - `DomainUseCaseDemos\Banking\MesaLiquidity`
 - `DomainUseCaseDemos\Banking\IntRateRisk`
 - `DomainUseCaseDemos\Banking\Marketing001`
+- `DomainUseCaseDemos\Banking\LoanDefaultPredictor` - Credit risk assessment with ML
 
 ### Credit Cards
 
@@ -50,6 +51,23 @@ This file is a curated index of the most useful demos in the repository.
 - `DomainUseCaseDemos\WealthMgmt\NIFTYOpt`
 - `DomainUseCaseDemos\WealthMgmt\PortfolioOptSynSharpeRation`
 
+### Quant Finance (Advanced)
+
+- `DomainUseCaseDemos\QuantFinance\BlackScholesOption` - European option pricing model
+
+### Risk Management (Advanced)
+
+- `DomainUseCaseDemos\RiskManagement\CounterPartyRisk` - CVA and credit risk
+- `DomainUseCaseDemos\RiskManagement\ContagionModel` - Network-based systemic risk
+
+### Compliance (Advanced)
+
+- `DomainUseCaseDemos\Compliance\MuleAccountDetection` - AML transaction monitoring
+
+### Supply Chain (Advanced)
+
+- `DomainUseCaseDemos\SupplyChain\SupplyChainFinance` - Trade credit optimization
+
 ## Technique-Oriented Demos
 
 ### Classification
@@ -69,6 +87,18 @@ This file is a curated index of the most useful demos in the repository.
 
 - `TechUseCaseDemos\Forecast\tflow001`
 - `TechUseCaseDemos\Forecast\tsdemo001`
+
+### Browser AI Demos
+
+- `TechUseCaseDemos\VoiceNotesApp001` - Speech-to-text with localStorage
+- `TechUseCaseDemos\AISummarizer001` - Transcript to bullet points demo
+- `TechUseCaseDemos\CreditScoringDemo` - Logistic regression credit scoring
+- `TechUseCaseDemos\PortfolioOptimizer` - Mean-variance portfolio optimization
+- `TechUseCaseDemos\FraudPlayground` - Anomaly detection for fraud
+- `TechUseCaseDemos\ABTestingFramework` - Statistical significance calculator
+- `TechUseCaseDemos\AIROICalculator` - AI project ROI estimation
+- `TechUseCaseDemos\FeatureStoreDemo` - ML feature registry
+- `TechUseCaseDemos\AIProductCanvas` - AI product planning tool
 
 ### Pattern Mining
 

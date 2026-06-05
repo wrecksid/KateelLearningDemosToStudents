@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI ROI Calculator - Product Demo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>💰 AI ROI Calculator</h1>
+      <p class="subtitle">Estimate AI Project Returns</p>
+    </header>
+
+    <main>
+      <!-- Project Inputs -->
+      <section class="inputs-section">
+        <h2>Project Details</h2>
+        <div class="inputs-grid">
+          <div class="input-group">
+            <label>Development Cost: $<span id="dev-cost-val">100K</span></label>
+            <input type="range" id="dev-cost" min="10" max="500" value="100" step="10">
+          </div>
+          <div class="input-group">
+            <label>Annual Maintenance: $<span id="maint-cost-val">20K</span></label>
+            <input type="range" id="maint-cost" min="5" max="100" value="20" step="5">
+          </div>
+          <div class="input-group">
+            <label>Annual Benefits: $<span id="benefits-val">50K</span></label>
+            <input type="range" id="benefits" min="10" max="500" value="50" step="10">
+          </div>
+          <div class="input-group">
+            <label>Project Duration: <span id="duration-val">3</span> years</label>
+            <input type="range" id="duration" min="1" max="10" value="3">
+          </div>
+        </div>
+      </section>
+
+      <!-- Results -->
+      <section class="results-section">
+        <h2>Financial Analysis</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <div class="result-value" id="total-cost">$160K</div>
+            <div class="result-label">Total Cost</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="total-benefits">$150K</div>
+            <div class="result-label">Total Benefits</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="net-value">-$10K</div>
+            <div class="result-label">Net Value</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="payback">N/A</div>
+            <div class="result-label">Payback (years)</div>
+          </div>
+        </div>
+        <div class="recommendation" id="recommendation">Recommendation: Consider project carefully</div>
+      </section>
+
+      <!-- Breakdown -->
+      <section class="breakdown-section">
+        <h2>Year-by-Year Breakdown</h2>
+        <table id="year-table">
+          <thead>
+            <tr><th>Year</th><th>Cost</th><th>Benefit</th><th>Cumulative</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

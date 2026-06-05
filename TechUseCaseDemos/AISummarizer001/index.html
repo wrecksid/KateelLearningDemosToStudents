@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Summarizer Demo - Transcript to Bullet Points</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>📝 AI Summarizer</h1>
+      <p class="subtitle">Transcript → Bullet Points Demo</p>
+    </header>
+
+    <main>
+      <!-- Input Section -->
+      <section class="input-section">
+        <div class="panel-header">
+          <label for="transcript-input">Enter your text/transcript:</label>
+        </div>
+        <textarea 
+          id="transcript-input" 
+          placeholder="Paste your long transcript or article here... (e.g., meeting notes, lecture recording, interview)"
+          rows="8"
+        ></textarea>
+        <button id="summarize-btn" class="primary-btn">Summarize to Bullet Points</button>
+      </section>
+
+      <!-- Results Section -->
+      <section id="results-section" class="results-section hidden">
+        <div class="panel-header">
+          <span>Summary (Key Points)</span>
+          <div class="actions">
+            <button id="copy-btn" class="secondary-btn">Copy</button>
+            <button id="save-btn" class="secondary-btn">Save</button>
+          </div>
+        </div>
+        <ul id="summary-list" class="summary-list"></ul>
+      </section>
+
+      <!-- Saved Summaries -->
+      <section id="history-section" class="history-section hidden">
+        <div class="panel-header">
+          <span>Saved Summaries</span>
+        </div>
+        <div id="history-list" class="history-list"></div>
+      </section>
+    </main>
+
+    <!-- Copy Toast -->
+    <div id="copy-toast" class="copy-toast hidden">
+      Copied to clipboard!
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

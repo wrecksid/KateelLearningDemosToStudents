@@ -1,0 +1,210 @@
+/* Credit Scoring Dashboard */
+
+:root {
+  --primary: #1e40af;
+  --primary-light: #3b82f6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --surface: #ffffff;
+  --surface-alt: #f8fafc;
+  --on-surface: #0f172a;
+  --on-surface-secondary: #64748b;
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  min-height: 100vh;
+  color: var(--on-surface);
+}
+
+.app-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+header h1 {
+  font-size: 2rem;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--on-surface-secondary);
+  font-size: 0.9rem;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Profile Section */
+.profile-section, .feature-section, .scorecard-section {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.profile-section h2, .feature-section h2, .scorecard-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 20px;
+  color: var(--primary);
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--on-surface-secondary);
+}
+
+.input-group input[type="range"] {
+  width: 100%;
+}
+
+/* Score Section */
+.score-section {
+  text-align: center;
+}
+
+.score-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.score-circle {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #e0e7ff, #1e40af 0deg, #1e40af var(--score-percent), #e0e7ff var(--score-percent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+}
+
+.score-value {
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.score-info h3 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.decision {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.risk-level {
+  color: var(--on-surface-secondary);
+}
+
+/* Feature Chart */
+.feature-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.feature-name {
+  width: 120px;
+  font-size: 0.85rem;
+}
+
+.feature-bar-container {
+  flex: 1;
+  height: 24px;
+  background: var(--surface-alt);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.feature-bar {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.feature-value {
+  width: 50px;
+  text-align: right;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Points Breakdown */
+.points-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.points-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--surface-alt);
+  border-radius: var(--radius-md);
+}
+
+.points-label {
+  font-weight: 500;
+}
+
+.points-value {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.positive {
+  color: var(--success);
+}
+
+.negative {
+  color: var(--error);
+}

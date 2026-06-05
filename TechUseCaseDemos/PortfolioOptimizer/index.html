@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio Optimizer - Finance AI Demo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>📊 Portfolio Optimizer</h1>
+      <p class="subtitle">Mean-Variance Optimization Demo</p>
+    </header>
+
+    <main>
+      <!-- Asset Allocation -->
+      <section class="allocation-section">
+        <h2>Asset Allocation</h2>
+        <div class="assets-grid">
+          <div class="asset-card">
+            <h3>Stocks (SPY)</h3>
+            <input type="range" id="spy-weight" min="0" max="100" value="60">
+            <span id="spy-value" class="weight-value">60%</span>
+          </div>
+          <div class="asset-card">
+            <h3>Bonds (BND)</h3>
+            <input type="range" id="bnd-weight" min="0" max="100" value="30">
+            <span id="bnd-value" class="weight-value">30%</span>
+          </div>
+          <div class="asset-card">
+            <h3>Gold (GLD)</h3>
+            <input type="range" id="gld-weight" min="0" max="100" value="10">
+            <span id="gld-value" class="weight-value">10%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Portfolio Metrics -->
+      <section class="metrics-section">
+        <h2>Portfolio Metrics</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="expected-return">7.2%</div>
+            <div class="metric-label">Expected Return</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="volatility">12.5%</div>
+            <div class="metric-label">Volatility (Risk)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="sharpe">0.42</div>
+            <div class="metric-label">Sharpe Ratio</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Efficient Frontier Chart -->
+      <section class="chart-section">
+        <h2>Efficient Frontier</h2>
+        <div class="chart-container">
+          <canvas id="frontier-chart" width="400" height="300"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

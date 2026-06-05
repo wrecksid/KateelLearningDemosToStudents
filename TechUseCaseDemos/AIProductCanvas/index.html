@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Product Canvas - Product Planning</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>🎯 AI Product Canvas</h1>
+      <p class="subtitle">AI Product Planning & Ideation Tool</p>
+    </header>
+
+    <main>
+      <div class="canvas-grid">
+        <!-- Problem Statement -->
+        <div class="canvas-card" data-section="problem">
+          <h3>Problem Statement</h3>
+          <textarea placeholder="What problem are we solving? Who experiences it?"></textarea>
+        </div>
+
+        <!-- AI Solution -->
+        <div class="canvas-card" data-section="solution">
+          <h3>AI Solution</h3>
+          <textarea placeholder="How can AI solve this problem? What type of ML?"></textarea>
+        </div>
+
+        <!-- User Stories -->
+        <div class="canvas-card" data-section="users">
+          <h3>User Stories</h3>
+          <textarea placeholder="Who are the users? What do they need?"></textarea>
+        </div>
+
+        <!-- Data Requirements -->
+        <div class="canvas-card" data-section="data">
+          <h3>Data Requirements</h3>
+          <textarea placeholder="What data is needed? Sources? Quality requirements?"></textarea>
+        </div>
+
+        <!-- Success Metrics -->
+        <div class="canvas-card" data-section="metrics">
+          <h3>Success Metrics</h3>
+          <textarea placeholder="How will we measure success? KPIs?"></textarea>
+        </div>
+
+        <!-- ML Tradeoffs -->
+        <div class="canvas-card" data-section="tradeoffs">
+          <h3>ML Tradeoffs</h3>
+          <textarea placeholder="Accuracy vs Latency? Cost constraints?"></textarea>
+        </div>
+
+        <!-- Ethical Considerations -->
+        <div class="canvas-card" data-section="ethics">
+          <h3>Ethical Considerations</h3>
+          <textarea placeholder="Bias? Fairness? Privacy? Compliance?"></textarea>
+        </div>
+
+        <!-- MVP Scope -->
+        <div class="canvas-card" data-section="mvp">
+          <h3>MVP Scope</h3>
+          <textarea placeholder="What's the minimum viable product?"></textarea>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="save-btn" class="primary-btn">Save Canvas</button>
+        <button id="export-btn" class="secondary-btn">Export as JSON</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

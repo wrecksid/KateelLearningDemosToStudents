@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Black-Scholes Option Pricing - Quant Finance</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>📈 Black-Scholes Option Pricer</h1>
+      <p class="subtitle">European Option Pricing Model</p>
+    </header>
+
+    <main>
+      <!-- Option Parameters -->
+      <section class="params-section">
+        <h2>Option Parameters</h2>
+        <div class="params-grid">
+          <div class="param-group">
+            <label>Spot Price: $<span id="spot-val">100</span></label>
+            <input type="range" id="spot" min="10" max="500" value="100">
+          </div>
+          <div class="param-group">
+            <label>Strike Price: $<span id="strike-val">100</span></label>
+            <input type="range" id="strike" min="10" max="500" value="100">
+          </div>
+          <div class="param-group">
+            <label>Time to Expiry: <span id="time-val">1</span> year</label>
+            <input type="range" id="time" min="1" max="365" value="365" step="7">
+          </div>
+          <div class="param-group">
+            <label>Volatility: <span id="vol-val">20%</span></label>
+            <input type="range" id="vol" min="1" max="100" value="20">
+          </div>
+          <div class="param-group">
+            <label>Risk-Free Rate: <span id="rate-val">2%</span>%</label>
+            <input type="range" id="rate" min="-2" max="10" value="2" step="0.25">
+          </div>
+        </div>
+      </section>
+
+      <!-- Pricing Results -->
+      <section class="results-section">
+        <div class="results-grid">
+          <div class="result-card">
+            <div class="result-value" id="call-price">$10.45</div>
+            <div class="result-label">Call Price</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="put-price">$5.57</div>
+            <div class="result-label">Put Price</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="call-delta">0.54</div>
+            <div class="result-label">Call Delta</div>
+          </div>
+          <div class="result-card">
+            <div class="result-value" id="put-delta">-0.46</div>
+            <div class="result-label">Put Delta</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Greeks -->
+      <section class=" Greeks-section">
+        <h2>Option Greeks</h2>
+        <div class="greeks-grid">
+          <div class="greek-item">
+            <span class="greek-name">Gamma</span>
+            <span class="greek-value" id="gamma">0.018</span>
+          </div>
+          <div class="greek-item">
+            <span class="greek-name">Theta</span>
+            <span class="greek-value" id="theta">-0.034</span>
+          </div>
+          <div class="greek-item">
+            <span class="greek-name">Vega</span>
+            <span class="greek-value" id="vega">0.089</span>
+          </div>
+          <div class="greek-item">
+            <span class="greek-name">Rho (Call)</span>
+            <span class="greek-value" id="rho-call">45.2</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chart -->
+      <section class="chart-section">
+        <h2>Option Value Surface</h2>
+        <canvas id="surface-chart" width="500" height="300"></canvas>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

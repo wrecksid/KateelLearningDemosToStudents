@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Loan Default Predictor - Finance AI Demo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>🏦 Loan Default Predictor</h1>
+      <p class="subtitle">Credit Risk Assessment Demo</p>
+    </header>
+
+    <main>
+      <!-- Applicant Form -->
+      <section class="form-section">
+        <h2>Applicant Information</h2>
+        <div class="form-grid">
+          <div class="input-group">
+            <label>Loan Amount: $<span id="loan-value">25000</span></label>
+            <input type="range" id="loan-amount" min="1000" max="100000" value="25000" step="1000">
+          </div>
+          <div class="input-group">
+            <label>Annual Income: $<span id="income-value">60000</span></label>
+            <input type="range" id="annual-income" min="20000" max="200000" value="60000" step="5000">
+          </div>
+          <div class="input-group">
+            <label>Credit Score: <span id="score-value">680</span></label>
+            <input type="range" id="credit-score" min="300" max="850" value="680">
+          </div>
+          <div class="input-group">
+            <label>Employment Years: <span id="emp-value">5</span></label>
+            <input type="range" id="employment" min="0" max="30" value="5">
+          </div>
+        </div>
+      </section>
+
+      <!-- Prediction Result -->
+      <section class="result-section">
+        <div class="prediction-card">
+          <div class="prediction-header">
+            <h2>Default Probability</h2>
+            <div class="probability" id="probability">32%</div>
+          </div>
+          <div class="recommendation" id="recommendation">Recommended: Approve with conditions</div>
+          <div class="risk-bar">
+            <div class="risk-fill" id="risk-fill"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Feature Importance -->
+      <section class="feature-section">
+        <h2>Key Risk Factors</h2>
+        <div id="feature-importance" class="feature-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

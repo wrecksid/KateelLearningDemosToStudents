@@ -1,5 +1,11 @@
-File unchanged since last read. The content from the earlier read_file result in this conversation is still current — refer to that instead of re-reading.
-- `TechUseCaseDemos\\Forecast\\tsdemo001`
+# Kateel Learning Demos to Students
+
+This repository contains a collection of educational demos covering various AI/ML and blockchain finance use‑cases. The demos are organized into two main categories:
+
+## Tech Use‑Case Demos
+
+- `TechUseCaseDemos\\Forecast\\tsdemo001` – Time series forecasting demo using LSTM models.
+- Additional demos for classification, clustering, outlier detection, pattern mining, and more (see sub‑folders).
 ## Blockchain Demos
 New lightweight blockchain finance demos added under `TechUseCaseDemos/Blockchain/`:
 - `blockchain_finance_demo.py` — basic ledger with PoW mining, balances, chain validation

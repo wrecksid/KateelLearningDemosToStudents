@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Voice Notes App - Speech to Text Demo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>🎤 Voice Notes</h1>
+      <p class="subtitle">Speech-to-text with localStorage</p>
+    </header>
+
+    <main>
+      <!-- Recording Panel -->
+      <div class="recording-panel">
+        <button id="record-btn" class="mic-button" title="Record">
+          <span id="mic-icon">🎤</span>
+        </button>
+        <div id="timer" class="timer hidden">00:00</div>
+        <div id="status-text">Click to start recording</div>
+      </div>
+
+      <!-- Transcription Output -->
+      <div class="transcript-panel">
+        <div class="panel-header">
+          <span>Current Transcript</span>
+          <button id="clear-btn" class="secondary-btn">Clear</button>
+        </div>
+        <div id="transcript-output" class="transcript-output">
+          Your transcription will appear here...
+        </div>
+      </div>
+
+      <!-- Saved Notes -->
+      <div class="notes-panel">
+        <div class="panel-header">
+          <span>Saved Notes</span>
+        </div>
+        <div id="notes-list" class="notes-list">
+          <p class="empty-state">No saved notes yet. Record and save to see them here.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

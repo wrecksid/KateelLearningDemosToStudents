@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mule Account Detection - AML</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1">🕵️ Mule Account Detection</h1>
+      <p class="subtitle">Anti-Money Laundering Demo</p>
+    </header>
+
+    <main>
+      <section class="controls">
+        <button id="generate-btn" class="primary-btn">Generate Transactions</button>
+        <button id="detect-btn" class="secondary-btn">Run Detection</button>
+      </section>
+
+      <section class="results">
+        <div class="metrics">
+          <div class="metric-card">
+            <div class="metric-value" id="total-txns">1000</div>
+            <div class="metric-label">Total Transactions</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="flagged">12</div>
+            <div class="metric-label">Flagged Accounts</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="precision">83%</div>
+            <div class="metric-label">Detection Rate</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="transactions">
+        <h2>Flagged Transactions</h2>
+        <div id="txn-list" class="txn-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
