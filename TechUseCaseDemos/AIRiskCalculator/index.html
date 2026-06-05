@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AI Risk Calculator</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AI Risk Calculator</h1>
+      <p class="subtitle">Assess risks for AI projects</p>
+    </header>
+
+    <main>
+      <section class="input-section">
+        <h2>Risk Parameters</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="modelComplexity">Model Complexity (1-10)</label>
+            <input type="range" id="modelComplexity" min="1" max="10" value="5"/>
+            <span id="mcValue">5</span>
+          </div>
+          <div class="field">
+            <label for="dataQuality">Data Quality (1-10)</label>
+            <input type="range" id="dataQuality" min="1" max="10" value="7"/>
+            <span id="dqValue">7</span>
+          </div>
+          <div class="field">
+            <label for="regulatoryPressure">Regulatory Pressure (1-10)</label>
+            <input type="range" id="regulatoryPressure" min="1" max="10" value="4"/>
+            <span id="rpValue">4</span>
+          </div>
+          <div class="field">
+            <label for="impactScore">Business Impact (1-10)</label>
+            <input type="range" id="impactScore" min="1" max="10" value="6"/>
+            <span id="isValue">6</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="results-section">
+        <h2>Risk Assessment</h2>
+        <div class="risk-card" id="riskCard">
+          <div class="risk-level">Overall Risk: <span id="riskLevel">Medium</span></div>
+          <div class="risk-score">Score: <span id="riskScore">50</span>/100</div>
+        </div>
+        <div class="breakdown">
+          <h3>Breakdown</h3>
+          <ul>
+            <li>Technical Risk: <span id="techRisk">50</span>/100</li>
+            <li>Operational Risk: <span id="opRisk">50</span>/100</li>
+            <li>Compliance Risk: <span id="compRisk">50</span>/100</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

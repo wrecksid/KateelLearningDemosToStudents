@@ -1,0 +1,39 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #e0e0e0;
+  min-height: 100vh;
+}
+.container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+header { text-align: center; margin-bottom: 2rem; }
+header h1 { font-size: 2.5rem; color: #fff; margin-bottom: 0.5rem; }
+.subtitle { color: #888; }
+
+main { display: grid; gap: 2rem; }
+section { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 1.5rem; }
+h2 { font-size: 1.25rem; margin-bottom: 1rem; color: #fff; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.field { display: flex; flex-direction: column; gap: 0.5rem; }
+label { font-size: 0.875rem; color: #aaa; }
+input[type="range"] { width: 100%; }
+.field span { font-weight: bold; color: #4fc3f7; }
+
+.risk-card {
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  border-radius: 8px; padding: 1.5rem; text-align: center; margin-bottom: 1rem;
+}
+.risk-level { font-size: 1.1rem; margin-bottom: 0.5rem; }
+.risk-level span { font-weight: bold; text-transform: uppercase; }
+.risk-score { font-size: 1.5rem; color: #fff; }
+.risk-score span { font-size: 2rem; font-weight: bold; }
+
+.breakdown ul { list-style: none; padding: 0; }
+.breakdown li { padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.breakdown li:last-child { border-bottom: none; }
+
+/* Risk level colors */
+.low { color: #4caf50; }
+.medium { color: #ff9800; }
+.high { color: #f44336; }
