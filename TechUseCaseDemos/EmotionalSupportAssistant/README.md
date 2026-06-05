@@ -2,9 +2,17 @@
 
 An AI companion that builds a knowledge graph from your emotional expressions and provides empathetic support for loneliness and emotional wellbeing.
 
-## Live Demo
+## Quick Start
 
-Open `index.html` in your browser.
+Open `TechUseCaseDemos/EmotionalSupportAssistant/index.html` in your browser.
+
+## What You'll Learn
+
+- **Emotion Detection**: How AI identifies emotions from text
+- **Knowledge Graph Building**: Representing emotional journeys
+- **Empathetic Response Generation**: Crafting supportive AI responses
+- **Voice Integration**: Speech-to-text and text-to-speech
+- **Personalization**: Adapting responses to individual emotional states
 
 ## Features
 
@@ -41,6 +49,40 @@ Your Message → Emotion Detection → Knowledge Graph Update
 - **Emotions**: Mood states over time
 - **Connections**: Links between emotions and events
 
+## How to Use in Real Life
+
+### Customer Service
+- Detect customer frustration from chat
+- Route to appropriate support level
+- Provide empathetic responses
+
+### Mental Health Apps
+- Track mood over time
+- Identify emotional patterns
+- Provide coping suggestions
+
+### Employee Wellbeing
+- Monitor team sentiment
+- Identify burnout early
+- Provide personalized support
+
+## How to Extend
+
+### Add New Emotions
+1. Add emotion keywords to `detectEmotion()` function
+2. Create response templates for new emotions
+3. Update the UI mood buttons
+
+### Integrate with APIs
+1. Replace local emotion detection with cloud APIs
+2. Connect to mental health service directories
+3. Add professional referral capabilities
+
+### Enhance Knowledge Graph
+1. Add more node types (triggers, coping strategies)
+2. Implement relationship inference
+3. Add temporal pattern analysis
+
 ## Important Notes
 
 ⚠️ **This is a demonstration tool** for educational purposes. For real emotional support:
@@ -61,3 +103,9 @@ EmotionalSupportAssistant/
 ## Privacy
 
 All conversations are stored locally in your browser. No data leaves your device.
+
+## Technical Details
+- **Frontend**: Vanilla JavaScript, no dependencies
+- **Speech**: Web Speech API (Chrome/Edge)
+- **Storage**: localStorage for emotional history
+- **Compatibility**: Modern browsers with ES6 support

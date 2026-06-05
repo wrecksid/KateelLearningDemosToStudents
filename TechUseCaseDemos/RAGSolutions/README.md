@@ -2,6 +2,24 @@
 
 Browser-based demonstrations of different RAG (Retrieval-Augmented Generation) architectures with voice integration.
 
+## Quick Start
+
+```bash
+# Text-based RAG
+open TechUseCaseDemos/RAGSolutions/StandardRAG/index.html
+
+# Voice RAG
+open TechUseCaseDemos/RAGSolutions/VoiceStandardRAG/index.html
+```
+
+## What You'll Learn
+
+- **RAG Fundamentals**: How retrieval-augmented generation works
+- **Architecture Comparison**: Text, Graph, and Index-based RAG
+- **Voice Integration**: Speech-to-Text and Text-to-Speech pipelines
+- **Document Processing**: Keyword matching and indexing strategies
+- **Knowledge Representation**: Graph structures and inverted indices
+
 ## Available Demos
 
 | Demo | Type | Document Upload | Voice I/O | Key Feature |
@@ -12,12 +30,6 @@ Browser-based demonstrations of different RAG (Retrieval-Augmented Generation) a
 | [Voice Standard RAG](VoiceStandardRAG/) | Voice + Text RAG | ✅ | ✅ | Voice pipeline |
 | [Voice Graph RAG](VoiceGraphRAG/) | Voice + Graph | ❌ | ✅ | Voice + reasoning |
 | [Voice PageIndex RAG](VoicePageIndexRAG/) | Voice + Index | ✅ | ✅ | Voice + citations |
-
-## What is RAG?
-
-Retrieval-Augmented Generation combines:
-1. **Information Retrieval**: Finding relevant context
-2. **Language Generation**: Producing answers from context
 
 ## Demo Types
 
@@ -45,26 +57,46 @@ All three RAG types have voice-enabled versions with:
 - **TTS**: Text-to-Speech for spoken output
 - **Full pipeline**: Voice → RAG → Voice
 
-## Quick Start
+## How to Use in Real Life
 
-```bash
-# Text-based RAG
-open TechUseCaseDemos/RAGSolutions/StandardRAG/index.html
+### Document QA System
+- Upload company documents to the RAG system
+- Ask questions about policies, procedures, contracts
+- Get cited answers with source references
 
-# Voice RAG
-open TechUseCaseDemos/RAGSolutions/VoiceStandardRAG/index.html
-```
+### Voice Assistant
+- Use Voice RAG for hands-free document queries
+- Ideal for accessibility scenarios
+- Voice-enabled knowledge base search
 
-## Learning Objectives
+### Knowledge Management
+- Build knowledge graphs for domains
+- Enable multi-hop reasoning over relationships
+- Support complex query answering
 
-- Understand different RAG architectures
-- Compare retrieval strategies
-- Explore trade-offs in RAG design
-- Practice prompt engineering for RAG
-- Learn citation and source attribution
-- Experience voice-enabled AI interfaces
+## How to Extend
+
+### Add New Documents
+1. Click "Load Knowledge Base" or "Upload Document"
+2. Add your .txt files
+3. Ask questions about the content
+
+### Extend Knowledge Graph
+1. Modify `graph.nodes` and `graph.edges` in app.js
+2. Add new entity types and relationships
+3. Implement new traversal algorithms
+
+### Customize Responses
+1. Modify the `generate()` function
+2. Add domain-specific response templates
+3. Integrate with LLM APIs for better generation
 
 ## Related Courses
-
 - [NLP Course Catalog](../CourseCatalogs/NLP/)
 - [Data Mining Course Catalog](../CourseCatalogs/DataMining/)
+
+## Technical Details
+- **Frontend**: Vanilla JavaScript, no dependencies
+- **Speech**: Web Speech API (Chrome/Edge)
+- **Storage**: localStorage for documents
+- **Compatibility**: Modern browsers with ES6 support
