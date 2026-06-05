@@ -4,10 +4,9 @@
 **GitHub:** [VinayaSharada](https://github.com/VinayaSharada)
 **Contact:** vinallcontact@gmail.com
 
-A curated, actively maintained collection of AI/ML demos, data-science walkthroughs, and
-in-browser Small Language Model applications built for students, faculty, and practitioners.
-Topics span finance, cybersecurity, NLP, forecasting, clustering, edge AI, blockchain,
-and responsible AI — all with synthetic data so every demo runs without compliance concerns.
+|A curated, actively maintained collection of AI/ML demos, data-science walkthroughs, in-browser SLM applications, and IoT security labs built for students, faculty, and practitioners.
+|Topics span finance, cybersecurity, NLP, forecasting, clustering, edge AI, blockchain,
+|embedded security, and responsible AI — all with synthetic data so every demo runs without compliance concerns.
 
 ---
 
