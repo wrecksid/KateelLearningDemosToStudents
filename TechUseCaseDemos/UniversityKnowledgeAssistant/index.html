@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Knowledge Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🎓 University Knowledge Assistant</h1>
+            <p class="subtitle">Voice + Graph RAG + PageIndex QA System</p>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <button id="load-btn" class="btn-primary">📚 Load Knowledge Base</button>
+                <input type="file" id="file-input" accept=".pdf,.txt" multiple style="display: none;">
+                <button id="upload-btn" class="btn-upload">📁 Upload PDFs</button>
+                <button id="mic-btn" class="btn-mic">🎤 Voice Question</button>
+                <button id="clear-btn" class="btn-secondary">🗑️ Clear</button>
+            </div>
+
+            <div class="status-panel">
+                <div id="status" class="status-item">Ready</div>
+                <div id="mode" class="status-item">Mode: Hybrid RAG</div>
+            </div>
+
+            <div class="workspace">
+                <div class="panel">
+                    <h3>📑 Ingested Documents</h3>
+                    <div id="documents" class="doc-content">
+                        <p class="hint">Upload PDFs or enter URLs to begin.</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>🔍 Knowledge Graph</h3>
+                    <div id="graph-preview" class="graph-content">
+                        <p class="hint">Graph will appear after ingestion.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="response-panel">
+                <h3>🤖 Answer</h3>
+                <div id="answer" class="answer-content">
+                    <p>Ask a question to see the answer with citations...</p>
+                </div>
+                <div id="citations" class="citations-content">
+                    <p class="hint">Citations will appear here...</p>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📖 System Architecture</h3>
+                <ol>
+                    <li><strong>Ingestion</strong>: PDFs → Text → Chunks</li>
+                    <li><strong>Indexing</strong>: PageIndex for page-level retrieval</li>
+                    <li><strong>Graph Building</strong>: FalkorDB for entity relationships</li>
+                    <li><strong>Query</strong>: STT → Hybrid RAG → TTS</li>
+                </ol>
+                <details>
+                    <summary>Technical Stack</summary>
+                    <ul>
+                        <li>📄 PDF.js - PDF text extraction</li>
+                        <li>🔢 PageIndex - Document indexing with citations</li>
+                        <li>🔗 FalkorDB - Knowledge graph (local)</li>
+                        <li>🧠 Local SLM - Phi-3.5/Mistral via llama.cpp</li>
+                        <li>🎤 Web Speech API - STT/TTS</li>
+                    </ul>
+                </details>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+/* University Knowledge Assistant - Advanced RAG Demo */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+header h1 {
+    margin: 0 0 8px 0;
+    font-size: 2.5rem;
+    color: #fbbf24;
+}
+
+.subtitle {
+    color: #9ca3af;
+    margin: 0;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.control-panel {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary, .btn-mic, .btn-upload {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    color: #1a1a1a;
+}
+
+.btn-mic {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #333;
+    color: #ccc;
+}
+
+.btn-upload {
+    background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+    color: #fff;
+}
+
+.status-panel {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.status-item {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.workspace {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panel h3 {
+    margin-top: 0;
+    color: #fbbf24;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.doc-content, .graph-content {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 12px;
+}
+
+.doc-item {
+    padding: 8px;
+    margin: 8px 0;
+    background: rgba(251, 191, 36, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #fbbf24;
+}
+
+.response-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.response-panel h3 {
+    margin-top: 0;
+    color: #fbbf24;
+}
+
+.answer-content {
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.citations-content {
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+.info-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.info-panel h3 {
+    margin-top: 0;
+    color: #fbbf24;
+}
+
+.info-panel ol {
+    margin: 16px 0;
+    padding-left: 20px;
+}
+
+.info-panel ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.hint {
+    color: #666;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    main {
+        padding: 10px;
+    }
+    
+    .control-panel {
+        flex-direction: column;
+    }
+}
