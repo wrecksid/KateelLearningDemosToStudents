@@ -1,0 +1,31 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+}
+.container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+header { margin-bottom: 2rem; }
+header h1 { color: #fff; font-size: 2rem; }
+.subtitle { color: #94a3b8; }
+
+main { display: grid; gap: 2rem; }
+section { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 1.5rem; }
+h2 { color: #fff; margin-bottom: 1rem; }
+
+.field { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+label { color: #94a3b8; font-size: 0.875rem; }
+input, select { padding: 0.75rem; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; }
+button { padding: 0.75rem 1.5rem; background: #3b82f6; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+button:hover { background: #2563eb; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+
+.decision-item {
+  background: rgba(255,255,255,0.05); border-left: 4px solid #3b82f6;
+  padding: 1rem; margin-bottom: 0.75rem; border-radius: 0 8px 8px 0;
+}
+.decision-item .category { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; }
+.decision-item .decision { font-weight: bold; margin: 0.25rem 0; }
+.decision-item .rationale { color: #cbd5e1; font-size: 0.875rem; }

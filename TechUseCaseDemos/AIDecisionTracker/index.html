@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AI Decision Tracker</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AI Decision Tracker</h1>
+      <p class="subtitle">Log and review AI product decisions</p>
+    </header>
+    <main>
+      <section class="form-section">
+        <h2>Add New Decision</h2>
+        <form id="decisionForm">
+          <div class="field">
+            <label for="decision">Decision</label>
+            <input type="text" id="decision" placeholder="What was decided?" required/>
+          </div>
+          <div class="grid">
+            <div class="field">
+              <label for="category">Category</label>
+              <select id="category">
+                <option value="model">Model Selection</option>
+                <option value="data">Data</option>
+                <option value="deployment">Deployment</option>
+                <option value="ethics">Ethics</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="rationale">Rationale</label>
+              <input type="text" id="rationale" placeholder="Why this choice?" required/>
+            </div>
+          </div>
+          <button type="submit">Add Decision</button>
+        </form>
+      </section>
+      <section class="list-section">
+        <h2>Decision Log</h2>
+        <div id="decisionList"></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
