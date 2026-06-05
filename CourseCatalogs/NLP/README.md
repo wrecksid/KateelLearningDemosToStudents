@@ -39,10 +39,11 @@ All demos run 100% in the browser using Transformers.js v3.
 ## 🔍 RAG Solutions (Retrieval-Augmented Generation)
 
 ### Browser-Based RAG Demos
-| Demo | Type | Description |
-|------|------|-------------|
-| [Standard RAG](TechUseCaseDemos/RAGSolutions/StandardRAG/) | Text-based | Keyword matching retrieval |
-| [Graph RAG](TechUseCaseDemos/RAGSolutions/GraphRAG/) | Graph-based | Knowledge graph traversal |
+|| Demo | Type | Description |
+||------|------|-------------|
+|| [Standard RAG](TechUseCaseDemos/RAGSolutions/StandardRAG/) | Text-based | Keyword matching retrieval |
+|| [Graph RAG](TechUseCaseDemos/RAGSolutions/GraphRAG/) | Graph-based | Knowledge graph traversal |
+|| [PageIndex RAG](TechUseCaseDemos/RAGSolutions/PageIndexRAG/) | Index-based | Document indexing with precise citations |
 
 ## Learning Path
 
