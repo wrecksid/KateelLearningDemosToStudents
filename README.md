@@ -98,8 +98,17 @@ Open any `index.html` in Chrome 113+ or Edge 113+ (WebGPU enabled).
 | [Ensemble Classification](TechUseCaseDemos/Classification/demo001/) | Random Forest, Gradient Boosting, Logistic Regression |
 | [Customer Clustering](TechUseCaseDemos/Clustering/demo002/) | K-Means, DBSCAN, Agglomerative with synthetic data |
 | [Time Series Forecasting](TechUseCaseDemos/Forecast/tsdemo001/) | LSTM forecasting pipeline on synthetic time series |
-| [Outlier Detection](TechUseCaseDemos/Outlier/demo001/) | Statistical and ML-based anomaly methods |
-| [Frequent Pattern Mining](TechUseCaseDemos/PatternMining/demo002/) | Apriori and FP-Growth on transaction baskets |
+|| [Outlier Detection](TechUseCaseDemos/Outlier/demo001/) | Statistical and ML-based anomaly methods |
+|| [Frequent Pattern Mining](TechUseCaseDemos/PatternMining/demo002/) | Apriori and FP-Growth on transaction baskets |
+
+### 🔐 Browser-Based Security Demos (IoT)
+
+Zero-infrastructure security labs that run entirely in the browser:
+
+|| Demo | Technique |
+||------|-----------|
+|| [IoT Network Penetration Lab](TechUseCaseDemos/IoT_Ethernet_PenTest_v86/) | Simulated Linux VM for network security labs |
+|| [Embedded Firmware Security Lab](TechUseCaseDemos/Embedded_Firmware_Exploit_Wokwi/) | Raspberry Pi Pico firmware exploitation via Wokwi |
 
 ---
 
