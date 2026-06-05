@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Aircraft IoT Vulnerability Scanner</title>
+  <link rel="stylesheet" href="../base.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Aircraft IoT Vulnerability Scanner</h1>
+      <p>Automated security assessment for IoT components</p>
+    </header>
+    <main>
+      <section>
+        <h2>Target Selection</h2>
+        <div class="flex flex-wrap">
+          <div class="card">
+            <label for="target">Select Device</label>
+            <select id="target">
+              <option value="cockpit">Cockpit Systems</option>
+              <option value="engines">Engine Controls</option>
+              <option value="avionics">Avionics</option>
+              <option value="sensors">Sensors Network</option>
+              <option value="comms">Communications</option>
+            </select>
+          </div>
+          <div class="card">
+            <button class="btn" onclick="startScan()" style="margin-top: 1.5rem;">Start Vulnerability Scan</button>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>Scan Results</h2>
+        <div id="scanResults"></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

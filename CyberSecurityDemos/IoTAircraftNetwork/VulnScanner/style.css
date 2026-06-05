@@ -1,0 +1,12 @@
+#scanResults { margin-top: 1rem; }
+.vuln-card {
+  background: var(--bg-secondary); border-radius: 8px; padding: 1rem;
+  margin-bottom: 0.5rem; border-left: 4px solid var(--warning);
+}
+.vuln-card.critical { border-left-color: var(--danger); }
+.vuln-card.high { border-left-color: #f97316; }
+.vuln-card.medium { border-left-color: var(--warning); }
+.vuln-card.low { border-left-color: var(--success); }
+
+.vuln-card h4 { margin-bottom: 0.25rem; }
+.vuln-card .meta { font-size: 0.75rem; color: var(--text-secondary); }
