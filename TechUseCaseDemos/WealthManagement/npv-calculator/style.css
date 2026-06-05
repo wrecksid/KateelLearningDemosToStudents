@@ -1,0 +1,116 @@
+/* NPV Calculator Styles */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #7c2d12 0%, #4c1d09 100%);
+    color: #fef3c7;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.widget {
+    max-width: 500px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+header {
+    padding: 20px;
+    background: linear-gradient(90deg, #92400e, #782f00);
+    color: white;
+}
+
+header h1 {
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+}
+
+header p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+main {
+    padding: 20px;
+}
+
+.input-section {
+    margin-bottom: 20px;
+}
+
+.input-section label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.input-section textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-family: monospace;
+}
+
+.input-section input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    margin-top: 10px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #92400e;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+button:hover {
+    background: #782f00;
+}
+
+.results {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.result-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.result-box .value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #10b981;
+    margin-top: 5px;
+}
+
+footer {
+    padding: 15px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 12px;
+    color: #64748b;
+}

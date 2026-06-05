@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPV Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="widget">
+        <header>
+            <h1>💰 NPV Calculator</h1>
+            <p>Net Present Value & Capital Budgeting</p>
+        </header>
+        
+        <main>
+            <div class="input-section">
+                <label>Cash Flows (one per line)</label>
+                <textarea id="cashflows" rows="5">1000
+500
+300
+200</textarea>
+                <input type="number" id="discount" placeholder="Discount Rate (%)" value="10">
+            </div>
+            
+            <button id="calculate-btn">Calculate NPV</button>
+            
+            <div class="results">
+                <div class="result-box">
+                    <span>NPV</span>
+                    <span class="value" id="npv">$102.15</span>
+                </div>
+                <div class="result-box">
+                    <span>IRR</span>
+                    <span class="value" id="irr">15.2%</span>
+                </div>
+                <div class="result-box">
+                    <span>PV of Inflows</span>
+                    <span class="value" id="pv">$1450.00</span>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Capital Budgeting | Financial Analysis</p>
+        </footer>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

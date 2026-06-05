@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efficient Frontier Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="widget">
+        <header>
+            <h1>📈 Portfolio Optimizer</h1>
+            <p>Markowitz Efficient Frontier Calculator</p>
+        </header>
+        
+        <main>
+            <div class="controls">
+                <button id="load-btn">📊 Load Sample Assets</button>
+                <button id="calculate-btn">🔢 Calculate Portfolio</button>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="chart"></canvas>
+            </div>
+            
+            <div class="results">
+                <div class="metric">
+                    <span class="label">Optimal Return</span>
+                    <span class="value" id="optimal-return">12.5%</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Minimum Risk</span>
+                    <span class="value" id="min-risk">8.2%</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Sharpe Ratio</span>
+                    <span class="value" id="sharpe">1.52</span>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Wealth Management Demo | Portfolio Optimization</p>
+        </footer>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
