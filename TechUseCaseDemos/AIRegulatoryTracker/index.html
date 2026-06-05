@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AI Regulatory Tracker</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AI Regulatory Tracker</h1>
+      <p class="subtitle">Track compliance requirements and deadlines</p>
+    </header>
+    <main>
+      <section class="form-section">
+        <h2>Add Regulation</h2>
+        <form id="regForm">
+          <div class="grid">
+            <div class="field">
+              <label for="name">Regulation Name</label>
+              <input type="text" id="name" placeholder="e.g., EU AI Act" required/>
+            </div>
+            <div class="field">
+              <label for="jurisdiction">Jurisdiction</label>
+              <select id="jurisdiction">
+                <option>EU</option>
+                <option>US</option>
+                <option>UK</option>
+                <option>Global</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="field">
+              <label for="deadline">Deadline</label>
+              <input type="date" id="deadline"/>
+            </div>
+            <div class="field">
+              <label for="status">Status</label>
+              <select id="status">
+                <option>Not Started</option>
+                <option>In Progress</option>
+                <option>Compliant</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit">Add Regulation</button>
+        </form>
+      </section>
+      <section class="list-section">
+        <h2>Regulatory Requirements</h2>
+        <div id="regList"></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
