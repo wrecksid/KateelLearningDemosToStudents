@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Aircraft IoT Intrusion Detection</title>
+  <link rel="stylesheet" href="../base.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Aircraft IoT Intrusion Detection System</h1>
+      <p>Real-time network monitoring and anomaly detection</p>
+    </header>
+    <main>
+      <section>
+        <h2>Network Status</h2>
+        <div class="status-bar">
+          <span id="statusIndicator" class="status-dot status-secure"></span>
+          <span id="statusText">System Secure</span>
+        </div>
+      </section>
+      <section>
+        <h2>Active Connections</h2>
+        <div id="connectionsTable"></div>
+      </section>
+      <section>
+        <h2>Recent Alerts</h2>
+        <div id="alertsList"></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

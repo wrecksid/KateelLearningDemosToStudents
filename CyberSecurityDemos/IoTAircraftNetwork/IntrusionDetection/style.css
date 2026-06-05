@@ -1,0 +1,20 @@
+.status-bar { display: flex; align-items: center; gap: 0.5rem; }
+.status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.status-secure { background: var(--success); }
+.status-warning { background: var(--warning); }
+.status-critical { background: var(--danger); }
+
+#connectionsTable {
+  background: var(--bg-secondary); border-radius: 8px; overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+th { color: var(--primary); }
+
+#alertsList { margin-top: 0.5rem; }
+.alert-item {
+  background: var(--bg-secondary); border-radius: 8px; padding: 1rem;
+  margin-bottom: 0.5rem; border-left: 4px solid var(--warning);
+}
+.alert-item.critical { border-left-color: var(--danger); }
+.alert-item .time { font-size: 0.75rem; color: var(--text-secondary); }
