@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PageIndex RAG Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>📚 PageIndex RAG Demo</h1>
+            <p class="subtitle">Document indexing and page-level retrieval for precise citations</p>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <button id="index-btn" class="btn-primary">📄 Index Documents</button>
+                <button id="clear-btn" class="btn-secondary">🗑️ Clear</button>
+            </div>
+
+            <div class="workspace">
+                <div class="panel">
+                    <h3>📑 Indexed Documents</h3>
+                    <div id="documents" class="doc-content">
+                        <p class="hint">Click "Index Documents" to load sample documents.</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>🔍 Search & Retrieve</h3>
+                    <input type="text" id="query-input" placeholder="Search by keyword or page...">
+                    <button id="search-btn" class="btn-search">Search</button>
+                    <div id="results" class="search-results">
+                        <p class="hint">Search results will appear here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="response-panel">
+                <h3>🤖 Generated Answer with Citations</h3>
+                <div id="answer" class="answer-content">
+                    <p>Search for information and generate answers with page citations...</p>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📖 PageIndex RAG Approach</h3>
+                <ol>
+                    <li><strong>Index</strong>: Create inverted index of document pages</li>
+                    <li><strong>Retrieve</strong>: Find pages matching query keywords</li>
+                    <li><strong>Cite</strong>: Return page numbers with results</li>
+                    <li><strong>Generate</strong>: LLM answers with precise citations</li>
+                </ol>
+                <p><strong>Advantage</strong>: Enables exact source attribution for factual accuracy.</p>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

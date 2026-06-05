@@ -1,0 +1,209 @@
+/* PageIndex RAG Demo */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #2a1a3a 0%, #3a1a4a 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+header h1 {
+    margin: 0 0 8px 0;
+    font-size: 2rem;
+    color: #a78bfa;
+}
+
+.subtitle {
+    color: #888;
+    margin: 0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.control-panel {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+}
+
+.btn-secondary {
+    background: #333;
+    color: #ccc;
+}
+
+.btn-secondary:hover {
+    background: #555;
+}
+
+.btn-search {
+    background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.workspace {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panel h3 {
+    margin-top: 0;
+    color: #a78bfa;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.doc-content {
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 13px;
+}
+
+.doc-item {
+    padding: 10px;
+    margin: 8px 0;
+    background: rgba(167, 139, 250, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #a78bfa;
+}
+
+.doc-title {
+    font-weight: 600;
+    color: #a78bfa;
+    margin-bottom: 5px;
+}
+
+.page-ref {
+    display: inline-block;
+    padding: 2px 6px;
+    background: rgba(167, 139, 250, 0.2);
+    border-radius: 3px;
+    font-size: 11px;
+    margin-right: 5px;
+}
+
+.search-results {
+    margin-top: 15px;
+}
+
+.result-item {
+    padding: 8px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+}
+
+.citation {
+    display: inline-block;
+    padding: 2px 8px;
+    background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+    color: #fff;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-right: 8px;
+}
+
+.response-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.response-panel h3 {
+    margin-top: 0;
+    color: #a78bfa;
+}
+
+.answer-content {
+    line-height: 1.6;
+}
+
+.citation-link {
+    color: #a78bfa;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.info-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.info-panel h3 {
+    margin-top: 0;
+    color: #a78bfa;
+}
+
+.info-panel ol {
+    margin: 16px 0;
+    padding-left: 20px;
+}
+
+.info-panel li {
+    margin: 8px 0;
+}
+
+.info-panel details {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.hint {
+    color: #666;
+    font-style: italic;
+}

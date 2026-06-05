@@ -4,11 +4,11 @@ Browser-based demonstrations of different RAG (Retrieval-Augmented Generation) a
 
 ## Available Demos
 
-| Demo | Type | Description |
-|------|------|-------------|
-| [Standard RAG](StandardRAG/) | Text-based | Keyword matching retrieval |
-| [Graph RAG](GraphRAG/) | Graph-based | Knowledge graph traversal |
-| PageIndex RAG | Index-based | *(Coming soon)* |
+|| Demo | Type | Description |
+||------|------|-------------|
+|| [Standard RAG](StandardRAG/) | Text-based | Keyword matching retrieval |
+|| [Graph RAG](GraphRAG/) | Graph-based | Knowledge graph traversal |
+|| [PageIndex RAG](PageIndexRAG/) | Index-based | Document indexing with precise citations |
 
 ## What is RAG?
 
