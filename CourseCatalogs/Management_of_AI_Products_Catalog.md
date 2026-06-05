@@ -47,3 +47,15 @@ This catalog organizes demos for managing AI products throughout their lifecycle
 
 ### Regulatory Compliance
 - `TechUseCaseDemos\AIRegulatoryTracker` - Track compliance requirements and deadlines
+
+## New Demos
+
+### RAG Solutions
+- `TechUseCaseDemos\RAGSolutions` - Multiple RAG architectures with voice support
+  - Standard RAG, Graph RAG, PageIndex RAG
+  - Voice-enabled variants for all three
+
+### Emotional Support AI
+- `TechUseCaseDemos\EmotionalSupportAssistant` - AI companion for loneliness support
+  - Emotion detection and knowledge graph building
+  - Empathetic responses with voice support
