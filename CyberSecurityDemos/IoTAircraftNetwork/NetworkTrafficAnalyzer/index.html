@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Aircraft IoT Traffic Analyzer</title>
+  <link rel="stylesheet" href="../base.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Aircraft IoT Network Traffic Analyzer</h1>
+      <p>Protocol analysis and anomaly detection</p>
+    </header>
+    <main>
+      <section>
+        <h2>Traffic Summary</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Total Packets</h3>
+            <div class="value" id="totalPackets">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>CAN Bus</h3>
+            <div class="value" id="canTraffic">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>ARINC</h3>
+            <div class="value" id="arincTraffic">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Anomalies</h3>
+            <div class="value" id="anomalies">0</div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>Protocol Distribution</h2>
+        <canvas id="protocolChart" height="200"></canvas>
+      </section>
+      <section>
+        <h2>Recent Traffic</h2>
+        <div id="trafficLog"></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
