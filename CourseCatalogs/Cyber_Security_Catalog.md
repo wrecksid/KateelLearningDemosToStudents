@@ -65,4 +65,16 @@ This catalog organizes demos relevant to cybersecurity applications using AI/ML.
 - `CyberSecurityDemos\IoTAircraftNetwork\VulnScanner` - CVE-based security assessment
 
 ### OWASP ZAP Setup Guide
-- `CyberSecurityDemos\IoTAircraftNetwork\OWASP_ZAP_Setup.md` - Browser-based OWASP ZAP setup
+- `CyberSecurityDemos\\IoTAircraftNetwork\\OWASP_ZAP_Setup.md` - Browser-based OWASP ZAP setup
+
+## New Additions
+
+### Voice Security Operations
+- `TechUseCaseDemos\\EmotionalSupportAssistant` - Security analyst sentiment analysis
+  - Emotion detection during incident response
+  - Voice-enabled security monitoring
+
+### RAG for Security Documents
+- `TechUseCaseDemos\\RAGSolutions` - Security policy and log analysis
+  - Standard RAG for incident report analysis
+  - PageIndex RAG for compliance document review

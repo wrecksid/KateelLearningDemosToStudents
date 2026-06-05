@@ -46,3 +46,15 @@ This catalog organizes demos relevant to AI/ML applications in financial service
 - `TechUseCaseDemos\AISummarizer001` - Transcript to bullet points
 - `TechUseCaseDemos\ABTestingFramework` - Statistical significance calculator
 - `TechUseCaseDemos\AIROICalculator` - AI project ROI estimation
+
+## New Additions
+
+### RAG for Financial Documents
+- `TechUseCaseDemos\RAGSolutions` - Document QA for financial reports
+  - Standard RAG for earnings calls
+  - PageIndex RAG for precise citations in financial analysis
+
+### Voice-Enabled Financial Assistant
+- `TechUseCaseDemos\EmotionalSupportAssistant` - Customer sentiment analysis
+  - Emotion detection for customer interactions
+  - Voice-enabled support for client calls
