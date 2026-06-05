@@ -15,19 +15,17 @@ Open `index.html` in your browser.
 
 ## Key Features
 
-- **Precise Citations**: Every answer includes page numbers
-- **Source Attribution**: Exact document and page references
-- **Audit Trail**: Clear traceability for factual claims
-- **Efficiency**: Fast keyword lookup via inverted index
+- **Document Upload**: Add your own .txt files to the knowledge base
+- **Precise Retrieval**: Keyword-based document search
+- **Rule-based Generation**: Answers from retrieved context
+- **Interactive Interface**: Simple query and response workflow
 
-## Advantages
+## Usage
 
-| Feature | PageIndex RAG | Standard RAG |
-|---------|---------------|--------------|
-| Source Attribution | ✅ Page-level | ❌ Chunk-level |
-| Audit Trail | ✅ Exact pages | ❌ Approximate |
-| Hallucination Risk | Lower | Higher |
-| Citation Accuracy | High | Moderate |
+1. Click "Index Documents" to load sample documents
+2. Or click "Upload Document" to add your own text files
+3. Type a question and click "Search"
+4. View retrieved pages and generated answers with citations
 
 ## Exercises
 

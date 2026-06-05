@@ -14,17 +14,25 @@ Open `index.html` in your browser.
 
 ## Features
 
-- Simulated knowledge base with 5 documents
-- Keyword-based retrieval
-- Rule-based answer generation
-- Interactive query interface
+- **Document Upload**: Add your own .txt files to the knowledge base
+- **Sample Knowledge Base**: 5 pre-loaded documents on AI/ML topics
+- **Keyword-based Retrieval**: Find relevant content by matching terms
+- **Rule-based Generation**: Answers generated from retrieved context
+- **Interactive Interface**: Simple query and response workflow
+
+## Usage
+
+1. Click "Load Knowledge Base" for sample documents
+2. Or click "Upload Document" to add your own text files
+3. Type a question and click "Ask"
+4. View retrieved chunks and generated answer
 
 ## Exercises
 
-1. Ask about "machine learning"
+1. Load sample docs and ask about "machine learning"
 2. Ask about "neural networks"
 3. Ask about "transformers"
-4. Ask about "nlp"
+4. Upload your own document and query it
 
 ## File Structure
 
