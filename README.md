@@ -186,5 +186,15 @@ or Edge 113+ (WebGPU support required, enabled by default in modern versions).
 
 ---
 
+## 📚 Course-Specific Documentation
+
+| Course | Catalog | Notes |
+|--------|---------|-------|
+| AI/ML Financial Services | [CourseCatalogs/AI_ML_Financial_Services_Catalog.md](CourseCatalogs/AI_ML_Financial_Services_Catalog.md) | Banking, credit, fraud, wealth management |
+| Cyber Security | [CourseCatalogs/Cyber_Security_Catalog.md](CourseCatalogs/Cyber_Security_Catalog.md) | IoT security, threat detection, network security |
+| Management of AI Products | [CourseCatalogs/Management_of_AI_Products_Catalog.md](CourseCatalogs/Management_of_AI_Products_Catalog.md) | Product strategy, risk, governance |
+
+---
+
 *This repository is actively maintained by Professor Vinaya Sathyanarayana.*
 *Star it to stay notified of new demos and updates.*

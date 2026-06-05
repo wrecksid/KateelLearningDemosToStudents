@@ -3,6 +3,14 @@
 ## Overview
 This catalog organizes demos relevant to cybersecurity applications using AI/ML.
 
+## IoT Security Labs (Browser-Based)
+
+### Network Penetration Testing
+- `TechUseCaseDemos\IoT_Ethernet_PenTest_v86` - In-browser Linux VM for network security labs
+
+### Embedded Firmware Security
+- `TechUseCaseDemos\Embedded_Firmware_Exploit_Wokwi` - Raspberry Pi Pico firmware exploitation via Wokwi
+
 ## Threat Detection & Monitoring
 
 ### Fraud & Anomaly Detection
