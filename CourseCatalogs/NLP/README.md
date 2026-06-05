@@ -45,6 +45,11 @@ All demos run 100% in the browser using Transformers.js v3.
 || [Graph RAG](TechUseCaseDemos/RAGSolutions/GraphRAG/) | Graph-based | Knowledge graph traversal |
 || [PageIndex RAG](TechUseCaseDemos/RAGSolutions/PageIndexRAG/) | Index-based | Document indexing with precise citations |
 
+### Advanced RAG Systems
+|| Demo | Type | Description |
+||------|------|-------------|
+|| [University Knowledge Assistant](TechUseCaseDemos/UniversityKnowledgeAssistant/) | Hybrid RAG | FalkorDB + PageIndex + Voice pipeline |
+
 ## Learning Path
 
 1. **Start with Browser Demos** - No setup required, just open HTML in browser
