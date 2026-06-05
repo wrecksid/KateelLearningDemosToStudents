@@ -57,12 +57,13 @@ python classificationdemo.py
 | [Semantic Search Engine](🤖%20Browser-AI-Demos/Browser-AI-Product-Demos/6-semantic-search/) | all-MiniLM | 23 MB | Document search |
 
 ### RAG Solutions (New!)
-| Demo | Type | Key Feature |
-|------|------|-------------|
-| [Standard RAG](TechUseCaseDemos/RAGSolutions/StandardRAG/) | Text-based | Document upload + QA |
-| [Graph RAG](TechUseCaseDemos/RAGSolutions/GraphRAG/) | Graph-based | Knowledge traversal |
-| [Voice RAG](TechUseCaseDemos/RAGSolutions/VoiceStandardRAG/) | Voice-enabled | Speak + get answers |
-| [Emotional Support AI](TechUseCaseDemos/EmotionalSupportAssistant/) | Empathetic AI | Emotion detection |
+|| Demo | Type | Key Feature |
+||------|------|-------------|
+|| [Standard RAG](TechUseCaseDemos/RAGSolutions/StandardRAG/) | Text-based | Document upload + QA |
+|| [Graph RAG](TechUseCaseDemos/RAGSolutions/GraphRAG/) | Graph-based | Knowledge traversal |
+|| [Voice RAG](TechUseCaseDemos/RAGSolutions/VoiceStandardRAG/) | Voice-enabled | Speak + get answers |
+|| [Emotional Support AI](TechUseCaseDemos/EmotionalSupportAssistant/) | Empathetic AI | Emotion detection |
+|| [University Knowledge Assistant](TechUseCaseDemos/UniversityKnowledgeAssistant/) | Hybrid RAG | FalkorDB + PageIndex + Voice |
 
 ---
 
