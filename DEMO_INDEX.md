@@ -99,6 +99,7 @@ This file is a curated index of the most useful demos in the repository.
 - `TechUseCaseDemos\AIROICalculator` - AI project ROI estimation
 - `TechUseCaseDemos\FeatureStoreDemo` - ML feature registry
 - `TechUseCaseDemos\AIProductCanvas` - AI product planning tool
+- `TechUseCaseDemos\QFDDemo` - Quality Function Deployment for feature prioritization
 
 ### Pattern Mining
 

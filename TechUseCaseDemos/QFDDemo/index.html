@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QFD Demo - Feature Prioritization</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>🎯 QFD Matrix</h1>
+      <p class="subtitle">Quality Function Deployment for AI Features</p>
+    </header>
+
+    <main>
+      <!-- Customer Requirements -->
+      <section class="input-section">
+        <h2>Customer Requirements</h2>
+        <div id="cr-list" class="items-list"></div>
+        <div class="add-item">
+          <input type="text" id="new-cr" placeholder="Enter customer requirement...">
+          <button id="add-cr" class="primary-btn">Add</button>
+        </div>
+      </section>
+
+      <!-- Technical Requirements -->
+      <section class="input-section">
+        <h2>Technical Requirements (AI Features)</h2>
+        <div id="tr-list" class="items-list"></div>
+        <div class="add-item">
+          <input type="text" id="new-tr" placeholder="Enter technical requirement...">
+          <button id="add-tr" class="primary-btn">Add</button>
+        </div>
+      </section>
+
+      <!-- Animated Matrix -->
+      <section class="matrix-section">
+        <h2>Correlation Matrix</h2>
+        <div id="matrix-container" class="matrix-container"></div>
+        <div id="priority-results" class="priority-results"></div>
+      </section>
+    </main>
+
+    <div id="animation-overlay" class="animation-overlay hidden"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
