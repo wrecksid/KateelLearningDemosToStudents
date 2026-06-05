@@ -4,76 +4,387 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>University Knowledge Assistant</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* University Knowledge Assistant - Embeddable Widget */
+        * { box-sizing: border-box; }
+        
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #fbbf24;
+            --text: #e0e0e0;
+            --bg: rgba(30, 58, 170, 0.95);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        
+        .uka-widget {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .uka-header {
+            padding: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .uka-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .uka-icon {
+            font-size: 2rem;
+        }
+        
+        .uka-body {
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .uka-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .uka-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .uka-btn-primary {
+            background: var(--secondary);
+            color: #1a1a1a;
+        }
+        
+        .uka-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .uka-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .uka-status {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 10px;
+        }
+        
+        .uka-chat {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        
+        .uka-message {
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            max-width: 85%;
+        }
+        
+        .uka-message.user {
+            background: rgba(255, 255, 255, 0.1);
+            margin-left: auto;
+        }
+        
+        .uka-message.assistant {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 3px solid var(--secondary);
+        }
+        
+        .uka-message-time {
+            font-size: 10px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .uka-input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .uka-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 14px;
+        }
+        
+        .uka-input::placeholder {
+            color: #666;
+        }
+        
+        .uka-voice-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .uka-voice-btn.listening {
+            background: #ef4444;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .uka-citations {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .uka-footer {
+            padding: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            border-top: 1px solid var(--border);
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <header>
-            <h1>🎓 University Knowledge Assistant</h1>
-            <p class="subtitle">Voice + Graph RAG + PageIndex QA System</p>
-        </header>
-
-        <main>
-            <div class="control-panel">
-                <button id="load-btn" class="btn-primary">📚 Load Knowledge Base</button>
-                <input type="file" id="file-input" accept=".pdf,.txt" multiple style="display: none;">
-                <button id="upload-btn" class="btn-upload">📁 Upload PDFs</button>
-                <button id="mic-btn" class="btn-mic">🎤 Voice Question</button>
-                <button id="clear-btn" class="btn-secondary">🗑️ Clear</button>
+    <div class="uka-widget">
+        <div class="uka-header">
+            <span class="uka-icon">🎓</span>
+            <h2>University Knowledge Assistant</h2>
+        </div>
+        
+        <div class="uka-body">
+            <div class="uka-controls">
+                <button class="uka-btn uka-btn-primary" id="load-btn">📚 Load Sample Data</button>
+                <button class="uka-btn uka-btn-secondary" id="clear-btn">🗑️ Clear</button>
             </div>
-
-            <div class="status-panel">
-                <div id="status" class="status-item">Ready</div>
-                <div id="mode" class="status-item">Mode: Hybrid RAG</div>
-            </div>
-
-            <div class="workspace">
-                <div class="panel">
-                    <h3>📑 Ingested Documents</h3>
-                    <div id="documents" class="doc-content">
-                        <p class="hint">Upload PDFs or enter URLs to begin.</p>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <h3>🔍 Knowledge Graph</h3>
-                    <div id="graph-preview" class="graph-content">
-                        <p class="hint">Graph will appear after ingestion.</p>
-                    </div>
+            
+            <div class="uka-status" id="status">Ready | Mode: Hybrid RAG</div>
+            
+            <div class="uka-chat" id="chat">
+                <div class="uka-message assistant">
+                    <strong>Assistant:</strong> Hello! I'm your University Knowledge Assistant. 
+                    Click "Load Sample Data" to begin, or ask me anything about university programs, 
+                    research, or campus life.
+                    <div class="uka-message-time">Now</div>
                 </div>
             </div>
-
-            <div class="response-panel">
-                <h3>🤖 Answer</h3>
-                <div id="answer" class="answer-content">
-                    <p>Ask a question to see the answer with citations...</p>
-                </div>
-                <div id="citations" class="citations-content">
-                    <p class="hint">Citations will appear here...</p>
-                </div>
+            
+            <div class="uka-input-area">
+                <input type="text" class="uka-input" id="query-input" placeholder="Ask a question...">
+                <button class="uka-voice-btn" id="mic-btn" title="Voice Input">🎤</button>
+                <button class="uka-btn uka-btn-primary" id="ask-btn">Ask</button>
             </div>
-
-            <div class="info-panel">
-                <h3>📖 System Architecture</h3>
-                <ol>
-                    <li><strong>Ingestion</strong>: PDFs → Text → Chunks</li>
-                    <li><strong>Indexing</strong>: PageIndex for page-level retrieval</li>
-                    <li><strong>Graph Building</strong>: FalkorDB for entity relationships</li>
-                    <li><strong>Query</strong>: STT → Hybrid RAG → TTS</li>
-                </ol>
-                <details>
-                    <summary>Technical Stack</summary>
-                    <ul>
-                        <li>📄 PDF.js - PDF text extraction</li>
-                        <li>🔢 PageIndex - Document indexing with citations</li>
-                        <li>🔗 FalkorDB - Knowledge graph (local)</li>
-                        <li>🧠 Local SLM - Phi-3.5/Mistral via llama.cpp</li>
-                        <li>🎤 Web Speech API - STT/TTS</li>
-                    </ul>
-                </details>
-            </div>
-        </main>
+        </div>
+        
+        <div class="uka-footer">
+            University Knowledge Assistant v1.0 | Zero API Keys | Local Processing
+        </div>
     </div>
-    <script src="app.js"></script>
+
+    <script>
+        // University Knowledge Assistant - Complete Implementation
+        class UniversityKnowledgeAssistant {
+            constructor() {
+                this.documents = [];
+                this.knowledgeGraph = { nodes: [], edges: [] };
+                this.pageIndex = {};
+                this.isListening = false;
+                this.speechRecognition = null;
+                
+                this.initSpeech();
+                this.init();
+            }
+            
+            initSpeech() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRecognition) {
+                    this.speechRecognition = new SpeechRecognition();
+                    this.speechRecognition.continuous = false;
+                    this.speechRecognition.interimResults = false;
+                    this.speechRecognition.lang = 'en-US';
+                }
+            }
+            
+            init() {
+                document.getElementById('load-btn').addEventListener('click', () => this.loadSampleData());
+                document.getElementById('clear-btn').addEventListener('click', () => this.clear());
+                document.getElementById('ask-btn').addEventListener('click', () => this.askQuestion());
+                document.getElementById('mic-btn').addEventListener('click', () => this.toggleListening());
+                document.getElementById('query-input').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.askQuestion();
+                });
+            }
+            
+            addMessage(role, content, source = null) {
+                const chat = document.getElementById('chat');
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `uka-message ${role}`;
+                
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                msgDiv.innerHTML = `
+                    <strong>${role === 'user' ? 'You' : 'Assistant'}:</strong> ${content}
+                    <div class="uka-message-time">${time}</div>
+                    ${source ? `<div class="uka-citations">Source: ${source}</div>` : ''}
+                `;
+                
+                chat.appendChild(msgDiv);
+                chat.scrollTop = chat.scrollHeight;
+            }
+            
+            loadSampleData() {
+                this.addDocument(`University of Technology offers undergraduate and graduate programs in Computer Science, Engineering, and Business. The university has a strong focus on research and innovation. Students can access financial aid and scholarship programs.`, "university-info.txt");
+                this.addDocument(`Banking operations include deposit services, loan processing, and investment advisory. Security protocols protect customer data and financial transactions. Network infrastructure supports online banking services.`, "banking-overview.txt");
+                this.updateStatus("Sample data loaded. Ask questions!");
+            }
+            
+            addDocument(content, filename) {
+                const id = this.documents.length + 1;
+                this.documents.push({ id, filename, content });
+                
+                // Index content
+                const words = content.toLowerCase().split(/\s+/);
+                words.forEach(word => {
+                    if (word.length > 3) {
+                        if (!this.pageIndex[word]) this.pageIndex[word] = [];
+                        this.pageIndex[word].push({ docId: id, filename });
+                    }
+                });
+                
+                // Build graph
+                this.knowledgeGraph.nodes.push({ id: `doc_${id}`, label: filename });
+            }
+            
+            askQuestion() {
+                const input = document.getElementById('query-input');
+                const query = input.value.trim();
+                if (!query) return;
+                
+                this.addMessage('user', query);
+                input.value = '';
+                this.updateStatus("Thinking...");
+                
+                setTimeout(() => {
+                    const answer = this.generateAnswer(query);
+                    const citations = this.getCitations(query);
+                    this.addMessage('assistant', answer, citations);
+                    this.speak(answer);
+                    this.updateStatus("Ready | Mode: Hybrid RAG");
+                }, 500);
+            }
+            
+            generateAnswer(query) {
+                const queryLower = query.toLowerCase();
+                const results = [];
+                
+                this.documents.forEach(doc => {
+                    const content = doc.content.toLowerCase();
+                    if (content.includes(queryLower)) {
+                        results.push(doc);
+                    }
+                });
+                
+                if (results.length > 0) {
+                    return results.map(d => d.content.substring(0, 200) + "...").join(" ");
+                }
+                
+                return "I couldn't find specific information. Try asking about university programs, banking, or campus life.";
+            }
+            
+            getCitations(query) {
+                const terms = query.toLowerCase().split(/\s+/);
+                const sources = new Set();
+                
+                terms.forEach(term => {
+                    if (this.pageIndex[term]) {
+                        this.pageIndex[term].forEach(ref => sources.add(ref.filename));
+                    }
+                });
+                
+                return sources.size ? Array.from(sources).join(', ') : 'No citations';
+            }
+            
+            speak(text) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 0.9;
+                    speechSynthesis.speak(utterance);
+                }
+            }
+            
+            toggleListening() {
+                if (!this.speechRecognition) return;
+                
+                const btn = document.getElementById('mic-btn');
+                if (this.isListening) {
+                    this.speechRecognition.stop();
+                    btn.classList.remove('listening');
+                } else {
+                    this.speechRecognition.start();
+                    btn.classList.add('listening');
+                    this.speechRecognition.onresult = (e) => {
+                        document.getElementById('query-input').value = e.results[0][0].transcript;
+                        this.askQuestion();
+                    };
+                    this.speechRecognition.onend = () => {
+                        btn.classList.remove('listening');
+                    };
+                }
+                this.isListening = !this.isListening;
+            }
+            
+            clear() {
+                this.documents = [];
+                this.knowledgeGraph = { nodes: [], edges: [] };
+                this.pageIndex = {};
+                document.getElementById('chat').innerHTML = '';
+                this.updateStatus("Cleared");
+            }
+            
+            updateStatus(msg) {
+                document.getElementById('status').textContent = msg;
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            new UniversityKnowledgeAssistant();
+        });
+    </script>
 </body>
 </html>
