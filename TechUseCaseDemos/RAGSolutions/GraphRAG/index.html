@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph RAG Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🌐 Graph RAG Demo</h1>
+            <p class="subtitle">Knowledge Graph-based Retrieval-Augmented Generation</p>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <button id="load-btn" class="btn-primary">📊 Load Knowledge Graph</button>
+                <button id="clear-btn" class="btn-secondary">🗑️ Clear</button>
+            </div>
+
+            <div class="workspace">
+                <div class="panel">
+                    <h3>🔗 Knowledge Graph</h3>
+                    <div id="graph-viz" class="graph-content">
+                        <p class="hint">Graph visualization will appear here...</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>❓ Query Node</h3>
+                    <input type="text" id="query-input" placeholder="Enter entity or concept...">
+                    <button id="query-btn" class="btn-query">Find Related</button>
+                    <div id="path-result" class="path-content">
+                        <p class="hint">Path will be shown here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="response-panel">
+                <h3>🤖 Graph-Based Answer</h3>
+                <div id="answer" class="answer-content">
+                    <p>Select nodes and explore relationships to generate answers...</p>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📖 How Graph RAG Works</h3>
+                <ol>
+                    <li><strong>Build Graph</strong>: Entities as nodes, relationships as edges</li>
+                    <li><strong>Traverse</strong>: Find relevant paths between query and data</li>
+                    <li><strong>Reason</strong>: Use graph structure for inference</li>
+                    <li><strong>Generate</strong>: LLM answers from graph context</li>
+                </ol>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

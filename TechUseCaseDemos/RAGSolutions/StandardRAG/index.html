@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standard RAG Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🔍 Standard RAG Demo</h1>
+            <p class="subtitle">Retrieval-Augmented Generation - Browser Implementation</p>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <button id="load-btn" class="btn-primary">📚 Load Knowledge Base</button>
+                <button id="clear-btn" class="btn-secondary">🗑️ Clear</button>
+            </div>
+
+            <div class="workspace">
+                <div class="panel">
+                    <h3>📝 Knowledge Base</h3>
+                    <div id="knowledge-base" class="kb-content">
+                        <p class="hint">Knowledge base is empty. Click "Load Knowledge Base" to populate.</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>❓ Ask a Question</h3>
+                    <div class="query-input">
+                        <input type="text" id="query-input" placeholder="Ask about the knowledge base...">
+                        <button id="ask-btn" class="btn-ask">Ask</button>
+                    </div>
+                    <div id="retrieved" class="retrieved-content">
+                        <p class="hint">Retrieved chunks will appear here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="response-panel">
+                <h3>🤖 Generated Answer</h3>
+                <div id="answer" class="answer-content">
+                    <p>Ask a question to see the RAG response...</p>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📖 How Standard RAG Works</h3>
+                <ol>
+                    <li><strong>Retrieve</strong>: Find relevant chunks from knowledge base</li>
+                    <li><strong>Augment</strong>: Combine query with retrieved context</li>
+                    <li><strong>Generate</strong>: LLM produces answer from context</li>
+                </ol>
+                <details>
+                    <summary>Technical Details</summary>
+                    <p>This demo simulates RAG using keyword matching for retrieval and a rule-based generator. Real RAG uses vector embeddings and transformer models.</p>
+                </details>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
