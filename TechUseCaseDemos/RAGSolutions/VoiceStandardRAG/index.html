@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Standard RAG Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🎤 Voice Standard RAG Demo</h1>
+            <p class="subtitle">Speech-to-Text + RAG + Text-to-Speech</p>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <button id="load-btn" class="btn-primary">📚 Load Knowledge Base</button>
+                <button id="mic-btn" class="btn-mic">🎤 Speak Question</button>
+                <button id="clear-btn" class="btn-secondary">🗑️ Clear</button>
+            </div>
+
+            <div class="status-panel">
+                <div id="stt-status" class="status-item">🎤 STT: Ready</div>
+                <div id="tts-status" class="status-item">🔊 TTS: Ready</div>
+            </div>
+
+            <div class="workspace">
+                <div class="panel">
+                    <h3>📝 Knowledge Base</h3>
+                    <div id="knowledge-base" class="kb-content">
+                        <p class="hint">Click "Load Knowledge Base" to populate.</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>❓ Query & Response</h3>
+                    <div id="query-display" class="query-content">
+                        <p class="hint">Your question will appear here after speaking...</p>
+                    </div>
+                    <div id="response-display" class="response-content">
+                        <p class="hint">System response will appear here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📖 Voice RAG Pipeline</h3>
+                <ol>
+                    <li><strong>STT</strong>: Your voice → text question</li>
+                    <li><strong>Retrieve</strong>: Find relevant docs</li>
+                    <li><strong>Generate</strong>: Create answer</li>
+                    <li><strong>TTS</strong>: Answer → spoken response</li>
+                </ol>
+                <p><strong>Requirements</strong>: Chrome/Edge with microphone and Web Speech API</p>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

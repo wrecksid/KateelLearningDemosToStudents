@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Graph RAG Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🌐 Voice Graph RAG Demo</h1>
+            <p class="subtitle">Voice + Knowledge Graph Traversal + Speech Output</p>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <button id="load-btn" class="btn-primary">📊 Load Knowledge Graph</button>
+                <button id="mic-btn" class="btn-mic">🎤 Ask via Voice</button>
+                <button id="clear-btn" class="btn-secondary">🗑️ Clear</button>
+            </div>
+
+            <div class="status-panel">
+                <div id="stt-status" class="status-item">🎤 STT: Ready</div>
+                <div id="tts-status" class="status-item">🔊 TTS: Ready</div>
+            </div>
+
+            <div class="workspace">
+                <div class="panel">
+                    <h3>🔗 Knowledge Graph</h3>
+                    <div id="graph-viz" class="graph-content">
+                        <p class="hint">Click "Load Knowledge Graph" to begin.</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>❓ Query & Response</h3>
+                    <div id="query-display" class="query-content">
+                        <p class="hint">Your question will appear here after speaking...</p>
+                    </div>
+                    <div id="path-display" class="path-content">
+                        <p class="hint">Graph path will be shown here...</p>
+                    </div>
+                    <div id="response-display" class="response-content">
+                        <p class="hint">System response will appear here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📖 Voice Graph RAG Pipeline</h3>
+                <ol>
+                    <li><strong>STT</strong>: Voice → text query</li>
+                    <li><strong>Traverse</strong>: Find paths in knowledge graph</li>
+                    <li><strong>Reason</strong>: Generate answer from graph context</li>
+                    <li><strong>TTS</strong>: Answer spoken aloud</li>
+                </ol>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

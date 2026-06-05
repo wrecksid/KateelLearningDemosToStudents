@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice PageIndex RAG Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>📚 Voice PageIndex RAG Demo</h1>
+            <p class="subtitle">Voice + Document Indexing + Precise Citations</p>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <button id="index-btn" class="btn-primary">📄 Index Documents</button>
+                <input type="file" id="file-input" accept=".txt" style="display: none;">
+                <button id="upload-btn" class="btn-upload">📁 Upload Docs</button>
+                <button id="mic-btn" class="btn-mic">🎤 Ask by Voice</button>
+                <button id="clear-btn" class="btn-secondary">🗑️ Clear</button>
+            </div>
+
+            <div class="status-panel">
+                <div id="stt-status" class="status-item">🎤 STT: Ready</div>
+                <div id="tts-status" class="status-item">🔊 TTS: Ready</div>
+            </div>
+
+            <div class="workspace">
+                <div class="panel">
+                    <h3>📑 Indexed Documents</h3>
+                    <div id="docs-content" class="doc-content">
+                        <p class="hint">Click "Index Documents" to load samples.</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>🔍 Search Results</h3>
+                    <div id="results-content" class="results-content">
+                        <p class="hint">Search results will appear here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="response-panel">
+                <h3>🤖 Voice Answer with Citations</h3>
+                <div id="answer" class="answer-content">
+                    <p>Ask a question by voice to get cited answers...</p>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📖 Voice PageIndex Pipeline</h3>
+                <ol>
+                    <li><strong>STT</strong>: Voice → text query</li>
+                    <li><strong>Index</strong>: Search inverted index</li>
+                    <li><strong>Cite</strong>: Return page/document references</li>
+                    <li><strong>TTS</strong>: Cited answer spoken aloud</li>
+                </ol>
+                <p><strong>Precision</strong>: Every answer includes exact source citations.</p>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
