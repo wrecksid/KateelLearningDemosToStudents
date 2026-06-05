@@ -90,15 +90,21 @@ Open any `index.html` in Chrome 113+ or Edge 113+ (WebGPU enabled).
 ---
 
 ### ⚙️ Technical ML Demos
+### ⚙️ Technical ML Demos
+|| Demo | Technique |
+||------|-----------||
+|| [Blockchain Finance](TechUseCaseDemos/Blockchain/) | PoW ledger, Merkle trees, smart contract escrow, payment channels |
+|| [Ensemble Classification](TechUseCaseDemos/Classification/demo001/) | Random Forest, Gradient Boosting, Logistic Regression |
+|| [Customer Clustering](TechUseCaseDemos/Clustering/demo002/) | K-Means, DBSCAN, Agglomerative with synthetic data |
+|| [Time Series Forecasting](TechUseCaseDemos/Forecast/tsdemo001/) | LSTM forecasting pipeline on synthetic time series |
+||| [Outlier Detection](TechUseCaseDemos/Outlier/demo001/) | Statistical and ML-based anomaly methods |
+||| [Frequent Pattern Mining](TechUseCaseDemos/PatternMining/demo002/) | Apriori and FP-Growth on transaction baskets |
 
-| Demo | Technique |
-|------|-----------|
-| [Blockchain Finance](TechUseCaseDemos/Blockchain/) | PoW ledger, Merkle trees, smart contract escrow, payment channels |
-| [Ensemble Classification](TechUseCaseDemos/Classification/demo001/) | Random Forest, Gradient Boosting, Logistic Regression |
-| [Customer Clustering](TechUseCaseDemos/Clustering/demo002/) | K-Means, DBSCAN, Agglomerative with synthetic data |
-| [Time Series Forecasting](TechUseCaseDemos/Forecast/tsdemo001/) | LSTM forecasting pipeline on synthetic time series |
-|| [Outlier Detection](TechUseCaseDemos/Outlier/demo001/) | Statistical and ML-based anomaly methods |
-|| [Frequent Pattern Mining](TechUseCaseDemos/PatternMining/demo002/) | Apriori and FP-Growth on transaction baskets |
+### 💙 Responsible AI & Emotional Support
+|| Demo | Purpose |
+||------|--------|
+|| [Emotional Support Assistant](TechUseCaseDemos/EmotionalSupportAssistant/) | AI companion for loneliness and emotional wellbeing |
+|| [RAG Solutions](TechUseCaseDemos/RAGSolutions/) | Retrieval-Augmented Generation architectures |
 
 ### 🔐 Browser-Based Security Demos (IoT)
 
