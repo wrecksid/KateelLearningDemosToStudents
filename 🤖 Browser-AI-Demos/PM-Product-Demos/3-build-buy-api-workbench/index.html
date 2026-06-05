@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Build vs Buy vs API Decision Workbench — PM Demo 03</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #07070e;
+    --card:     #0d0d1a;
+    --panel-hd: #0a0a16;
+    --border:   #1a1a30;
+    --text:     #e2e2f0;
+    --muted:    #8888aa;
+    --indigo:   #6366f1;
+    --amber:    #f59e0b;
+    --green:    #22c55e;
+    --red:      #ef4444;
+    --cyan:     #06b6d4;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: var(--panel-hd);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .back-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color .15s;
+  }
+  .back-link:hover { color: var(--text); }
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    flex: 1;
+    white-space: nowrap;
+  }
+  .badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .03em;
+  }
+  .badge-indigo { background: #6366f122; color: var(--indigo); border: 1px solid #6366f144; }
+  .badge-amber  { background: #f59e0b22; color: var(--amber);  border: 1px solid #f59e0b44; }
+
+  /* ── Main wrapper ── */
+  .main { max-width: 1280px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  /* ── Section titles ── */
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: var(--panel-hd);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .card-body { padding: 18px; }
+
+  /* ── Capability pills ── */
+  .cap-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .cap-pill {
+    background: #12121f;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 7px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all .15s;
+    user-select: none;
+  }
+  .cap-pill:hover   { border-color: var(--indigo); color: var(--indigo); }
+  .cap-pill.active  { background: #6366f122; border-color: var(--indigo); color: var(--indigo); font-weight: 600; }
+
+  .free-text-wrap { margin-top: 4px; }
+  .free-text-wrap label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+  .free-text-wrap textarea {
+    width: 100%;
+    background: #12121f;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 13px;
+    padding: 8px 12px;
+    resize: vertical;
+    min-height: 56px;
+    font-family: inherit;
+  }
+  .free-text-wrap textarea:focus { outline: none; border-color: #6366f166; }
+
+  /* ── Slider grid ── */
+  .slider-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 28px;
+  }
+  @media (max-width: 640px) { .slider-grid { grid-template-columns: 1fr; } }
+
+  .slider-row label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  .slider-row label span { color: var(--muted); font-size: 11px; font-weight: 400; }
+  .slider-row .slider-meta {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 5px;
+    background: #1a1a30;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: var(--indigo);
+    cursor: pointer;
+    transition: transform .1s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+  .val-badge {
+    display: inline-block;
+    min-width: 24px;
+    text-align: center;
+    background: #6366f122;
+    color: var(--indigo);
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 1px 5px;
+  }
+
+  /* ── Option cards ── */
+  .option-cards {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 900px) { .option-cards { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 540px) { .option-cards { grid-template-columns: 1fr; } }
+
+  .option-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color .2s;
+    position: relative;
+  }
+  .option-card.winner {
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 1px #6366f133, 0 4px 24px #6366f11a;
+  }
+  .option-card .opt-icon { font-size: 26px; }
+  .option-card .opt-name {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .opt-rec-badge {
+    display: none;
+    background: #6366f122;
+    color: var(--indigo);
+    border: 1px solid #6366f133;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    letter-spacing: .04em;
+    width: fit-content;
+  }
+  .option-card.winner .opt-rec-badge { display: block; }
+
+  .score-wrap { display: flex; align-items: center; gap: 10px; }
+  .score-bar-bg {
+    flex: 1;
+    height: 7px;
+    background: #1a1a30;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: #3a3a55;
+    transition: width .35s ease;
+  }
+  .option-card.winner .score-bar-fill { background: var(--indigo); }
+  .score-num {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--muted);
+    min-width: 36px;
+    text-align: right;
+    transition: color .2s;
+  }
+  .option-card.winner .score-num { color: var(--indigo); }
+
+  .best-when {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .best-when span::before { content: '• '; color: #4444aa; }
+
+  .flag-list { display: flex; flex-direction: column; gap: 6px; }
+  .flag-item {
+    background: #2d1515;
+    border: 1px solid #ef444444;
+    border-radius: 6px;
+    color: #fca5a5;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  /* ── Two-col layout ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── Quadrant map ── */
+  #quadrant-wrap {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    user-select: none;
+  }
+  #quadrant-inner {
+    position: absolute;
+    inset: 0;
+  }
+  #quadrant-svg { width: 100%; height: 100%; }
+
+  /* ── Recommendation memo ── */
+  .memo-box {
+    background: #0a0a16;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--indigo);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    color: #c8c8e8;
+    min-height: 180px;
+  }
+
+  /* ── Risk register ── */
+  .risk-table-wrap { overflow-x: auto; }
+  table.risk-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.risk-table th {
+    background: var(--panel-hd);
+    padding: 9px 14px;
+    text-align: left;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  table.risk-table td {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  table.risk-table tr:nth-child(even) td { background: #0a0a16; }
+  table.risk-table td:first-child { text-align: left; font-weight: 500; }
+
+  /* ── Export button ── */
+  .export-btn {
+    background: #6366f122;
+    color: var(--indigo);
+    border: 1px solid #6366f144;
+    border-radius: 7px;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .export-btn:hover { background: #6366f133; border-color: var(--indigo); }
+  .export-btn:active { transform: scale(.97); }
+  .copy-msg {
+    font-size: 12px;
+    color: var(--green);
+    margin-left: 10px;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .copy-msg.show { opacity: 1; }
+
+  /* ── PM Reflection ── */
+  details.reflection {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  details.reflection summary {
+    background: var(--panel-hd);
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  details.reflection summary::-webkit-details-marker { display: none; }
+  details.reflection summary::after {
+    content: '▸';
+    margin-left: auto;
+    transition: transform .2s;
+    color: var(--muted);
+  }
+  details.reflection[open] summary::after { transform: rotate(90deg); }
+  .reflection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 18px;
+  }
+  @media (max-width: 640px) { .reflection-grid { grid-template-columns: 1fr; } }
+  .reflection-item {
+    background: #0a0a16;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .reflection-item strong { color: var(--text); display: block; margin-bottom: 4px; }
+
+  /* ── Footer ── */
+  .site-footer {
+    text-align: center;
+    padding: 18px;
+    font-size: 12px;
+    color: #44445a;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+
+  /* ── Pulse ring ── */
+  @keyframes pulse-ring {
+    0%   { r: 9; opacity: .7; }
+    70%  { r: 16; opacity: 0; }
+    100% { r: 9; opacity: 0; }
+  }
+  .pulse-ring { animation: pulse-ring 1.8s ease-out infinite; }
+
+  /* spacing helpers */
+  .mb-16 { margin-bottom: 16px; }
+  .mb-24 { margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<!-- file:// warning -->
+<div id="fp-warn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#7c1c1c;color:#fecaca;padding:12px 20px;font-size:13px;font-weight:600;align-items:center;gap:12px;box-shadow:0 2px 12px #0008">
+  <span style="font-size:18px">⚠️</span>
+  <div style="flex:1">Cannot run as <code style="background:#0003;padding:1px 5px;border-radius:4px">file://</code> — open via <strong>start_demos.bat</strong> or <code>python -m http.server 8080</code> instead.</div>
+  <button onclick="document.getElementById('fp-warn').style.display='none'" style="background:none;border:1px solid #fecaca88;color:#fecaca;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:12px">✕</button>
+</div>
+<script>if(location.protocol==='file:'){document.getElementById('fp-warn').style.display='flex';}</script>
+
+<!-- Header -->
+<header class="site-header">
+  <a class="back-link" href="../../index.html">← PM Demos</a>
+  <div class="header-title">⚖️ Build vs Buy vs API Decision Workbench</div>
+  <span class="badge badge-indigo">PM Demo 03</span>
+  <span class="badge badge-amber">Sessions 03, 13</span>
+</header>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- Step 1: Capability Selector -->
+  <div class="section-title">Step 1 — Select a Capability</div>
+  <div class="card mb-24">
+    <div class="card-header">Choose a preset capability (pre-fills sliders) or describe your own</div>
+    <div class="card-body">
+      <div class="cap-grid" id="cap-grid">
+        <button class="cap-pill" data-cap="summarization">📝 Text Summarization</button>
+        <button class="cap-pill" data-cap="fraud">🔒 Fraud Detection</button>
+        <button class="cap-pill" data-cap="recsys">🎯 Recommendation Engine</button>
+        <button class="cap-pill" data-cap="copilot">🤖 Internal Copilot</button>
+        <button class="cap-pill" data-cap="stt">🎙️ Speech-to-Text</button>
+        <button class="cap-pill" data-cap="docai">📄 Document AI / OCR</button>
+      </div>
+      <div class="free-text-wrap">
+        <label>Describe your capability need (display only)</label>
+        <textarea id="cap-desc" placeholder="e.g. We need to extract structured data from customer invoices for our AP automation workflow…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Constraint Sliders -->
+  <div class="section-title">Step 2 — Adjust Constraints</div>
+  <div class="card mb-24">
+    <div class="card-header">Rate each constraint 1–10 — scores update live</div>
+    <div class="card-body">
+      <div class="slider-grid">
+
+        <div class="slider-row">
+          <label>⏱️ Time to Market Pressure <span>1 = months OK · 10 = need it in weeks</span></label>
+          <input type="range" id="s-ttm" min="1" max="10" value="5"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
+            <span>Months OK</span><span class="val-badge" id="v-ttm">5</span><span>Need it in weeks</span>
+          </div>
+        </div>
+
+        <div class="slider-row">
+          <label>💰 Budget Availability <span>1 = very constrained · 10 = flexible</span></label>
+          <input type="range" id="s-budget" min="1" max="10" value="5"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
+            <span>Constrained</span><span class="val-badge" id="v-budget">5</span><span>Flexible</span>
+          </div>
+        </div>
+
+        <div class="slider-row">
+          <label>🔐 Privacy / Data Sensitivity <span>1 = public data OK · 10 = highly regulated</span></label>
+          <input type="range" id="s-privacy" min="1" max="10" value="5"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
+            <span>Public data OK</span><span class="val-badge" id="v-privacy">5</span><span>Highly regulated</span>
+          </div>
+        </div>
+
+        <div class="slider-row">
+          <label>🎛️ Customisation Need <span>1 = generic works · 10 = must be deeply custom</span></label>
+          <input type="range" id="s-custom" min="1" max="10" value="5"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
+            <span>Generic works</span><span class="val-badge" id="v-custom">5</span><span>Deeply custom</span>
+          </div>
+        </div>
+
+        <div class="slider-row">
+          <label>🧠 Internal ML Talent <span>1 = none · 10 = strong team</span></label>
+          <input type="range" id="s-talent" min="1" max="10" value="5"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
+            <span>None</span><span class="val-badge" id="v-talent">5</span><span>Strong team</span>
+          </div>
+        </div>
+
+        <div class="slider-row">
+          <label>📈 Expected Scale <span>1 = &lt;1k/day · 10 = &gt;1M/day</span></label>
+          <input type="range" id="s-scale" min="1" max="10" value="5"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
+            <span>&lt;1k/day</span><span class="val-badge" id="v-scale">5</span><span>&gt;1M/day</span>
+          </div>
+        </div>
+
+        <div class="slider-row">
+          <label>🛡️ Reliability Requirement <span>1 = best-effort · 10 = 99.99% SLA</span></label>
+          <input type="range" id="s-reliability" min="1" max="10" value="5"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
+            <span>Best-effort</span><span class="val-badge" id="v-reliability">5</span><span>99.99% SLA</span>
+          </div>
+        </div>
+
+        <div class="slider-row">
+          <label>🔗 Vendor Lock-in Concern <span>1 = don't care · 10 = strong concern</span></label>
+          <input type="range" id="s-lockIn" min="1" max="10" value="5"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
+            <span>Don't care</span><span class="val-badge" id="v-lockIn">5</span><span>Strong concern</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Option Cards -->
+  <div class="section-title">Step 3 — Scored Options</div>
+  <div class="option-cards" id="option-cards">
+
+    <div class="option-card" id="card-build">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="opt-icon">🏗️</div>
+        <div>
+          <div class="opt-name">Build</div>
+          <div class="opt-rec-badge">⭐ Recommended</div>
+        </div>
+      </div>
+      <div class="score-wrap">
+        <div class="score-bar-bg"><div class="score-bar-fill" id="bar-build" style="width:50%"></div></div>
+        <div class="score-num" id="num-build">50</div>
+      </div>
+      <div class="best-when">
+        <span>Differentiated IP is core to competitive moat</span>
+        <span>Strong internal ML/AI team available</span>
+        <span>Privacy or compliance bars external vendors</span>
+      </div>
+      <div class="flag-list" id="flags-build"></div>
+    </div>
+
+    <div class="option-card" id="card-buy">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="opt-icon">🛒</div>
+        <div>
+          <div class="opt-name">Buy</div>
+          <div class="opt-rec-badge">⭐ Recommended</div>
+        </div>
+      </div>
+      <div class="score-wrap">
+        <div class="score-bar-bg"><div class="score-bar-fill" id="bar-buy" style="width:50%"></div></div>
+        <div class="score-num" id="num-buy">50</div>
+      </div>
+      <div class="best-when">
+        <span>Need proven reliability and SLA guarantees</span>
+        <span>Off-the-shelf feature set covers 80%+ of needs</span>
+        <span>Speed to market is important, budget is available</span>
+      </div>
+      <div class="flag-list" id="flags-buy"></div>
+    </div>
+
+    <div class="option-card" id="card-api">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="opt-icon">🔌</div>
+        <div>
+          <div class="opt-name">API</div>
+          <div class="opt-rec-badge">⭐ Recommended</div>
+        </div>
+      </div>
+      <div class="score-wrap">
+        <div class="score-bar-bg"><div class="score-bar-fill" id="bar-api" style="width:50%"></div></div>
+        <div class="score-num" id="num-api">50</div>
+      </div>
+      <div class="best-when">
+        <span>Fastest path to production and validation</span>
+        <span>Commodity capability, no differentiation needed</span>
+        <span>Scale is moderate; cost per call is acceptable</span>
+      </div>
+      <div class="flag-list" id="flags-api"></div>
+    </div>
+
+    <div class="option-card" id="card-partner">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="opt-icon">🤝</div>
+        <div>
+          <div class="opt-name">Partner</div>
+          <div class="opt-rec-badge">⭐ Recommended</div>
+        </div>
+      </div>
+      <div class="score-wrap">
+        <div class="score-bar-bg"><div class="score-bar-fill" id="bar-partner" style="width:50%"></div></div>
+        <div class="score-num" id="num-partner">50</div>
+      </div>
+      <div class="best-when">
+        <span>Need deep customisation but lack internal talent</span>
+        <span>Shared risk / IP model is commercially acceptable</span>
+        <span>Long-term strategic alignment with partner exists</span>
+      </div>
+      <div class="flag-list" id="flags-partner"></div>
+    </div>
+
+  </div>
+
+  <!-- Quadrant + Memo -->
+  <div class="two-col mb-24">
+
+    <!-- Quadrant Map -->
+    <div class="card">
+      <div class="card-header">Control vs Speed Quadrant Map</div>
+      <div class="card-body" style="padding:12px">
+        <div id="quadrant-wrap">
+          <div id="quadrant-inner">
+            <svg id="quadrant-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+              <!-- Background quadrant zones -->
+              <rect x="10" y="10" width="130" height="130" fill="#1a1a30" rx="4" opacity=".5"/>
+              <rect x="160" y="10" width="130" height="130" fill="#0d1a2a" rx="4" opacity=".5"/>
+              <rect x="10" y="160" width="130" height="130" fill="#0d0d0d" rx="4" opacity=".5"/>
+              <rect x="160" y="160" width="130" height="130" fill="#0d1a1a" rx="4" opacity=".5"/>
+
+              <!-- Axes -->
+              <line x1="150" y1="10" x2="150" y2="290" stroke="#1a1a30" stroke-width="1"/>
+              <line x1="10" y1="150" x2="290" y2="150" stroke="#1a1a30" stroke-width="1"/>
+
+              <!-- Axis labels -->
+              <text x="150" y="302" text-anchor="middle" font-size="9" fill="#6666aa">Speed to Market →</text>
+              <text x="4" y="150" text-anchor="middle" font-size="9" fill="#6666aa" transform="rotate(-90, 4, 150)">Control / Customisation ↑</text>
+              <text x="10" y="8" font-size="8" fill="#4444aa">Low Speed</text>
+              <text x="250" y="8" font-size="8" fill="#4444aa">High Speed</text>
+              <text x="160" y="8" font-size="8" fill="#4444aa">▶</text>
+
+              <!-- Quadrant zone labels -->
+              <text x="75" y="34" text-anchor="middle" font-size="8" fill="#4444aa">High Control</text>
+              <text x="75" y="44" text-anchor="middle" font-size="8" fill="#4444aa">Low Speed</text>
+              <text x="225" y="34" text-anchor="middle" font-size="8" fill="#114433">High Control</text>
+              <text x="225" y="44" text-anchor="middle" font-size="8" fill="#114433">High Speed</text>
+              <text x="75" y="184" text-anchor="middle" font-size="8" fill="#333322">Low Control</text>
+              <text x="75" y="194" text-anchor="middle" font-size="8" fill="#333322">Low Speed</text>
+              <text x="225" y="184" text-anchor="middle" font-size="8" fill="#0d2222">Low Control</text>
+              <text x="225" y="194" text-anchor="middle" font-size="8" fill="#0d2222">High Speed</text>
+
+              <!-- Pulse ring (rendered behind dots) -->
+              <circle id="q-pulse" class="pulse-ring" cx="150" cy="150" r="9" fill="none" stroke="#6366f1" stroke-width="2" opacity="0"/>
+
+              <!-- Option dots -->
+              <circle id="q-build"   cx="70"  cy="70"  r="9" fill="#6366f1" opacity=".85"/>
+              <circle id="q-buy"     cx="195" cy="115" r="9" fill="#f59e0b" opacity=".85"/>
+              <circle id="q-api"     cx="255" cy="210" r="9" fill="#06b6d4" opacity=".85"/>
+              <circle id="q-partner" cx="145" cy="145" r="9" fill="#22c55e" opacity=".85"/>
+
+              <!-- Labels -->
+              <text id="ql-build"   x="70"  y="57"  text-anchor="middle" font-size="9" fill="#a5b4fc">🏗️ Build</text>
+              <text id="ql-buy"     x="195" y="102" text-anchor="middle" font-size="9" fill="#fcd34d">🛒 Buy</text>
+              <text id="ql-api"     x="255" y="235" text-anchor="middle" font-size="9" fill="#67e8f9">🔌 API</text>
+              <text id="ql-partner" x="145" y="170" text-anchor="middle" font-size="9" fill="#86efac">🤝 Partner</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendation Memo -->
+    <div class="card">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+        <span>📋 Auto-Generated Recommendation Memo</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="export-btn" onclick="exportMemo()">📋 Copy as Markdown</button>
+          <span class="copy-msg" id="copy-msg">Copied!</span>
+        </div>
+      </div>
+      <div class="card-body" style="padding:14px">
+        <div class="memo-box" id="memo-box">Adjust sliders to generate recommendation…</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Risk Register -->
+  <div class="section-title mb-16">Risk Register</div>
+  <div class="card mb-24">
+    <div class="card-header">Risk Assessment by Option (derived from slider values)</div>
+    <div class="card-body risk-table-wrap">
+      <table class="risk-table" id="risk-table">
+        <thead>
+          <tr>
+            <th>Risk Dimension</th>
+            <th>🏗️ Build</th>
+            <th>🛒 Buy</th>
+            <th>🔌 API</th>
+            <th>🤝 Partner</th>
+          </tr>
+        </thead>
+        <tbody id="risk-tbody">
+          <tr><td>Data Privacy</td><td id="r-build-privacy">—</td><td id="r-buy-privacy">—</td><td id="r-api-privacy">—</td><td id="r-partner-privacy">—</td></tr>
+          <tr><td>Vendor Lock-in</td><td id="r-build-lockin">—</td><td id="r-buy-lockin">—</td><td id="r-api-lockin">—</td><td id="r-partner-lockin">—</td></tr>
+          <tr><td>Cost at Scale</td><td id="r-build-cost">—</td><td id="r-buy-cost">—</td><td id="r-api-cost">—</td><td id="r-partner-cost">—</td></tr>
+          <tr><td>Timeline Risk</td><td id="r-build-time">—</td><td id="r-buy-time">—</td><td id="r-api-time">—</td><td id="r-partner-time">—</td></tr>
+          <tr><td>Talent Risk</td><td id="r-build-talent">—</td><td id="r-buy-talent">—</td><td id="r-api-talent">—</td><td id="r-partner-talent">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PM Reflection -->
+  <details class="reflection mb-24">
+    <summary>🎓 PM Reflection — Decision Framing</summary>
+    <div class="reflection-grid">
+      <div class="reflection-item">
+        <strong>🎯 Decision</strong>
+        Should we build, buy, use an API, or partner for this AI capability? This is one of the most recurring sourcing decisions in AI product management.
+      </div>
+      <div class="reflection-item">
+        <strong>📊 Assumed</strong>
+        Slider inputs are self-assessed estimates. Real decisions require vendor POCs, legal data-sharing review, formal build estimates, and total cost of ownership modelling.
+      </div>
+      <div class="reflection-item">
+        <strong>⚠️ Risk</strong>
+        This model treats all constraints as independent linear inputs. Real decisions have complex interdependencies — e.g. high privacy AND high customisation together strongly favour Build, not just each individually.
+      </div>
+      <div class="reflection-item">
+        <strong>💡 PM Override</strong>
+        A PM might choose API despite high privacy concerns if a signed DPA and a private deployment option exist with the vendor. Scoring models inform — they don't decide.
+      </div>
+    </div>
+  </details>
+
+</main>
+
+<!-- Footer -->
+<footer class="site-footer">
+  PM Demo 03 · Build vs Buy vs API Decision Workbench · Professor Vinaya Sathyanarayana · KateelLearningDemosToStudents
+</footer>
+
+<script>
+/* ===== PRESET DATA ===== */
+const PRESETS = {
+  summarization: { ttm:8, budget:5, privacy:4, custom:3, talent:4, scale:6, reliability:6, lockIn:4 },
+  fraud:         { ttm:4, budget:7, privacy:9, custom:8, talent:6, scale:8, reliability:9, lockIn:5 },
+  recsys:        { ttm:5, budget:7, privacy:5, custom:8, talent:7, scale:9, reliability:8, lockIn:5 },
+  copilot:       { ttm:5, budget:6, privacy:10, custom:9, talent:5, scale:4, reliability:7, lockIn:8 },
+  stt:           { ttm:7, budget:5, privacy:4, custom:3, talent:3, scale:8, reliability:7, lockIn:5 },
+  docai:         { ttm:5, budget:6, privacy:8, custom:7, talent:4, scale:5, reliability:7, lockIn:6 },
+};
+
+/* ===== SCORING ENGINE ===== */
+function rawScore(s, option) {
+  const { ttm, budget, privacy, custom, talent, scale, reliability, lockIn } = s;
+  if (option === 'build') {
+    return (talent*12) + (custom*10) + (privacy*9) + (lockIn*8) + (budget*6) + (reliability*5) - (ttm*8) - 20;
+  }
+  if (option === 'buy') {
+    return (reliability*10) + (budget*9) + (scale*8) + (ttm*7) + (custom*3) - (privacy*6) - (lockIn*7) - (talent*3) + 10;
+  }
+  if (option === 'api') {
+    return (ttm*11) + (scale*9) + (budget*7) + (reliability*6) - (privacy*8) - (lockIn*9) - (custom*4) + 15;
+  }
+  if (option === 'partner') {
+    return (custom*9) + (talent*(-5)) + (ttm*6) + (budget*(-4)) + (privacy*4) + (reliability*7) - (lockIn*5) + 5;
+  }
+}
+
+function normaliseScores(raw) {
+  const vals = Object.values(raw);
+  const mn = Math.min(...vals), mx = Math.max(...vals);
+  const range = mx - mn || 1;
+  const out = {};
+  for (const k in raw) {
+    out[k] = Math.round(((raw[k] - mn) / range) * 100);
+  }
+  return out;
+}
+
+/* ===== RED FLAGS ===== */
+function getFlags(s) {
+  const flags = { build: [], buy: [], api: [], partner: [] };
+  const { ttm, budget, privacy, talent, scale, lockIn } = s;
+
+  if (privacy >= 8)   flags.api.push('⚠️ High privacy sensitivity — sending data to an external API may violate compliance requirements');
+  if (talent <= 3)    flags.build.push('⚠️ Low ML talent — building from scratch will likely miss timelines and quality targets');
+  if (ttm >= 8)       flags.build.push('⚠️ Tight timeline — in-house builds rarely ship within weeks');
+  if (scale >= 9)     flags.api.push('⚠️ Extreme scale — API costs may become uneconomical (compute cost > build cost)');
+  if (lockIn >= 8)    flags.api.push('⚠️ High lock-in concern — single-vendor API creates strategic dependency');
+  if (budget <= 2)    flags.buy.push('⚠️ Budget constrained — enterprise platform licences may be unaffordable');
+
+  return flags;
+}
+
+/* ===== QUADRANT POSITIONS ===== */
+// Returns {x, y} in SVG coords (10–290 range, origin top-left)
+// X = speed (low left, high right), Y = control (high up, low down)
+function quadrantPos(s, option) {
+  const { ttm, budget, privacy, custom, talent, scale, lockIn } = s;
+  const pad = 25;   // margin from edges
+  const w = 280, h = 280;
+
+  let speed, control;   // both 0–1 (0=low, 1=high)
+
+  if (option === 'build') {
+    speed   = 1 - Math.min(ttm / 10, 1) * 0.7;           // high ttm pressure → still slow
+    control = (talent * 0.5 + custom * 0.3 + privacy * 0.2) / 10;
+  } else if (option === 'buy') {
+    speed   = (ttm * 0.4 + (11 - lockIn) * 0.3 + budget * 0.3) / 10;
+    control = ((11 - lockIn) * 0.4 + custom * 0.2 + budget * 0.4) / 10;
+  } else if (option === 'api') {
+    speed   = (ttm * 0.6 + (11 - custom) * 0.25 + scale * 0.15) / 10;
+    control = ((11 - lockIn) * 0.15 + (11 - privacy) * 0.35 + (11 - custom) * 0.5) / 10;
+  } else {  // partner
+    speed   = (ttm * 0.35 + budget * 0.3 + (11 - custom) * 0.35) / 10;
+    control = (custom * 0.45 + (11 - lockIn) * 0.25 + talent * 0.3) / 10;
+  }
+
+  speed   = Math.max(0, Math.min(1, speed));
+  control = Math.max(0, Math.min(1, control));
+
+  const x = pad + speed * (w - 2 * pad);
+  const y = pad + (1 - control) * (h - 2 * pad);   // invert Y
+
+  return { x: Math.round(x + 10), y: Math.round(y + 10) };  // offset for SVG padding
+}
+
+/* ===== RISK REGISTER ===== */
+const L = '🟢 Low', M = '🟡 Medium', H = '🔴 High';
+function rl(v, lo, hi) { return v <= lo ? L : v <= hi ? M : H; }
+
+function computeRisks(s) {
+  const { ttm, budget, privacy, custom, talent, scale, reliability, lockIn } = s;
+  return {
+    build: {
+      privacy:  L,           // full control — lowest privacy risk
+      lockin:   L,
+      cost:     rl(custom + talent, 12, 16),
+      time:     rl(ttm + (11-talent), 10, 16),
+      talent:   rl(11 - talent, 4, 7),
+    },
+    buy: {
+      privacy:  rl(privacy, 4, 7),
+      lockin:   rl(lockIn, 4, 7),
+      cost:     rl(scale + (11-budget), 10, 16),
+      time:     rl(11 - ttm, 4, 7),
+      talent:   L,
+    },
+    api: {
+      privacy:  rl(privacy, 3, 6),
+      lockin:   rl(lockIn, 4, 7),
+      cost:     rl(scale, 5, 8),
+      time:     L,
+      talent:   L,
+    },
+    partner: {
+      privacy:  rl(privacy, 5, 8),
+      lockin:   rl(lockIn, 4, 7),
+      cost:     rl(11-budget, 4, 7),
+      time:     rl(11 - ttm, 3, 6),
+      talent:   rl(11 - talent, 3, 6),
+    },
+  };
+}
+
+/* ===== RECOMMENDATION MEMO ===== */
+function sliderLabel(key, val) {
+  const labels = {
+    ttm:         ['long timeline available', 'moderate time pressure', 'strong time pressure'],
+    budget:      ['constrained budget', 'moderate budget', 'flexible budget'],
+    privacy:     ['low data sensitivity', 'moderate data sensitivity', 'high data sensitivity'],
+    custom:      ['low customisation need', 'moderate customisation need', 'high customisation need'],
+    talent:      ['minimal ML talent', 'moderate ML talent', 'strong ML talent'],
+    scale:       ['low scale (<1k/day)', 'moderate scale', 'high scale (>1M/day)'],
+    reliability: ['best-effort reliability', 'moderate reliability need', 'strict reliability SLA needed'],
+    lockIn:      ['low lock-in concern', 'moderate lock-in concern', 'strong lock-in concern'],
+  };
+  const idx = val <= 3 ? 0 : val <= 6 ? 1 : 2;
+  return labels[key][idx];
+}
+
+function topSliders(s) {
+  return Object.entries(s)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([k, v]) => sliderLabel(k, v));
+}
+
+const MEMO_TEMPLATES = {
+  build: {
+    reasons: (s) => [
+      s.talent >= 6 ? 'Your team has the ML expertise to build and maintain this capability.' : 'Customisation needs outweigh the talent risk — consider augmenting the team.',
+      s.custom >= 7 ? 'Deep customisation is required; no off-the-shelf solution will reach the needed quality.' : 'The solution must be tailored to proprietary data and workflows.',
+      s.privacy >= 7 ? 'High data sensitivity makes it difficult to send data to external vendors without compliance risk.' : 'Ownership of the full stack gives you long-term flexibility and zero lock-in.',
+    ],
+    risks: (s) => [
+      s.ttm >= 7 ? 'Timeline risk is real — agree on an MVP scope and time-box the first milestone to 6 weeks.' : 'Engineering timeline must be tightly managed to avoid scope creep.',
+      s.talent <= 5 ? 'Talent gap is a concern — plan for hiring, contractor support, or a hybrid approach.' : 'Maintain model quality over time; allocate ongoing engineering capacity for retraining and monitoring.',
+    ],
+    questions: [
+      'What is the minimum viable version we can build in the first 6 weeks?',
+      'Do we have labelled training data, or do we need a data collection sprint first?',
+      'What is the total cost of ownership over 2 years vs. API/Buy options?',
+    ],
+  },
+  buy: {
+    reasons: (s) => [
+      s.reliability >= 7 ? 'Enterprise platforms offer contracted SLAs that would take years to replicate in-house.' : 'A mature vendor solution de-risks delivery and reduces operational burden.',
+      s.budget >= 6 ? 'Budget availability allows procurement of a proven platform.' : 'Even with constraints, a targeted SaaS purchase may be more cost-effective than a full build.',
+      s.scale >= 6 ? 'At expected scale, a cloud platform can absorb traffic spikes without custom infrastructure.' : 'The vendor handles infrastructure, allowing your team to focus on product differentiation.',
+    ],
+    risks: (s) => [
+      s.lockIn >= 6 ? 'Negotiate data portability and exit clauses before signing. Avoid proprietary data formats.' : 'Ensure the vendor roadmap aligns with your product direction.',
+      s.privacy >= 7 ? 'Conduct a thorough DPA/data residency review before contracting; require SOC 2 Type II or equivalent.' : 'Validate the vendor\'s security posture and data handling practices.',
+    ],
+    questions: [
+      'Does the vendor offer a private deployment or data residency option to satisfy compliance?',
+      'What does the pricing model look like at 3× and 10× our current volume?',
+      'What are the data migration and contract exit clauses?',
+    ],
+  },
+  api: {
+    reasons: (s) => [
+      s.ttm >= 7 ? 'API integration can put a working product in front of users within days — critical given tight timelines.' : 'Fastest path to proving value with minimal engineering investment.',
+      s.custom <= 4 ? 'A commodity API covers the core need; deep customisation is not required.' : 'Modern APIs offer fine-tuning and configuration options that may cover most customisation needs.',
+      s.scale <= 7 ? 'At expected scale, per-call API pricing is economical compared to infrastructure investment.' : 'Monitor cost per call closely and model break-even with a build option.',
+    ],
+    risks: (s) => [
+      s.privacy >= 6 ? 'Critical: negotiate a signed DPA, confirm data is not used for training, and explore private endpoint options.' : 'Implement input sanitisation to avoid inadvertently sending sensitive context to the API.',
+      s.lockIn >= 6 ? 'Design an abstraction layer so the API provider can be swapped with minimal refactoring.' : 'Monitor API deprecation and versioning policies; pin to stable API versions.',
+    ],
+    questions: [
+      'Does the vendor\'s DPA satisfy our legal and compliance requirements?',
+      'What is the cost model at peak load, and does it have a hard spend cap?',
+      'Can we implement a provider-agnostic abstraction to reduce lock-in?',
+    ],
+  },
+  partner: {
+    reasons: (s) => [
+      s.custom >= 7 ? 'Deep customisation is required, and a specialist partner can deliver it faster than an in-house build.' : 'A co-development model allows rapid prototyping with external expertise.',
+      s.talent <= 5 ? 'Internal ML talent is limited — a partner brings the specialised skills needed.' : 'Partnering allows parallel workstreams, accelerating delivery.',
+      s.reliability >= 6 ? 'A reputable partner can offer strong delivery commitments and post-launch support SLAs.' : 'Shared ownership of the solution creates aligned incentives for long-term success.',
+    ],
+    risks: (s) => [
+      'Define IP ownership, data handling, and handover terms explicitly in the contract before engagement.',
+      s.budget <= 5 ? 'Partnership models can be expensive; negotiate milestone-based payments and capped fees.' : 'Ensure internal team is involved throughout to build knowledge — avoid full dependency on the partner.',
+    ],
+    questions: [
+      'Who owns the IP, model weights, and training data produced during the engagement?',
+      'What does the handover and long-term support model look like post-delivery?',
+      'Can we negotiate a T&M cap and milestone-based payment schedule?',
+    ],
+  },
+};
+
+function buildMemo(s, winner) {
+  const top3 = topSliders(s);
+  const t = MEMO_TEMPLATES[winner];
+  const reasons   = t.reasons(s);
+  const risks     = t.risks(s);
+  const questions = t.questions;
+
+  const optionName = { build: 'Build In-House', buy: 'Buy Platform', api: 'Use an API', partner: 'Partner / Co-develop' }[winner];
+
+  return [
+    `Given your constraints — ${top3.join(', ')} — the recommended path is ${optionName}.`,
+    '',
+    'Key reasons:',
+    ...reasons.map(r => `  • ${r}`),
+    '',
+    'Key risks to mitigate:',
+    ...risks.map(r => `  • ${r}`),
+    '',
+    'Suggested next due diligence questions:',
+    ...questions.map(q => `  • ${q}`),
+  ].join('\n');
+}
+
+/* ===== DOM HELPERS ===== */
+function getSliders() {
+  return {
+    ttm:         +document.getElementById('s-ttm').value,
+    budget:      +document.getElementById('s-budget').value,
+    privacy:     +document.getElementById('s-privacy').value,
+    custom:      +document.getElementById('s-custom').value,
+    talent:      +document.getElementById('s-talent').value,
+    scale:       +document.getElementById('s-scale').value,
+    reliability: +document.getElementById('s-reliability').value,
+    lockIn:      +document.getElementById('s-lockIn').value,
+  };
+}
+
+function setSliders(preset) {
+  const map = { ttm:'s-ttm', budget:'s-budget', privacy:'s-privacy', custom:'s-custom', talent:'s-talent', scale:'s-scale', reliability:'s-reliability', lockIn:'s-lockIn' };
+  for (const [k, id] of Object.entries(map)) {
+    if (preset[k] !== undefined) document.getElementById(id).value = preset[k];
+  }
+  updateValBadges();
+}
+
+function updateValBadges() {
+  const map = { ttm:'v-ttm', budget:'v-budget', privacy:'v-privacy', custom:'v-custom', talent:'v-talent', scale:'v-scale', reliability:'v-reliability', lockIn:'v-lockIn' };
+  for (const [k, id] of Object.entries(map)) {
+    document.getElementById(id).textContent = document.getElementById('s-' + k).value;
+  }
+}
+
+/* ===== MAIN UPDATE ===== */
+function update() {
+  const s = getSliders();
+
+  // Compute raw + normalised scores
+  const raw = { build: rawScore(s,'build'), buy: rawScore(s,'buy'), api: rawScore(s,'api'), partner: rawScore(s,'partner') };
+  const norm = normaliseScores(raw);
+
+  // Find winner
+  const winner = Object.entries(norm).sort((a,b)=>b[1]-a[1])[0][0];
+
+  // Update score bars + numbers
+  for (const opt of ['build','buy','api','partner']) {
+    document.getElementById('bar-' + opt).style.width = norm[opt] + '%';
+    document.getElementById('num-' + opt).textContent = norm[opt];
+    const card = document.getElementById('card-' + opt);
+    card.classList.toggle('winner', opt === winner);
+  }
+
+  // Flags
+  const flags = getFlags(s);
+  for (const opt of ['build','buy','api','partner']) {
+    const el = document.getElementById('flags-' + opt);
+    el.innerHTML = flags[opt].map(f => `<div class="flag-item">${f}</div>`).join('');
+  }
+
+  // Quadrant map
+  const positions = {};
+  for (const opt of ['build','buy','api','partner']) {
+    positions[opt] = quadrantPos(s, opt);
+  }
+  for (const opt of ['build','buy','api','partner']) {
+    const dot  = document.getElementById('q-' + opt);
+    const lbl  = document.getElementById('ql-' + opt);
+    const { x, y } = positions[opt];
+    dot.setAttribute('cx', x);
+    dot.setAttribute('cy', y);
+    lbl.setAttribute('x', x);
+    lbl.setAttribute('y', y - 13);
+  }
+
+  // Pulse ring on winner
+  const wPos = positions[winner];
+  const ring = document.getElementById('q-pulse');
+  ring.setAttribute('cx', wPos.x);
+  ring.setAttribute('cy', wPos.y);
+  ring.setAttribute('opacity', '1');
+
+  // Memo
+  document.getElementById('memo-box').textContent = buildMemo(s, winner);
+
+  // Risk register
+  const risks = computeRisks(s);
+  const rmap = {
+    privacy: { build:'r-build-privacy', buy:'r-buy-privacy', api:'r-api-privacy', partner:'r-partner-privacy' },
+    lockin:  { build:'r-build-lockin',  buy:'r-buy-lockin',  api:'r-api-lockin',  partner:'r-partner-lockin'  },
+    cost:    { build:'r-build-cost',    buy:'r-buy-cost',    api:'r-api-cost',    partner:'r-partner-cost'    },
+    time:    { build:'r-build-time',    buy:'r-buy-time',    api:'r-api-time',    partner:'r-partner-time'    },
+    talent:  { build:'r-build-talent',  buy:'r-buy-talent',  api:'r-api-talent',  partner:'r-partner-talent'  },
+  };
+  for (const [risk, cols] of Object.entries(rmap)) {
+    for (const [opt, id] of Object.entries(cols)) {
+      document.getElementById(id).textContent = risks[opt][risk];
+    }
+  }
+}
+
+/* ===== EXPORT ===== */
+function exportMemo() {
+  const s = getSliders();
+  const raw = { build: rawScore(s,'build'), buy: rawScore(s,'buy'), api: rawScore(s,'api'), partner: rawScore(s,'partner') };
+  const norm = normaliseScores(raw);
+  const winner = Object.entries(norm).sort((a,b)=>b[1]-a[1])[0][0];
+  const optionName = { build: 'Build In-House', buy: 'Buy Platform', api: 'Use an API', partner: 'Partner / Co-develop' }[winner];
+
+  const scores = ['build','buy','api','partner'].map(o =>
+    `| ${({build:'🏗️ Build',buy:'🛒 Buy',api:'🔌 API',partner:'🤝 Partner'})[o]} | ${norm[o]} |`
+  ).join('\n');
+
+  const md = [
+    '# Build vs Buy vs API Decision Memo',
+    '',
+    `**Recommendation: ${optionName}**`,
+    '',
+    '## Constraint Scores',
+    `| Slider | Value |`,
+    `|--------|-------|`,
+    `| Time to Market Pressure | ${s.ttm} |`,
+    `| Budget Availability | ${s.budget} |`,
+    `| Privacy / Data Sensitivity | ${s.privacy} |`,
+    `| Customisation Need | ${s.custom} |`,
+    `| Internal ML Talent | ${s.talent} |`,
+    `| Expected Scale | ${s.scale} |`,
+    `| Reliability Requirement | ${s.reliability} |`,
+    `| Vendor Lock-in Concern | ${s.lockIn} |`,
+    '',
+    '## Option Scores (normalised 0–100)',
+    `| Option | Score |`,
+    `|--------|-------|`,
+    scores,
+    '',
+    '## Recommendation',
+    '',
+    document.getElementById('memo-box').textContent,
+    '',
+    '---',
+    '*Generated by PM Demo 03 — Build vs Buy vs API Decision Workbench*',
+    '*KateelLearningDemosToStudents · Professor Vinaya Sathyanarayana*',
+  ].join('\n');
+
+  navigator.clipboard.writeText(md).then(() => {
+    const msg = document.getElementById('copy-msg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 2000);
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = md;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const msg = document.getElementById('copy-msg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 2000);
+  });
+}
+
+/* ===== WIRE UP EVENTS ===== */
+// Slider input events
+['s-ttm','s-budget','s-privacy','s-custom','s-talent','s-scale','s-reliability','s-lockIn'].forEach(id => {
+  const el = document.getElementById(id);
+  const key = id.replace('s-', '');
+  el.addEventListener('input', () => {
+    const vid = 'v-' + (key === 'lockIn' ? 'lockIn' : key);
+    document.getElementById(vid).textContent = el.value;
+    update();
+  });
+});
+
+// Capability pills
+document.getElementById('cap-grid').addEventListener('click', e => {
+  const pill = e.target.closest('.cap-pill');
+  if (!pill) return;
+  document.querySelectorAll('.cap-pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  const cap = pill.dataset.cap;
+  if (PRESETS[cap]) setSliders(PRESETS[cap]);
+  update();
+});
+
+/* ===== INIT ===== */
+updateValBadges();
+update();
+</script>
+</body>
+</html>

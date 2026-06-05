@@ -1,66 +1,124 @@
 # Contributing Guide
 
-This repository is used as a student-facing learning companion. Contributions should optimize for clarity, reproducibility, and teaching value, not only for technical correctness.
+**Repository:** [KateelLearningDemosToStudents](https://github.com/VinayaSharada/KateelLearningDemosToStudents)
+**Author:** Professor Vinaya Sathyanarayana
+
+Thank you for your interest in contributing. This repository is used as a student-facing
+learning companion — contributions should optimise for clarity, reproducibility, and
+teaching value, not only for technical correctness.
+
+---
+
+## ⚠️ Mandatory Attribution Before Contributing
+
+Before submitting any pull request, you must comply with the three mandatory requirements
+in [ATTRIBUTION.md](ATTRIBUTION.md):
+
+1. **Credit Professor Vinaya Sathyanarayana** in any downstream use of this material.
+2. **Star the repository** at https://github.com/VinayaSharada/KateelLearningDemosToStudents
+3. **Email vinallcontact@gmail.com** with a usage notification.
+
+Contributors who adapt this material for their own courses, workshops, or repositories
+must carry the attribution forward into all derived work.
+
+---
 
 ## Goals
 
-- keep demos easy for students to run
-- make the business context explicit
-- prefer synthetic data when real data is unavailable or sensitive
-- leave a clear path for extension exercises
+- Keep demos easy for students to run with minimal setup
+- Make the business context explicit alongside the technical method
+- Prefer synthetic data when real data is unavailable or sensitive
+- Leave a clear path for extension exercises and deeper exploration
+
+---
 
 ## Preferred Demo Structure
 
 For a new demo folder, please include:
 
-- `README.md`
-- `requirements.txt` or `pyproject.toml`
-- a synthetic data generator if needed
-- one main runnable script
-- optional notebook for interactive exploration
-- optional screenshots or output artifacts
+```
+<demo-folder>/
+├── README.md               # required — see template below
+├── requirements.txt        # or pyproject.toml
+├── syndata.py              # synthetic data generator (if needed)
+├── <main_script>.py        # one runnable entry point
+├── <notebook>.ipynb        # optional — interactive exploration
+└── screenshots/            # optional — expected output images
+```
 
-## README Template Expectations
+---
 
-Each demo README should cover:
+## README Template
 
-- what the demo does
-- why it matters in BFSI or analytics
-- files in the folder
-- setup steps
-- how to run the demo
-- expected outputs
-- ideas for student extensions
+Every demo README must cover:
 
-## Naming and Organization
+| Section | Content |
+|---------|---------|
+| **What it does** | One paragraph describing the demo |
+| **Why it matters** | Business or academic relevance (BFSI, analytics, etc.) |
+| **Files** | Table listing each file and its purpose |
+| **Setup** | `pip install -r requirements.txt` and any prerequisites |
+| **How to run** | Exact command(s) to execute |
+| **Expected outputs** | What the student should see when it works |
+| **Student extensions** | 3–5 ideas for deeper exploration or course submissions |
 
-- prefer descriptive folder names over cryptic names
-- keep business use cases under `DomainUseCaseDemos`
-- keep technique-first examples under `TechUseCaseDemos`
-- use consistent naming for `README.md`
+---
+
+## Naming and Organisation
+
+- Use descriptive folder names (`CCUnderWriting`, not `demo7`)
+- Business / industry use cases → `DomainUseCaseDemos/<Vertical>/<Name>/`
+- Technique-first examples → `TechUseCaseDemos/<Technique>/<Name>/`
+- In-browser SLM demos → `🤖 Browser-AI-Demos/Browser-AI-Product-Demos/<Name>/`
+- Assignment scaffolds → `Assignments/Session<NN>_<Topic>/`
+
+---
 
 ## Testing
 
-Where practical, add at least a smoke test that verifies:
+Where practical, include a smoke test that verifies:
 
-- synthetic data generation runs
-- key scripts execute without crashing
-- expected output files or columns are created
+- Synthetic data generation runs without error
+- The main script executes to completion
+- Expected output files or columns are created
+
+A single `pytest` function or a `if __name__ == "__main__"` guard with an assertion is
+sufficient — full test coverage is not required for educational demos.
+
+---
 
 ## Documentation Style
 
-- explain both the technical method and the business meaning
-- write for students who may be seeing the topic for the first time
-- keep setup instructions explicit
+- Explain both the technical method **and** the business meaning
+- Write for students who may be encountering the topic for the first time
+- Keep setup instructions explicit — assume a fresh virtual environment
+- No jargon without a one-line explanation nearby
 
-## Attribution Expectations
-
-- faculty who reuse or adapt this repository in course delivery should acknowledge and attribute Professor Vinaya Sathyanarayana in their course material, including slides
-- students and external builders who extend this work should add attribution in their reports, presentations, and downstream repositories
-- if you add a new demo, keep the attribution expectation clear in any derived notebooks, reports, or teaching-facing documentation
+---
 
 ## Safe Data Practices
 
-- do not commit sensitive or private real-world data
-- prefer synthetic datasets for teaching examples
-- call out any assumptions used to generate synthetic data
+- Do not commit sensitive or real-world private data
+- Prefer synthetic datasets generated by a script the student can inspect and modify
+- Document any assumptions baked into the synthetic data generator
+
+---
+
+## Pull Request Checklist
+
+Before opening a PR, confirm:
+
+- [ ] New folder follows the structure above
+- [ ] README covers all required sections
+- [ ] `requirements.txt` is present and pinned to tested versions
+- [ ] All `.log`, `.csv`, `.h5`, large binary files are either generated by a script or excluded via `.gitignore`
+- [ ] No real-world sensitive data committed
+- [ ] Attribution is preserved in any derived notebooks or documentation
+- [ ] Smoke test passes locally
+
+---
+
+## Questions
+
+Open a GitHub Issue or email **vinallcontact@gmail.com** for discussion before investing
+significant effort in a large contribution.

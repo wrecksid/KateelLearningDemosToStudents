@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: 📖 Attribution & Usage Policy
+    url: https://github.com/VinayaSharada/KateelLearningDemosToStudents/blob/main/ATTRIBUTION.md
+    about: Read the mandatory requirements before using this repository.
+  - name: 📋 Usage Registry (Wiki)
+    url: https://github.com/VinayaSharada/KateelLearningDemosToStudents/wiki/Usage-Registry
+    about: Already registered? View or update your entry in the Usage Registry.

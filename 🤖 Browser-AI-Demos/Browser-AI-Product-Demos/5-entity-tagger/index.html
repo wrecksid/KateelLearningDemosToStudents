@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Named Entity Tagger | Browser AI Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #080810;
+      color: #e2e2f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── status bar ── */
+    #status-bar {
+      background: #0c0c1c;
+      border-bottom: 1px solid #18183a;
+      padding: 7px 20px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12.5px; flex-shrink: 0;
+    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #505090; flex-shrink: 0; transition: background .4s, box-shadow .4s; }
+    .dot.loading { background: #f59e0b; animation: pulse 1.2s ease-in-out infinite; }
+    .dot.ready   { background: #22c55e; box-shadow: 0 0 8px #22c55e88; }
+    .dot.error   { background: #ef4444; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    #status-label { color: #8080b0; flex: 1; }
+    #prog-wrap { width: 140px; height: 3px; background: #18183a; border-radius: 99px; overflow: hidden; flex-shrink: 0; }
+    #prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #06b6d4, #6366f1); border-radius: 99px; transition: width .25s; }
+    #prog-pct  { color: #06b6d4; font-size: 11.5px; min-width: 34px; text-align: right; }
+    .back-link { color: #30305a; text-decoration: none; font-size: 12px; flex-shrink: 0; }
+    .back-link:hover { color: #7070a0; }
+
+    /* ── header ── */
+    #header { background: #0a0a18; border-bottom: 1px solid #14142c; padding: 10px 20px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    #header h1 { font-size: 15px; font-weight: 700; }
+    .badge { font-size: 10.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px; background: rgba(6,182,212,.12); border: 1px solid rgba(6,182,212,.3); color: #67e8f9; }
+
+    /* ── layout ── */
+    #workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    @media (max-width: 800px) { #workspace { grid-template-columns: 1fr; } }
+
+    /* ── pane shared ── */
+    .pane { display: flex; flex-direction: column; }
+    .pane-header {
+      padding: 10px 18px;
+      border-bottom: 1px solid #14142c;
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #404070;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* ── input pane ── */
+    #input-pane { border-right: 1px solid #14142c; }
+
+    #text-input {
+      flex: 1; min-height: 300px;
+      background: #0a0a18; border: none; outline: none;
+      color: #d8d8f4; font-size: 14.5px; font-family: inherit;
+      line-height: 1.75; padding: 20px 22px; resize: none;
+    }
+    #text-input::placeholder { color: #202040; font-style: italic; }
+    #text-input:disabled { opacity: .45; cursor: not-allowed; }
+
+    .sample-row {
+      padding: 10px 16px;
+      border-top: 1px solid #14142c;
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    }
+    .sample-lbl { font-size: 11px; color: #30305a; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-right: 2px; }
+    .sample-btn {
+      font-size: 11.5px; padding: 4px 11px; border-radius: 8px;
+      border: 1px solid #22223a; background: #0e0e20; color: #60609a;
+      cursor: pointer; font-family: inherit; transition: border-color .15s, color .15s;
+    }
+    .sample-btn:hover { border-color: #06b6d4; color: #67e8f9; }
+
+    .debounce-bar {
+      height: 2px; background: #14142c; overflow: hidden;
+    }
+    .debounce-fill {
+      height: 100%; width: 0%; background: #06b6d4;
+      transition: width .4s linear;
+    }
+
+    /* ── output pane ── */
+    #output-pane { }
+
+    /* Entity legend */
+    #legend {
+      padding: 10px 18px;
+      border-bottom: 1px solid #14142c;
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .legend-chip {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11.5px; color: #60608a;
+    }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* highlighted output */
+    #highlight-output {
+      flex: 1; padding: 20px 22px;
+      font-size: 14.5px; line-height: 1.85;
+      color: #c0c0e8; overflow-y: auto;
+      min-height: 220px;
+    }
+    .entity-span {
+      display: inline;
+      padding: 1px 5px 2px;
+      border-radius: 5px;
+      font-weight: 600;
+      cursor: default;
+      position: relative;
+    }
+    .entity-label {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      vertical-align: super; margin-left: 2px; opacity: .8;
+    }
+
+    /* entity type colors */
+    .ent-PER  { background: rgba(168,85,247,.18); color: #d8b4fe; border: 1px solid rgba(168,85,247,.35); }
+    .ent-ORG  { background: rgba(59,130,246,.18);  color: #93c5fd; border: 1px solid rgba(59,130,246,.35); }
+    .ent-LOC  { background: rgba(16,185,129,.18);  color: #6ee7b7; border: 1px solid rgba(16,185,129,.35); }
+    .ent-MISC { background: rgba(245,158,11,.18);  color: #fcd34d; border: 1px solid rgba(245,158,11,.35); }
+    .ent-DATE { background: rgba(236,72,153,.18);  color: #f9a8d4; border: 1px solid rgba(236,72,153,.35); }
+    .ent-MON  { background: rgba(6,182,212,.18);   color: #67e8f9; border: 1px solid rgba(6,182,212,.35); }
+    .ent-NUM  { background: rgba(132,204,22,.18);  color: #bef264; border: 1px solid rgba(132,204,22,.35); }
+
+    /* idle state */
+    #idle-msg { color: #202040; font-size: 13px; font-style: italic; }
+
+    /* ── stats panel ── */
+    #stats-panel {
+      border-top: 1px solid #14142c;
+      padding: 14px 18px;
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+    .stat-chip {
+      display: flex; align-items: center; gap: 6px;
+      background: #0e0e20; border: 1px solid #1e1e38;
+      border-radius: 8px; padding: 5px 12px;
+      font-size: 12px;
+    }
+    .stat-chip .sc-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .stat-chip .sc-count { font-weight: 700; color: #e2e2f0; }
+    .stat-chip .sc-lbl  { color: #50508a; }
+
+    /* processing spinner */
+    #proc-spin {
+      display: none; align-items: center; gap: 8px;
+      font-size: 12px; color: #50508a; padding: 4px 0;
+    }
+    #proc-spin.visible { display: flex; }
+    .spin-xs { width: 14px; height: 14px; border: 2px solid #1e1e38; border-top-color: #06b6d4; border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* loading overlay */
+    #load-overlay { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; flex:1; color:#404070; text-align:center; padding:40px; }
+    #load-overlay.hidden { display:none; }
+    .spinner { width:36px;height:36px;border:3px solid #1a1a38;border-top-color:#06b6d4;border-radius:50%;animation:spin .8s linear infinite; }
+
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#1e1e38;border-radius:99px; }
+  </style>
+</head>
+<body>
+<!-- file:// protocol detection -->
+<div id="fp-warn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a0800;border-bottom:2px solid #f59e0b;padding:12px 16px;font-family:system-ui,sans-serif;font-size:13px;color:#fde68a;gap:12px;align-items:flex-start;">
+  <span style="font-size:20px;flex-shrink:0">⚠️</span>
+  <div><strong style="color:#fbbf24">Cannot run as file:// — serve over HTTP instead.</strong><br>
+  Double-click <code style="background:rgba(255,255,255,.12);padding:1px 6px;border-radius:4px">start_demos.bat</code> in the parent folder, or run <code style="background:rgba(255,255,255,.12);padding:1px 6px;border-radius:4px">python -m http.server 8080</code> there and open <a href="http://localhost:8080" style="color:#60a5fa">http://localhost:8080</a>.</div>
+  <button onclick="document.getElementById('fp-warn').style.display='none'" style="margin-left:auto;flex-shrink:0;background:transparent;border:1px solid #92400e;color:#fbbf24;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px">✕</button>
+</div>
+<script>if(location.protocol==='file:'){var w=document.getElementById('fp-warn');w.style.display='flex';}</script>
+
+<div id="status-bar">
+  <div class="dot loading" id="dot"></div>
+  <span id="status-label">⚪ Downloading BERT-NER…</span>
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <span id="prog-pct">0%</span>
+  <a class="back-link" href="../index.html">← Hub</a>
+</div>
+
+<div id="header">
+  <h1>🏷️ Named Entity Tagger</h1>
+  <span class="badge">Demo 05</span>
+</div>
+
+<div id="workspace">
+
+  <!-- Left: input -->
+  <div class="pane" id="input-pane">
+    <div class="pane-header">
+      <span>Input Text</span>
+      <div id="proc-spin"><div class="spin-xs"></div> Analysing…</div>
+    </div>
+    <textarea id="text-input" placeholder="Type or paste any text here…&#10;&#10;BERT will identify people, organizations, places, dates, and more — all running locally in your browser." disabled></textarea>
+    <div class="debounce-bar"><div class="debounce-fill" id="debounce-fill"></div></div>
+    <div class="sample-row">
+      <span class="sample-lbl">Samples:</span>
+      <button class="sample-btn" data-key="news">📰 News</button>
+      <button class="sample-btn" data-key="finance">📈 Finance</button>
+      <button class="sample-btn" data-key="science">🔬 Science</button>
+      <button class="sample-btn" data-key="history">🏛️ History</button>
+    </div>
+  </div>
+
+  <!-- Right: output -->
+  <div class="pane" id="output-pane">
+    <div class="pane-header"><span>Entity Highlights</span></div>
+
+    <!-- Legend -->
+    <div id="legend">
+      <div class="legend-chip"><div class="legend-dot" style="background:#a855f7"></div> Person</div>
+      <div class="legend-chip"><div class="legend-dot" style="background:#3b82f6"></div> Organization</div>
+      <div class="legend-chip"><div class="legend-dot" style="background:#10b981"></div> Location</div>
+      <div class="legend-chip"><div class="legend-dot" style="background:#f59e0b"></div> Misc</div>
+    </div>
+
+    <!-- Loading state -->
+    <div id="load-overlay">
+      <div class="spinner"></div>
+      <span>Loading BERT-NER model…</span>
+      <span style="font-size:12px">~400 MB · cached after first load</span>
+    </div>
+
+    <!-- Highlighted text output -->
+    <div id="highlight-output" style="display:none">
+      <span id="idle-msg">Start typing to see entities highlighted…</span>
+    </div>
+
+    <!-- Stats -->
+    <div id="stats-panel" style="display:none"></div>
+  </div>
+
+</div>
+
+<script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
+
+// ── Config ────────────────────────────────────────────────────────────────────
+const MODEL_ID = 'Xenova/bert-base-NER';
+
+// Maps raw model labels → display config
+const ENTITY_CONFIG = {
+  'PER':  { label: 'PER',  name: 'Person',       cls: 'ent-PER',  dot: '#a855f7' },
+  'ORG':  { label: 'ORG',  name: 'Organization', cls: 'ent-ORG',  dot: '#3b82f6' },
+  'LOC':  { label: 'LOC',  name: 'Location',     cls: 'ent-LOC',  dot: '#10b981' },
+  'MISC': { label: 'MISC', name: 'Misc',          cls: 'ent-MISC', dot: '#f59e0b' },
+};
+
+const SAMPLES = {
+  news: `Apple CEO Tim Cook announced on Tuesday that the company will open a new research campus in Austin, Texas next year. The facility, expected to employ over 5,000 engineers, is part of Apple's $430 billion investment in the United States. Google and Microsoft have made similar announcements in the past month.`,
+
+  finance: `Goldman Sachs reported record earnings of $12.6 billion in Q3, beating Wall Street expectations. CEO David Solomon credited strong performance in the asset management division. The Federal Reserve, chaired by Jerome Powell, is expected to raise interest rates again in December. JPMorgan Chase and Bank of America also posted gains.`,
+
+  science: `Dr. Jennifer Doudna and Dr. Emmanuelle Charpentier won the Nobel Prize in Chemistry in 2020 for developing CRISPR gene-editing technology. The research was conducted at the University of California, Berkeley and the Max Planck Institute in Berlin. The Gates Foundation has since invested over $200 million in CRISPR-based therapeutics.`,
+
+  history: `In June 1944, Allied forces led by General Dwight D. Eisenhower landed on the beaches of Normandy, France in Operation Overlord. Winston Churchill and Franklin D. Roosevelt had planned the operation at the Tehran Conference in November 1943. The Soviet Union, led by Joseph Stalin, simultaneously launched Operation Bagration on the Eastern Front.`,
+};
+
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const dotEl        = document.getElementById('dot');
+const statusLabel  = document.getElementById('status-label');
+const progFill     = document.getElementById('prog-fill');
+const progPct      = document.getElementById('prog-pct');
+const textInput    = document.getElementById('text-input');
+const debounceFill = document.getElementById('debounce-fill');
+const loadOverlay  = document.getElementById('load-overlay');
+const highlightOut = document.getElementById('highlight-output');
+const idleMsg      = document.getElementById('idle-msg');
+const statsPanel   = document.getElementById('stats-panel');
+const procSpin     = document.getElementById('proc-spin');
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let ner = null;
+let debounceTimer  = null;
+let debounceAnim   = null;
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function initModel() {
+  try {
+    ner = await pipeline('token-classification', MODEL_ID, {
+      aggregation_strategy: 'simple',
+      progress_callback: ({ status, progress, file }) => {
+        const pct  = progress ?? 0;
+        const name = file ? file.split('/').pop() : '';
+        if (status === 'downloading' || status === 'progress') {
+          statusLabel.textContent = `⚪ Downloading${name ? ' — ' + name : ''}…`;
+          progFill.style.width = pct + '%';
+          progPct.textContent  = Math.round(pct) + '%';
+        } else if (status === 'loading') {
+          statusLabel.textContent = '⚪ Loading BERT-NER…';
+          progFill.style.width = '99%'; progPct.textContent = '99%';
+        }
+      }
+    });
+
+    dotEl.className = 'dot ready';
+    statusLabel.textContent = '🟢 BERT-NER Ready — start typing to detect entities';
+    progFill.style.width = '100%'; progPct.textContent = '100%';
+
+    loadOverlay.classList.add('hidden');
+    highlightOut.style.display = 'block';
+    statsPanel.style.display   = 'flex';
+    textInput.disabled = false;
+    textInput.focus();
+
+  } catch (err) {
+    dotEl.className = 'dot error';
+    statusLabel.textContent = '⚠️ Failed to load model';
+    loadOverlay.innerHTML = `<div style="color:#fca5a5;font-size:13px">⚠️ ${err.message}<br><br>Chrome 113+ / Edge required. Check console.</div>`;
+    console.error(err);
+  }
+}
+
+// ── Analyse text ──────────────────────────────────────────────────────────────
+async function analyse(text) {
+  if (!text.trim()) {
+    highlightOut.innerHTML = '<span id="idle-msg">Start typing to see entities highlighted…</span>';
+    statsPanel.innerHTML = '';
+    return;
+  }
+
+  procSpin.classList.add('visible');
+  try {
+    const entities = await ner(text);
+    renderHighlights(text, entities);
+    renderStats(entities);
+  } catch (err) {
+    highlightOut.textContent = '⚠️ ' + err.message;
+    console.error(err);
+  } finally {
+    procSpin.classList.remove('visible');
+  }
+}
+
+// ── Render highlighted text ───────────────────────────────────────────────────
+function renderHighlights(text, entities) {
+  // entities: [{entity_group, start, end, word, score}, ...]
+  const sorted = [...entities].sort((a, b) => a.start - b.start);
+  let html = '';
+  let cursor = 0;
+
+  for (const ent of sorted) {
+    if (ent.start < cursor) continue; // skip overlapping
+    const typeKey = ent.entity_group;
+    const cfg = ENTITY_CONFIG[typeKey];
+
+    // Plain text before entity
+    if (ent.start > cursor) {
+      html += escHtml(text.slice(cursor, ent.start));
+    }
+
+    const entityText = text.slice(ent.start, ent.end);
+    const pct = Math.round(ent.score * 100);
+    const clsName = cfg ? cfg.cls : 'ent-MISC';
+    const labelText = cfg ? cfg.label : typeKey;
+
+    html += `<span class="entity-span ${clsName}" title="${labelText} · ${pct}% confidence">${escHtml(entityText)}<span class="entity-label">${labelText}</span></span>`;
+    cursor = ent.end;
+  }
+
+  // Remaining text
+  if (cursor < text.length) html += escHtml(text.slice(cursor));
+
+  highlightOut.innerHTML = html || '<span style="color:#202040;font-style:italic">No entities detected.</span>';
+}
+
+// ── Render stats chips ────────────────────────────────────────────────────────
+function renderStats(entities) {
+  const counts = {};
+  for (const ent of entities) {
+    const k = ent.entity_group;
+    counts[k] = (counts[k] ?? 0) + 1;
+  }
+
+  if (Object.keys(counts).length === 0) {
+    statsPanel.innerHTML = '<span style="font-size:12px;color:#28284a">No entities found</span>';
+    return;
+  }
+
+  statsPanel.innerHTML = Object.entries(counts).map(([k, n]) => {
+    const cfg = ENTITY_CONFIG[k] ?? { name: k, dot: '#808080' };
+    return `<div class="stat-chip">
+      <div class="sc-dot" style="background:${cfg.dot}"></div>
+      <span class="sc-count">${n}</span>
+      <span class="sc-lbl">${cfg.name}${n > 1 ? 's' : ''}</span>
+    </div>`;
+  }).join('') + `<div class="stat-chip" style="margin-left:auto">
+    <span class="sc-count">${entities.length}</span>
+    <span class="sc-lbl">total</span>
+  </div>`;
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── Debounced input ───────────────────────────────────────────────────────────
+textInput.addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  clearInterval(debounceAnim);
+  debounceFill.style.transition = 'none';
+  debounceFill.style.width = '0%';
+  requestAnimationFrame(() => {
+    debounceFill.style.transition = 'width .5s linear';
+    debounceFill.style.width = '100%';
+  });
+  debounceTimer = setTimeout(() => {
+    debounceFill.style.width = '0%';
+    analyse(textInput.value);
+  }, 500);
+});
+
+// ── Sample buttons ────────────────────────────────────────────────────────────
+document.querySelectorAll('.sample-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    textInput.value = SAMPLES[btn.dataset.key] ?? '';
+    textInput.dispatchEvent(new Event('input'));
+    textInput.focus();
+  });
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+initModel();
+</script>
+</body>
+</html>

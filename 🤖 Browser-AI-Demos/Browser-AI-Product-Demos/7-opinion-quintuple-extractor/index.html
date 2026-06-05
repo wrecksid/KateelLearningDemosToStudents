@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Opinion Quintuple Extractor | Browser AI Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #07070f; color: #e2e2f0;
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+
+    /* ── status bar ── */
+    #status-bar {
+      background: #0b0b1a; border-bottom: 1px solid #161630;
+      padding: 7px 20px; display: flex; align-items: center; gap: 10px;
+      font-size: 12.5px; flex-shrink: 0;
+    }
+    .dot { width:9px;height:9px;border-radius:50%;background:#505090;flex-shrink:0;transition:background .4s,box-shadow .4s; }
+    .dot.loading { background:#f59e0b;animation:pulse 1.2s ease-in-out infinite; }
+    .dot.ready   { background:#22c55e;box-shadow:0 0 8px #22c55e88; }
+    .dot.error   { background:#ef4444; }
+    .dot.working { background:#818cf8;animation:pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+    #status-label { color:#8080b0;flex:1; }
+    #prog-wrap { width:140px;height:3px;background:#161630;border-radius:99px;overflow:hidden;flex-shrink:0; }
+    #prog-fill { height:100%;width:0%;background:linear-gradient(90deg,#a855f7,#ec4899);border-radius:99px;transition:width .25s; }
+    #prog-pct  { color:#a855f7;font-size:11.5px;min-width:34px;text-align:right; }
+    .back-link { color:#30305a;text-decoration:none;font-size:12px;flex-shrink:0; }
+    .back-link:hover { color:#7070a0; }
+
+    /* ── header ── */
+    #header {
+      background:#090916;border-bottom:1px solid #131328;
+      padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;
+    }
+    #header h1 { font-size:15px;font-weight:700; }
+    .badge { font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:99px; }
+    .b-purple { background:rgba(168,85,247,.14);border:1px solid rgba(168,85,247,.35);color:#c084fc; }
+    .b-pink   { background:rgba(236,72,153,.12);border:1px solid rgba(236,72,153,.3);color:#f9a8d4; }
+    .b-teal   { background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.3);color:#5eead4; }
+    #model-badge { font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:99px;
+                   background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;
+                   transition:all .3s; }
+
+    /* ── model selector bar ── */
+    #model-bar {
+      background:#08081a;border-bottom:1px solid #10102a;
+      padding:8px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;
+    }
+    #model-bar label { font-size:11.5px;color:#50508a;font-weight:600;white-space:nowrap; }
+    #model-select {
+      flex:1;min-width:220px;max-width:400px;
+      background:#0e0e20;border:1px solid #1e1e38;color:#c0c0e0;
+      font-size:12px;padding:5px 8px;border-radius:7px;outline:none;cursor:pointer;
+    }
+    #model-select:focus { border-color:#6060a0; }
+    #model-select option { background:#0e0e20; }
+    #load-btn {
+      font-size:12px;padding:5px 14px;border-radius:7px;cursor:pointer;
+      background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;
+      font-weight:600;transition:opacity .15s;white-space:nowrap;
+    }
+    #load-btn:hover:not(:disabled) { opacity:.85; }
+    #load-btn:disabled { background:#1e1e38;color:#40405a;cursor:not-allowed; }
+    #model-meta {
+      font-size:11px;color:#35355a;white-space:nowrap;
+      display:flex;align-items:center;gap:6px;
+    }
+    #model-meta .ms-size { color:#5050a0; }
+    #model-meta .ms-note { color:#3a3a60; }
+    .rec-star { color:#f59e0b;font-size:12px; }
+
+    /* ── main split ── */
+    #main { flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:0;overflow:hidden; }
+    @media (max-width:860px) { #main { grid-template-columns:1fr;overflow:visible; } }
+
+    .panel { display:flex;flex-direction:column;min-height:0;overflow:hidden; }
+    #left-panel { border-right:1px solid #131328; }
+
+    .panel-header {
+      padding:10px 16px;border-bottom:1px solid #0f0f22;
+      font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#40407a;
+      display:flex;align-items:center;gap:8px;flex-shrink:0;
+    }
+    .panel-sub { color:#6060a0;font-weight:400;font-size:12px;text-transform:none;letter-spacing:0; }
+
+    .tabs { display:flex;gap:2px;margin-left:auto; }
+    .tab-btn { font-size:11px;padding:3px 10px;border-radius:6px;border:none;
+               background:rgba(255,255,255,.04);color:#50508a;cursor:pointer;transition:all .15s; }
+    .tab-btn.active { background:rgba(168,85,247,.18);color:#c084fc; }
+    .tab-btn:disabled { opacity:.35;cursor:not-allowed; }
+
+    /* presets */
+    #presets { padding:8px 14px;display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0;border-bottom:1px solid #0f0f22; }
+    .preset-btn { font-size:11px;padding:3px 10px;border-radius:99px;
+                  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
+                  color:#8080b0;cursor:pointer;transition:all .15s; }
+    .preset-btn:hover  { background:rgba(168,85,247,.14);border-color:#a855f7;color:#c084fc; }
+    .preset-btn.active { background:rgba(168,85,247,.2);border-color:#a855f7;color:#e2d9f3; }
+
+    /* coref toggle */
+    #coref-toggle-row { padding:8px 14px;border-bottom:1px solid #0f0f22;
+                        display:flex;align-items:center;gap:8px;flex-shrink:0; }
+    #coref-cb { accent-color:#a855f7;width:14px;height:14px;cursor:pointer; }
+    #coref-label { font-size:12px;color:#7070b0;cursor:pointer;user-select:none;
+                   display:flex;align-items:center;gap:6px;flex:1; }
+    #coref-label strong { color:#a0a0d0; }
+    .coref-why { font-size:10.5px;color:#30304a;margin-left:auto;
+                 background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.15);
+                 border-radius:99px;padding:2px 8px;cursor:help; }
+
+    /* pipeline pills */
+    #pipeline-strip { padding:8px 14px;border-bottom:1px solid #0f0f22;
+                      display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap; }
+    .stage-pill { font-size:11px;padding:3px 10px;border-radius:99px;
+                  border:1px solid #1a1a30;color:#40405a;background:rgba(255,255,255,.03);
+                  display:flex;align-items:center;gap:5px;transition:all .3s; }
+    .stage-pill .sd { width:7px;height:7px;border-radius:50%;background:#303050; }
+    .stage-pill.active .sd { background:#f59e0b;animation:pulse 1s ease-in-out infinite; }
+    .stage-pill.done   { border-color:rgba(34,197,94,.3);color:#86efac; }
+    .stage-pill.done .sd { background:#22c55e;animation:none; }
+    .stage-pill.skip   { opacity:.3; }
+    .sarrow { color:#252545;font-size:12px; }
+
+    /* coref result */
+    #coref-result-wrap { display:none;flex-shrink:0;border-bottom:1px solid #0f0f22; }
+    #coref-result-header { padding:6px 14px;display:flex;align-items:center;gap:8px;
+                           font-size:11px;color:#50509a;cursor:pointer;user-select:none; }
+    #coref-result-header:hover { color:#8080c0; }
+    #coref-chevron { transition:transform .2s;margin-left:auto; }
+    #coref-resolved-text { max-height:120px;overflow-y:auto;margin:0 14px 10px;
+                           background:#0a0a1c;border:1px solid #1a1a34;border-radius:8px;
+                           padding:10px 12px;font-size:12.5px;line-height:1.75;color:#9090c8;
+                           white-space:pre-wrap;word-break:break-word; }
+    .coref-resolved { color:#5eead4;text-decoration:underline;text-decoration-style:dotted;cursor:help; }
+
+    /* tab content */
+    .tab-content { flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column; }
+    #review-input { flex:1;padding:14px 16px;background:transparent;border:none;resize:none;
+                    color:#d0d0f0;font-size:13.5px;line-height:1.8;outline:none;font-family:inherit;min-height:140px; }
+    #review-input::placeholder { color:#2a2a4a; }
+    #hl-view { flex:1;padding:14px 16px;font-size:13.5px;line-height:1.9;
+               color:#c8c8e8;overflow-y:auto;white-space:pre-wrap;word-break:break-word; }
+
+    mark { border-radius:3px;padding:1px 0;cursor:default; }
+    mark.hl-quote-pos { background:rgba(34,197,94,.09);color:inherit; }
+    mark.hl-quote-neg { background:rgba(239,68,68,.09);color:inherit; }
+    mark.hl-quote-neu { background:rgba(148,163,184,.07);color:inherit; }
+    mark.hl-object    { background:rgba(99,102,241,.22);color:#c7d2fe; }
+    mark.hl-feature   { background:rgba(245,158,11,.28);color:#fde68a;font-weight:700; }
+    mark.hl-holder    { background:rgba(168,85,247,.22);color:#e9d5ff; }
+    mark.hl-time      { background:rgba(6,182,212,.18);color:#a5f3fc;font-style:italic; }
+    mark[title]:hover { outline:1px solid rgba(255,255,255,.22); }
+
+    /* legend */
+    #legend { padding:7px 14px;border-top:1px solid #0f0f22;
+              display:flex;gap:9px;flex-wrap:wrap;flex-shrink:0; }
+    .leg { display:flex;align-items:center;gap:5px;font-size:11px;color:#40405a; }
+    .leg mark { font-size:10.5px;padding:1px 6px;font-weight:600;cursor:default; }
+
+    #qinfo { margin:0 14px 8px;background:#0d0d22;border:1px solid #1a1a38;
+             border-radius:8px;padding:8px 12px;font-size:11.5px;color:#44448a;line-height:1.6;flex-shrink:0; }
+    #qinfo strong { color:#6060a8; }
+    #qinfo code { background:rgba(168,85,247,.12);padding:1px 5px;border-radius:4px;font-size:10px;color:#c084fc; }
+
+    #extract-btn { margin:0 14px 12px;padding:10px 0;
+                   background:linear-gradient(135deg,#7c3aed,#a855f7);
+                   border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;
+                   cursor:pointer;transition:opacity .15s,transform .1s;flex-shrink:0; }
+    #extract-btn:hover:not(:disabled) { opacity:.88; }
+    #extract-btn:active:not(:disabled) { transform:scale(.98); }
+    #extract-btn:disabled { background:#1e1e38;color:#40405a;cursor:not-allowed; }
+
+    /* right panel */
+    #results-area { flex:1;overflow-y:auto;padding:14px; }
+    #empty-state { display:flex;flex-direction:column;align-items:center;justify-content:center;
+                   min-height:260px;gap:12px;text-align:center; }
+    #empty-state .icon { font-size:44px;opacity:.25; }
+    #empty-state p { color:#30305a;font-size:13px;max-width:260px;line-height:1.6; }
+    #spinner { display:none;flex-direction:column;align-items:center;justify-content:center;min-height:260px;gap:14px; }
+    .spin-ring { width:38px;height:38px;border:3px solid #1a1a32;border-top-color:#a855f7;
+                 border-radius:50%;animation:spin .8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    #spinner p { color:#50508a;font-size:13px; }
+    #raw-stream { display:none;background:#0a0a18;border:1px solid #1a1a30;border-radius:8px;
+                  padding:10px 12px;margin-bottom:10px;font-family:'Fira Code',monospace;
+                  font-size:11px;color:#5050a0;line-height:1.55;white-space:pre-wrap;
+                  word-break:break-word;max-height:110px;overflow-y:auto; }
+
+    .qcard { background:#0e0e1e;border:1px solid #1c1c32;border-radius:12px;
+             padding:12px 14px;margin-bottom:10px;
+             display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;
+             animation:fadeIn .3s ease;cursor:pointer;transition:border-color .2s; }
+    .qcard:hover { border-color:#2a2a48; }
+    .qcard.hl-active { border-color:#a855f7;box-shadow:0 0 0 1px rgba(168,85,247,.25); }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none} }
+    .qcard-header { grid-column:1/-1;display:flex;align-items:center;gap:8px;margin-bottom:2px; }
+    .qcard-num { width:22px;height:22px;border-radius:50%;flex-shrink:0;
+                 background:rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.4);
+                 color:#c084fc;font-size:11px;font-weight:700;
+                 display:flex;align-items:center;justify-content:center; }
+    .qcard-title { font-size:12.5px;font-weight:600;color:#c0c0e0;flex:1;
+                   white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .sbadge { font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px; }
+    .sbadge.pos { background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.35);color:#86efac; }
+    .sbadge.neg { background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5; }
+    .sbadge.neu { background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.25);color:#94a3b8; }
+    .coref-badge { font-size:10px;padding:1px 7px;border-radius:99px;margin-left:2px;
+                   background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.3);color:#5eead4; }
+    .qfield { display:flex;flex-direction:column;gap:3px; }
+    .qlabel { font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#30305a; }
+    .qval { font-size:12px;color:#b0b0d8;background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.06);border-radius:5px;padding:3px 7px;
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .qval.v-object  { border-color:rgba(99,102,241,.25);color:#c7d2fe; }
+    .qval.v-feature { border-color:rgba(245,158,11,.3);color:#fde68a;font-weight:600; }
+    .qval.v-holder  { border-color:rgba(168,85,247,.25);color:#e9d5ff; }
+    .qval.v-time    { border-color:rgba(6,182,212,.22);color:#a5f3fc;font-style:italic; }
+
+    #results-footer { display:none;padding:8px 14px;border-top:1px solid #0f0f22;
+                      flex-shrink:0;align-items:center;gap:8px; }
+    #count-badge { font-size:12px;color:#6060a0; }
+    #count-badge strong { color:#a855f7; }
+    #copy-btn,#toggle-raw-btn { font-size:11.5px;padding:4px 12px;border-radius:7px;cursor:pointer;transition:all .15s; }
+    #copy-btn       { margin-left:auto;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.3);color:#c084fc; }
+    #copy-btn:hover { background:rgba(168,85,247,.22); }
+    #toggle-raw-btn { background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#5050a0; }
+    #toggle-raw-btn:hover { color:#8080c0; }
+    .parse-error { background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);
+                   border-radius:8px;padding:12px 14px;margin-bottom:10px;
+                   font-size:12.5px;color:#fca5a5;line-height:1.6; }
+
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#1e1e38;border-radius:99px; }
+  </style>
+</head>
+<body>
+
+<!-- file:// detection -->
+<div id="fp-warn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a0800;border-bottom:2px solid #f59e0b;padding:12px 16px;font-family:system-ui,sans-serif;font-size:13px;color:#fde68a;gap:12px;align-items:flex-start;">
+  <span style="font-size:20px;flex-shrink:0">⚠️</span>
+  <div><strong style="color:#fbbf24">Cannot run as file:// — serve over HTTP instead.</strong><br>
+  Double-click <code style="background:rgba(255,255,255,.12);padding:1px 6px;border-radius:4px">start_demos.bat</code> in the parent folder, or run <code style="background:rgba(255,255,255,.12);padding:1px 6px;border-radius:4px">python -m http.server 8080</code> and open <a href="http://localhost:8080" style="color:#60a5fa">http://localhost:8080</a>.</div>
+  <button onclick="document.getElementById('fp-warn').style.display='none'" style="margin-left:auto;flex-shrink:0;background:transparent;border:1px solid #92400e;color:#fbbf24;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px">✕</button>
+</div>
+<script>if(location.protocol==='file:'){var w=document.getElementById('fp-warn');w.style.display='flex';}</script>
+
+<!-- Status bar -->
+<div id="status-bar">
+  <div class="dot loading" id="dot"></div>
+  <span id="status-label">⚪ Loading model…</span>
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <span id="prog-pct">0%</span>
+  <a class="back-link" href="../index.html">← Hub</a>
+</div>
+
+<!-- Header -->
+<div id="header">
+  <span style="font-size:20px">💬</span>
+  <h1>Opinion Quintuple Extractor</h1>
+  <span class="badge b-purple">Opinion Mining</span>
+  <span class="badge b-pink">ABSA</span>
+  <span class="badge b-teal">Co-ref Resolution</span>
+  <span id="model-badge">Qwen2.5-1.5B</span>
+  <span style="font-size:11px;color:#30305a;margin-left:auto">Ctrl+Enter to extract</span>
+</div>
+
+<!-- Model selector bar -->
+<div id="model-bar">
+  <label for="model-select">🧠 Model</label>
+  <select id="model-select" onchange="onModelSelectChange()">
+    <option value="onnx-community/Qwen2.5-1.5B-Instruct" selected>Qwen2.5-1.5B-Instruct</option>
+    <option value="onnx-community/Qwen2.5-0.5B-Instruct">Qwen2.5-0.5B-Instruct</option>
+    <option value="onnx-community/Qwen2.5-3B-Instruct">Qwen2.5-3B-Instruct</option>
+    <option value="onnx-community/SmolLM2-360M-Instruct">SmolLM2-360M-Instruct</option>
+    <option value="onnx-community/Llama-3.2-1B-Instruct">Llama-3.2-1B-Instruct</option>
+  </select>
+  <button id="load-btn" onclick="loadSelectedModel()" disabled>⏳ Loading…</button>
+  <div id="model-meta">
+    <span class="ms-size" id="ms-size">~900 MB</span>
+    <span class="ms-note" id="ms-note">· Best JSON reliability + co-ref accuracy</span>
+    <span class="rec-star" id="ms-star">⭐ Recommended</span>
+  </div>
+</div>
+
+<div id="main">
+
+  <!-- ════ LEFT PANEL ════ -->
+  <div id="left-panel" class="panel">
+    <div class="panel-header">
+      Review
+      <span class="panel-sub" id="left-subtitle">select a preset or type your own</span>
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-edit-btn" onclick="switchTab('edit')">✏️ Edit</button>
+        <button class="tab-btn" id="tab-hl-btn" onclick="switchTab('hl')" disabled>🎨 Highlights</button>
+      </div>
+    </div>
+
+    <div id="presets">
+      <button class="preset-btn active" onclick="loadPreset(0)">📱 iPhone</button>
+      <button class="preset-btn"        onclick="loadPreset(1)">🏨 Hotel</button>
+      <button class="preset-btn"        onclick="loadPreset(2)">💻 Laptop</button>
+      <button class="preset-btn"        onclick="loadPreset(3)">🍕 Restaurant</button>
+    </div>
+
+    <div id="coref-toggle-row">
+      <input type="checkbox" id="coref-cb" checked />
+      <label id="coref-label" for="coref-cb">
+        <strong>Co-reference resolution</strong> — rewrite pronouns before extraction
+        <span class="coref-why" title='"It was nice" → "The iPhone was nice". Prevents object being filled with "it" or "the phone" instead of the product name.'>Why?</span>
+      </label>
+    </div>
+
+    <div id="pipeline-strip">
+      <div class="stage-pill" id="stage1-pill"><div class="sd"></div>Stage 1: Co-ref Rewrite</div>
+      <span class="sarrow">→</span>
+      <div class="stage-pill" id="stage2-pill"><div class="sd"></div>Stage 2: Quintuple Extraction</div>
+    </div>
+
+    <div id="coref-result-wrap">
+      <div id="coref-result-header" onclick="toggleCorefPanel()">
+        <span>🔗</span>
+        <span id="coref-header-label">Resolved text — click to expand</span>
+        <span id="coref-chevron">▶</span>
+      </div>
+      <div id="coref-resolved-text" style="display:none"></div>
+    </div>
+
+    <div id="tab-edit-content" class="tab-content">
+      <textarea id="review-input" spellcheck="false" placeholder="Type or paste a customer review here…"></textarea>
+    </div>
+    <div id="tab-hl-content" class="tab-content" style="display:none">
+      <div id="hl-view"></div>
+    </div>
+
+    <div id="legend">
+      <div class="leg"><mark class="hl-feature">feature</mark><span>fjk</span></div>
+      <div class="leg"><mark class="hl-holder">holder</mark><span>hi</span></div>
+      <div class="leg"><mark class="hl-time">time</mark><span>tl</span></div>
+      <div class="leg"><mark class="hl-object">object</mark><span>oj</span></div>
+      <div class="leg" style="gap:3px">
+        <mark class="hl-quote-pos" style="padding:1px 4px;font-size:10.5px;font-weight:600">+</mark>
+        <mark class="hl-quote-neg" style="padding:1px 4px;font-size:10.5px;font-weight:600">−</mark>
+        <mark class="hl-quote-neu" style="padding:1px 4px;font-size:10.5px;font-weight:600">∅</mark>
+        <span>sentiment wash</span>
+      </div>
+    </div>
+
+    <div id="qinfo">
+      <strong>Quintuple</strong> &nbsp;
+      <code>oj</code> object &nbsp;·&nbsp; <code>fjk</code> feature &nbsp;·&nbsp;
+      <code>soijkl</code> sentiment &nbsp;·&nbsp; <code>hi</code> holder &nbsp;·&nbsp; <code>tl</code> time
+    </div>
+
+    <button id="extract-btn" disabled onclick="extractQuintuples()">⏳ Loading Model…</button>
+  </div>
+
+  <!-- ════ RIGHT PANEL ════ -->
+  <div id="right-panel" class="panel">
+    <div class="panel-header">
+      Extracted Quintuples
+      <span class="panel-sub" id="right-subtitle">results appear here</span>
+    </div>
+    <div id="results-area">
+      <div id="empty-state">
+        <div class="icon">🔍</div>
+        <p>Select a model, paste a review, and click <strong>Extract Quintuples</strong>.<br>
+           Switch models to compare output quality side-by-side.</p>
+      </div>
+      <div id="spinner">
+        <div class="spin-ring"></div>
+        <p id="spin-label">Analysing…</p>
+      </div>
+      <div id="raw-stream"></div>
+      <div id="quintuples-list"></div>
+      <div class="parse-error" id="parse-error" style="display:none">
+        <strong>⚠️ Could not parse JSON from model output.</strong><br>
+        Raw output shown above. Larger models (Qwen2.5-1.5B+) rarely hit this error.
+      </div>
+    </div>
+    <div id="results-footer">
+      <span id="count-badge"></span>
+      <button id="toggle-raw-btn" onclick="toggleRaw()">Show raw JSON</button>
+      <button id="copy-btn" onclick="copyJSON()">⎘ Copy JSON</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Load overlay -->
+<div id="load-overlay" style="position:fixed;inset:0;background:#07070f;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;">
+  <div style="font-size:46px">💬</div>
+  <div style="font-size:15px;font-weight:700;color:#c0c0e0">Opinion Quintuple Extractor</div>
+  <div style="font-size:12.5px;color:#50508a;text-align:center;max-width:320px;line-height:1.6">
+    Downloading <span id="overlay-model-name">Qwen2.5-1.5B-Instruct</span>…<br>
+    <span style="color:#35355a;font-size:11px">First load only — caches in your browser after that.</span>
+  </div>
+  <div style="width:260px;height:4px;background:#1a1a30;border-radius:99px;overflow:hidden">
+    <div id="overlay-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:99px;transition:width .25s"></div>
+  </div>
+  <div id="overlay-pct" style="font-size:12px;color:#a855f7">0%</div>
+</div>
+
+<script type="module">
+import { pipeline, TextStreamer } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/+esm';
+
+// ── Model catalogue ───────────────────────────────────────────────────────────
+const MODEL_CATALOGUE = {
+  'onnx-community/Qwen2.5-1.5B-Instruct': {
+    label: 'Qwen2.5-1.5B',
+    size:  '~900 MB',
+    note:  'Best JSON reliability + co-ref accuracy',
+    star:  '⭐ Recommended'
+  },
+  'onnx-community/Qwen2.5-0.5B-Instruct': {
+    label: 'Qwen2.5-0.5B',
+    size:  '~300 MB',
+    note:  'Good quality, faster download',
+    star:  ''
+  },
+  'onnx-community/Qwen2.5-3B-Instruct': {
+    label: 'Qwen2.5-3B',
+    size:  '~1.9 GB',
+    note:  'Highest accuracy, large download',
+    star:  ''
+  },
+  'onnx-community/SmolLM2-360M-Instruct': {
+    label: 'SmolLM2-360M',
+    size:  '~200 MB',
+    note:  'Smallest / fastest load, limited accuracy',
+    star:  ''
+  },
+  'onnx-community/Llama-3.2-1B-Instruct': {
+    label: 'Llama-3.2-1B',
+    size:  '~650 MB',
+    note:  'Good instruction following',
+    star:  ''
+  }
+};
+
+const DEFAULT_MODEL = 'onnx-community/Qwen2.5-1.5B-Instruct';
+
+// ── Prompts ───────────────────────────────────────────────────────────────────
+const COREF_PROMPT = `You are a co-reference resolution system. Rewrite the given review replacing ALL pronouns and abbreviated references with their explicit full referents.
+
+Resolve: it, its, they, them, their, this, that, he, she, him, her, the product, the item, the place, the device, the phone, the hotel, the food, the room, etc.
+
+Rules:
+1. Replace every pronoun/reference with the specific entity it refers to
+2. Keep ALL original sentences — do not add, remove, or reorder content
+3. Do not change any words other than the resolved references
+4. Output ONLY the rewritten text — no explanation
+
+Example:
+Input: "I bought an iPhone. It was amazing. My sister tried it and she loved it too."
+Output: "I bought an iPhone. The iPhone was amazing. My sister tried the iPhone and my sister loved the iPhone too."`;
+
+const EXTRACT_PROMPT = `You are an expert opinion mining system. Extract ALL opinion quintuples from the customer review.
+
+Each quintuple must have exactly 7 fields:
+- "object"      : the main product or entity (e.g. "iPhone", "hotel")
+- "feature"     : the specific aspect discussed (e.g. "battery life", "touch screen", "price")
+- "sentiment"   : exactly one of: "positive", "negative", or "neutral"
+- "holder"      : normalised holder — "reviewer" for the writer, otherwise describe (e.g. "reviewer's mother")
+- "holder_text" : the EXACT word(s) from the review for the holder (e.g. "I", "my mother", "she")
+- "time"        : time reference from the text, or null if none
+- "quote"       : the EXACT phrase from the review containing this opinion — copy verbatim
+
+Rules:
+1. Extract EVERY opinion, including third-party opinions
+2. Copy "holder_text" and "quote" verbatim from the text
+3. Output ONLY a valid JSON array — start with [ and end with ]`;
+
+// ── Preset reviews ────────────────────────────────────────────────────────────
+const PRESETS = [
+  { label:'iPhone', text:`I bought an iPhone a few days ago. It was such a nice phone. The touch screen was really cool. The voice quality was clear too. Although the battery life was not long, that is ok for me. However, my mother was mad with me as I did not tell her before I bought the phone. She also thought the phone was too expensive, and wanted me to return it to the shop.` },
+  { label:'Hotel',  text:`We stayed at this hotel for three nights last summer. The location was perfect — right in the city centre. The rooms were clean and spacious, and the bed was incredibly comfortable. However, the breakfast was disappointing and overpriced for what was served. The reception staff were friendly and helpful, but the housekeeping team was slow to respond to requests. My wife loved the rooftop pool, though I thought it was too crowded in the evenings.` },
+  { label:'Laptop', text:`I purchased this laptop two weeks ago for university. The display is absolutely stunning — the colours are vivid and the resolution is sharp. It boots up in seconds and handles multitasking very smoothly. Unfortunately the keyboard feels flimsy and the trackpad occasionally misregisters clicks. The battery lasts about 6 hours which is acceptable. My colleague borrowed it for a presentation and said the speakers were too quiet for a large room.` },
+  { label:'Restaurant', text:`We visited this restaurant for my wife's birthday last Friday. The ambiance was romantic and beautifully decorated. The pasta and risotto were absolutely delicious. However, we waited nearly 45 minutes for our main course, which was unacceptable. Our waiter was friendly and apologised for the delay. The dessert menu was limited but the tiramisu was excellent. My wife felt the wine list was overpriced for the quality offered.` }
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let generator      = null;
+let currentModelId = null;
+let lastJSON       = null;
+let rawShown       = false;
+let resolvedText   = null;
+let corefExpanded  = false;
+
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const dot         = document.getElementById('dot');
+const statusLabel = document.getElementById('status-label');
+const progFill    = document.getElementById('prog-fill');
+const progPct     = document.getElementById('prog-pct');
+const overlayBar  = document.getElementById('overlay-bar');
+const overlayPct  = document.getElementById('overlay-pct');
+const overlay     = document.getElementById('load-overlay');
+const extractBtn  = document.getElementById('extract-btn');
+const reviewInput = document.getElementById('review-input');
+const emptyState  = document.getElementById('empty-state');
+const spinner     = document.getElementById('spinner');
+const spinLabel   = document.getElementById('spin-label');
+const rawStream   = document.getElementById('raw-stream');
+const quintList   = document.getElementById('quintuples-list');
+const parseError  = document.getElementById('parse-error');
+const footer      = document.getElementById('results-footer');
+const countBadge  = document.getElementById('count-badge');
+const rightSub    = document.getElementById('right-subtitle');
+const leftSub     = document.getElementById('left-subtitle');
+const hlView      = document.getElementById('hl-view');
+const tabHlBtn    = document.getElementById('tab-hl-btn');
+const stage1Pill  = document.getElementById('stage1-pill');
+const stage2Pill  = document.getElementById('stage2-pill');
+const corefWrap   = document.getElementById('coref-result-wrap');
+const corefText   = document.getElementById('coref-resolved-text');
+const loadBtn     = document.getElementById('load-btn');
+const modelSelect = document.getElementById('model-select');
+const modelBadge  = document.getElementById('model-badge');
+
+// ── Model catalogue meta updater ──────────────────────────────────────────────
+window.onModelSelectChange = function() {
+  const id   = modelSelect.value;
+  const meta = MODEL_CATALOGUE[id] || {};
+  document.getElementById('ms-size').textContent = meta.size || '';
+  document.getElementById('ms-note').textContent = '· ' + (meta.note || '');
+  document.getElementById('ms-star').textContent = meta.star || '';
+  // Distinguish: already loaded vs needs loading
+  if (id === currentModelId) {
+    loadBtn.textContent = '✓ Loaded';
+    loadBtn.disabled    = true;
+  } else {
+    loadBtn.textContent = 'Load Model';
+    loadBtn.disabled    = false;
+  }
+};
+
+// ── Load a model ──────────────────────────────────────────────────────────────
+async function doLoadModel(modelId, showOverlay) {
+  const meta = MODEL_CATALOGUE[modelId] || {};
+  extractBtn.disabled   = true;
+  loadBtn.disabled      = true;
+  loadBtn.textContent   = '⏳ Loading…';
+  dot.className         = 'dot loading';
+  progFill.style.width  = '0%';
+  progPct.textContent   = '0%';
+  document.getElementById('overlay-model-name').textContent = meta.label || modelId.split('/')[1];
+  if (showOverlay) overlay.style.display = 'flex';
+
+  try {
+    let lastFile = '';
+    generator = await pipeline('text-generation', modelId, {
+      dtype: 'q4',
+      progress_callback: ({ status, file, progress }) => {
+        if (status === 'progress' && file) {
+          const pct   = Math.round(progress ?? 0);
+          const short = file.split('/').pop();
+          if (short !== lastFile) lastFile = short;
+          statusLabel.textContent = `↓ ${short} — ${pct}%`;
+          progFill.style.width    = pct + '%';
+          progPct.textContent     = pct + '%';
+          overlayBar.style.width  = pct + '%';
+          overlayPct.textContent  = pct + '%';
+        }
+      }
+    });
+
+    currentModelId        = modelId;
+    dot.className         = 'dot ready';
+    statusLabel.textContent = `✓ ${meta.label || modelId.split('/')[1]} ready`;
+    progFill.style.width  = '100%';
+    progPct.textContent   = '100%';
+    extractBtn.disabled   = false;
+    extractBtn.textContent = '🔍  Extract Quintuples';
+    overlay.style.display = 'none';
+    modelBadge.textContent = meta.label || modelId.split('/')[1];
+    loadBtn.textContent   = '✓ Loaded';
+    loadBtn.disabled      = true;
+
+  } catch (err) {
+    dot.className = 'dot error';
+    statusLabel.textContent = '✗ Failed: ' + err.message;
+    loadBtn.textContent = 'Retry';
+    loadBtn.disabled    = false;
+    overlay.innerHTML = `<div style="color:#f87171;font-size:14px;text-align:center;padding:40px">
+      ⚠️ Load Error<br><span style="font-size:12px;color:#7a3030">${err.message}</span></div>`;
+    console.error(err);
+  }
+}
+
+// Initial load
+doLoadModel(DEFAULT_MODEL, true);
+
+// ── Switch model (explicit Load button) ──────────────────────────────────────
+window.loadSelectedModel = function() {
+  doLoadModel(modelSelect.value, false);
+};
+
+// ── Presets ───────────────────────────────────────────────────────────────────
+window.loadPreset = function(idx) {
+  reviewInput.value = PRESETS[idx].text;
+  document.querySelectorAll('.preset-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  switchTab('edit');
+  resetPipelineUI();
+};
+loadPreset(0);
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+window.switchTab = function(tab) {
+  document.getElementById('tab-edit-content').style.display = tab==='edit' ? 'flex' : 'none';
+  document.getElementById('tab-hl-content').style.display   = tab==='hl'   ? 'flex' : 'none';
+  document.getElementById('tab-edit-btn').classList.toggle('active', tab==='edit');
+  tabHlBtn.classList.toggle('active', tab==='hl');
+};
+
+// ── Co-ref panel ──────────────────────────────────────────────────────────────
+window.toggleCorefPanel = function() {
+  corefExpanded = !corefExpanded;
+  corefText.style.display = corefExpanded ? 'block' : 'none';
+  document.getElementById('coref-chevron').textContent = corefExpanded ? '▼' : '▶';
+};
+
+// ── Pipeline UI helpers ───────────────────────────────────────────────────────
+function setPill(pill, state) { pill.className = 'stage-pill' + (state ? ' '+state : ''); }
+function resetPipelineUI() {
+  setPill(stage1Pill,''); setPill(stage2Pill,'');
+  corefWrap.style.display = 'none'; resolvedText = null;
+}
+
+// ── One generation pass ───────────────────────────────────────────────────────
+async function generate(systemPrompt, userContent, primer, onToken) {
+  const messages = [
+    { role:'system',    content:systemPrompt },
+    { role:'user',      content:userContent  },
+    { role:'assistant', content:primer       }
+  ];
+  let acc = primer;
+  const streamer = new TextStreamer(generator.tokenizer, {
+    skip_prompt: true,
+    callback_function: tok => { acc += tok; if (onToken) onToken(acc); }
+  });
+  await generator(messages, { max_new_tokens: 900, do_sample: false, streamer });
+  return acc;
+}
+
+// ── Main extraction ───────────────────────────────────────────────────────────
+window.extractQuintuples = async function() {
+  const originalReview = reviewInput.value.trim();
+  if (!originalReview || !generator) return;
+  const useCoref = document.getElementById('coref-cb').checked;
+
+  extractBtn.disabled    = true;
+  extractBtn.textContent = '⏳ Running pipeline…';
+  dot.className          = 'dot working';
+  emptyState.style.display   = 'none';
+  spinner.style.display      = 'flex';
+  rawStream.style.display    = 'none'; rawStream.textContent = '';
+  quintList.innerHTML        = '';
+  parseError.style.display   = 'none';
+  footer.style.display       = 'none';
+  rawShown = false;
+  document.getElementById('toggle-raw-btn').textContent = 'Show raw JSON';
+  tabHlBtn.disabled = true;
+  switchTab('edit');
+  corefWrap.style.display = 'none'; resolvedText = null;
+  setPill(stage1Pill, useCoref ? '' : 'skip');
+  setPill(stage2Pill, '');
+
+  let reviewForExtraction = originalReview;
+
+  // Stage 1: Co-reference rewrite
+  if (useCoref) {
+    setPill(stage1Pill, 'active');
+    statusLabel.textContent = '⚙ Stage 1 — resolving co-references…';
+    spinLabel.textContent   = 'Stage 1: Rewriting pronouns…';
+    try {
+      const out = await generate(
+        COREF_PROMPT,
+        `Resolve all co-references in this review:\n\n"${originalReview}"`,
+        '', null
+      );
+      resolvedText = out.trim().replace(/^["']|["']$/g, '');
+      reviewForExtraction = resolvedText || originalReview;
+    } catch (err) {
+      console.warn('Co-ref stage failed, using original:', err);
+    }
+    setPill(stage1Pill, 'done');
+
+    if (resolvedText) {
+      corefWrap.style.display = 'block';
+      document.getElementById('coref-header-label').textContent = 'Resolved text — click to expand';
+      corefText.innerHTML = buildCorefDiff(originalReview, resolvedText);
+      corefExpanded = false;
+      document.getElementById('coref-chevron').textContent = '▶';
+      corefText.style.display = 'none';
+    }
+  } else {
+    setPill(stage1Pill, 'skip');
+  }
+
+  // Stage 2: Quintuple extraction
+  setPill(stage2Pill, 'active');
+  statusLabel.textContent = '⚙ Stage 2 — extracting quintuples…';
+  spinLabel.textContent   = 'Stage 2: Extracting quintuples…';
+  let rawOutput = '[';
+  try {
+    rawOutput = await generate(
+      EXTRACT_PROMPT,
+      `Extract opinion quintuples from this review:\n\n"${reviewForExtraction}"`,
+      '[',
+      acc => { rawStream.textContent = acc; rawStream.scrollTop = rawStream.scrollHeight; }
+    );
+  } catch (err) { console.error('Extraction error:', err); }
+  setPill(stage2Pill, 'done');
+  spinner.style.display = 'none';
+
+  const quintuples = parseQuintuples(rawOutput);
+  if (quintuples && quintuples.length > 0) {
+    lastJSON = quintuples;
+    renderCards(quintuples, useCoref && !!resolvedText);
+    buildHighlights(reviewForExtraction, quintuples);
+    tabHlBtn.disabled    = false;
+    switchTab('hl');
+    rightSub.textContent = quintuples.length + ' quintuple' + (quintuples.length!==1?'s':'') + ' found';
+    leftSub.textContent  = resolvedText ? 'highlights on resolved text' : 'hover for details';
+    countBadge.innerHTML = `<strong>${quintuples.length}</strong> quintuple${quintuples.length!==1?'s':''} extracted`;
+    footer.style.display = 'flex';
+  } else {
+    rawStream.style.display  = 'block';
+    parseError.style.display = 'block';
+    rightSub.textContent     = 'parse error — see raw output';
+    lastJSON = null;
+  }
+
+  dot.className          = 'dot ready';
+  statusLabel.textContent = `✓ ${MODEL_CATALOGUE[currentModelId]?.label || 'Model'} · pipeline complete`;
+  extractBtn.disabled    = false;
+  extractBtn.textContent = '🔍  Extract Quintuples';
+};
+
+// ── Co-ref diff ───────────────────────────────────────────────────────────────
+function buildCorefDiff(original, resolved) {
+  const origSet = new Set(original.split(/\s+/).map(w => w.toLowerCase().replace(/[^a-z0-9]/g,'')));
+  return resolved.split(/\s+/).map(word => {
+    const clean = word.toLowerCase().replace(/[^a-z0-9]/g,'');
+    return (clean && !origSet.has(clean))
+      ? `<span class="coref-resolved" title="Resolved from pronoun/reference">${esc(word)}</span>`
+      : esc(word);
+  }).join(' ');
+}
+
+// ── JSON parser ───────────────────────────────────────────────────────────────
+function parseQuintuples(text) {
+  if (!text) return null;
+  const ok = arr => Array.isArray(arr) && arr.length > 0 && arr[0].object;
+  const tries = [
+    () => { const m = text.match(/\[[\s\S]*\]/); return m && JSON.parse(m[0]); },
+    () => JSON.parse(text.trim().replace(/```json|```/g,'')),
+    () => JSON.parse(text.trim().replace(/,\s*$/,'') + ']')
+  ];
+  for (const fn of tries) { try { const r=fn(); if(ok(r)) return r; } catch {} }
+  return null;
+}
+
+// ── Render cards ──────────────────────────────────────────────────────────────
+function renderCards(qs, corefUsed) {
+  quintList.innerHTML = '';
+  qs.forEach((q, i) => {
+    const sc = sentClass(q.sentiment);
+    const labels = { pos:'😊 Positive', neg:'😠 Negative', neu:'😐 Neutral' };
+    const corefTag = corefUsed ? `<span class="coref-badge" title="Extracted from co-reference resolved text">🔗 co-ref</span>` : '';
+    const card = document.createElement('div');
+    card.className = 'qcard'; card.dataset.qi = i;
+    card.innerHTML = `
+      <div class="qcard-header">
+        <div class="qcard-num">${i+1}</div>
+        <div class="qcard-title">${esc(q.object)} · ${esc(q.feature)}</div>
+        <span class="sbadge ${sc}">${labels[sc]}</span>${corefTag}
+      </div>
+      <div class="qfield"><div class="qlabel">oj · Object</div>
+        <div class="qval v-object" title="${esc(q.object)}">${esc(q.object||'—')}</div></div>
+      <div class="qfield"><div class="qlabel">fjk · Feature</div>
+        <div class="qval v-feature" title="${esc(q.feature)}">${esc(q.feature||'—')}</div></div>
+      <div class="qfield"><div class="qlabel">hi · Holder</div>
+        <div class="qval v-holder" title="${esc(q.holder)}">${esc(q.holder||'—')}</div></div>
+      <div class="qfield"><div class="qlabel">tl · Time</div>
+        <div class="qval v-time" title="${esc(q.time)}">${esc(q.time||'—')}</div></div>`;
+    card.addEventListener('click', () => scrollToHighlight(i));
+    quintList.appendChild(card);
+  });
+}
+
+// ── Highlights ────────────────────────────────────────────────────────────────
+function buildHighlights(text, qs) {
+  const spans = [];
+  const add = (needle, cls, tip, priority, qi) => {
+    if (!needle) return;
+    const idx = text.toLowerCase().indexOf(needle.toLowerCase());
+    if (idx < 0) return;
+    spans.push({ start:idx, end:idx+needle.length, cls, tip, priority, qi });
+  };
+  qs.forEach((q, qi) => {
+    const sc  = sentClass(q.sentiment);
+    const tip = `Q${qi+1}: ${q.object} · ${q.feature} [${q.sentiment}] by ${q.holder}`;
+    add(q.quote,       `hl-quote-${sc}`, tip,                        1, qi);
+    add(q.object,      'hl-object',  `Object (oj): ${q.object}`,     2, qi);
+    add(q.time,        'hl-time',    `Time (tl): ${q.time}`,          3, qi);
+    add(q.holder_text, 'hl-holder',  `Holder (hi): ${q.holder}`,      4, qi);
+    add(q.feature,     'hl-feature', `Feature (fjk): ${q.feature}`,   5, qi);
+  });
+  const map = new Array(text.length).fill(null);
+  [...spans].sort((a,b)=>a.priority-b.priority).forEach(sp => {
+    for (let i=sp.start;i<sp.end;i++) map[i]=sp;
+  });
+  let html='', i=0;
+  while (i < text.length) {
+    const sp=map[i]; let j=i+1;
+    while (j<text.length && map[j]===sp) j++;
+    const seg = esc(text.slice(i,j)).replace(/\n/g,'<br>');
+    html += sp ? `<mark class="${sp.cls}" title="${esc(sp.tip)}" data-qi="${sp.qi}">${seg}</mark>` : seg;
+    i=j;
+  }
+  hlView.innerHTML = html;
+  hlView.querySelectorAll('mark[data-qi]').forEach(el => {
+    el.addEventListener('click', () => scrollToCard(parseInt(el.dataset.qi)));
+  });
+}
+
+function scrollToHighlight(qi) {
+  switchTab('hl');
+  const m = hlView.querySelector(`mark[data-qi="${qi}"]`);
+  if (m) { m.scrollIntoView({behavior:'smooth',block:'center'}); m.style.outline='2px solid #a855f7'; setTimeout(()=>m.style.outline='',1200); }
+}
+function scrollToCard(qi) {
+  const c = quintList.querySelector(`.qcard[data-qi="${qi}"]`);
+  if (!c) return;
+  c.scrollIntoView({behavior:'smooth',block:'center'});
+  c.classList.add('hl-active'); setTimeout(()=>c.classList.remove('hl-active'),1000);
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function sentClass(s) { const v=(s||'').toLowerCase(); return v.includes('pos')?'pos':v.includes('neg')?'neg':'neu'; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+window.copyJSON = function() {
+  if (!lastJSON) return;
+  navigator.clipboard.writeText(JSON.stringify(lastJSON,null,2)).then(()=>{
+    const b=document.getElementById('copy-btn');b.textContent='✓ Copied!';
+    setTimeout(()=>b.textContent='⎘ Copy JSON',1800);
+  });
+};
+window.toggleRaw = function() {
+  rawShown=!rawShown; rawStream.style.display=rawShown?'block':'none';
+  document.getElementById('toggle-raw-btn').textContent=rawShown?'Hide raw JSON':'Show raw JSON';
+};
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey)&&e.key==='Enter') { e.preventDefault(); if(!extractBtn.disabled) extractBtn.click(); }
+});
+</script>
+
+</body>
+</html>
