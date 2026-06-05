@@ -38,6 +38,10 @@ Open `index.html` in your browser.
 - **Fewer hallucinations**: Constrained by graph structure
 - **Scalable**: Can handle large knowledge bases efficiently
 
+## Note on Document Upload
+
+This demo uses a predefined knowledge graph. For document upload capabilities, see [Standard RAG](../StandardRAG/).
+
 ## File Structure
 
 ```
