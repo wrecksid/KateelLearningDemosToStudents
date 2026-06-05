@@ -28,6 +28,7 @@ python classificationdemo.py
 | Course | Catalog | Demos | Key Topics |
 |--------|---------|-------|------------|
 | **AI/ML Financial Services** | [Catalog](CourseCatalogs/AI_ML_Financial_Services_Catalog.md) | 6 | Banking, fraud, credit, wealth management |
+| **Wealth Management** | [Catalog](CourseCatalogs/WealthManagement/README.md) | 3+ | Portfolio theory, options pricing, NPV |
 | **Cyber Security** | [Catalog](CourseCatalogs/Cyber_Security_Catalog.md) | 2+ | IoT security, network penetration, threat detection |
 | **Data Mining** | [Catalog](CourseCatalogs/DataMining/README.md) | 7 | Classification, clustering, forecasting, pattern mining |
 | **NLP & Information Extraction** | [Catalog](CourseCatalogs/NLP/README.md) | 16+ | Entity recognition, sentiment, RAG, voice assistants |
