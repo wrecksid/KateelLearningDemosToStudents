@@ -1,0 +1,33 @@
+.threat-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;
+  margin-top: 1rem;
+}
+.threat-card {
+  background: var(--bg-secondary); border-radius: 8px; padding: 1rem;
+  border-left: 4px solid var(--warning);
+}
+.threat-card.spoofing { border-left-color: var(--primary); }
+.threat-card.tampering { border-left-color: var(--danger); }
+.threat-card.info { border-left-color: var(--success); }
+.threat-card.dos { border-left-color: var(--warning); }
+
+.threat-card h4 { margin-bottom: 0.25rem; }
+.threat-card .risk { font-size: 0.75rem; text-transform: uppercase; }
+
+.risk-low { color: var(--success); }
+.risk-medium { color: var(--warning); }
+.risk-high { color: #f97316; }
+.risk-critical { color: var(--danger); }
+
+#threatList { margin-top: 1rem; }
+.threat-item {
+  background: var(--bg-secondary); border-radius: 8px; padding: 1rem;
+  margin-bottom: 0.5rem; display: flex; justify-content: space-between;
+}
+.threat-item .badge {
+  padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;
+}
+.badge-low { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+.badge-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+.badge-high { background: rgba(249, 115, 22, 0.2); color: #f97316; }
+.badge-critical { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
