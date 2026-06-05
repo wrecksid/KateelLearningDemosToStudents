@@ -5,7 +5,7 @@
 **Author:** Professor Vinaya Sathyanarayana  
 **GitHub:** [VinayaSharada](https://github.com/VinayaSharada)  
 **Contact:** vinallcontact@gmail.com  
-**License:** MIT | **Stars:** [![Star Repo](https://img.shields.io/github/stars/VinayaSharada/KateelLearningDemosToStudents?style=social)](https://github.com/VinayaSharada/KateelLearningDemosToStudents/stargazers)
+**License:** Educational Use Only | **Stars:** [![Star Repo](https://img.shields.io/github/stars/VinayaSharada/KateelLearningDemosToStudents?style=social)](https://github.com/VinayaSharada/KateelLearningDemosToStudents/stargazers)
 
 ---
 
@@ -66,13 +66,12 @@ python classificationdemo.py
 
 ---
 
-## 🔐 Security & Compliance
+## 🌟 Why A Lot of People Use This
 
-All demos use **synthetic data** - no real customer information, no compliance risks:
-- ✅ GDPR compliant
-- ✅ HIPAA safe
-- ✅ PCI DSS neutral
-- ✅ Zero external API calls (browser demos)
+- **No cloud required** - Many demos run entirely in browser
+- **No API keys** - Local models only
+- **Production patterns** - Real-world best practices
+- **Active maintenance** - New demos monthly
 
 ---
 
@@ -90,15 +89,6 @@ KateelLearningDemosToStudents/
 
 ---
 
-## ⭐ Why 12,000+ Students Use This
-
-- **No cloud required** - Runs entirely in browser
-- **No API keys** - Local models only
-- **Production patterns** - Real-world best practices
-- **Active maintenance** - New demos monthly
-
----
-
 ## 📧 Stay Connected
 
 **Email for course adoption:** vinallcontact@gmail.com  
@@ -106,9 +96,9 @@ KateelLearningDemosToStudents/
 
 ---
 
-## 📄 License & Attribution
+## 📄 Usage Policy
 
-**MIT License** - Free for educational and commercial use.  
+**Educational Use** - Free for students, faculty, and practitioners.  
 **Attribution required** - Include citation in presentations/publications.
 
 > *Demos and course material adapted from the **KateelLearningDemosToStudents** repository*  
