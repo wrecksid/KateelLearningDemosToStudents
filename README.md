@@ -110,7 +110,7 @@ KateelLearningDemosToStudents/
 
 ## 🔍 SEO Tags
 
-`AI ML demos, machine learning tutorials, data science projects, NLP examples, RAG implementation, browser AI, zero-shot learning, transformers.js, sentiment analysis, clustering algorithms, time series forecasting, fraud detection, IoT security labs, responsible AI, emotional AI, knowledge graph, voice assistant demo, synthetic data, classroom AI, educational ML, student projects, faculty resources`
+`AI ML demos, machine learning tutorials, data science projects, NLP examples, RAG implementation, Graph RAG, browser AI, zero-shot learning, transformers.js, sentiment analysis, clustering algorithms, time series forecasting, fraud detection, IoT security labs, responsible AI, emotional AI, knowledge graph, voice assistant demo, synthetic data, classroom AI, educational ML, student projects, faculty resources, university chatbot, university assistant, FalkorDB, PageIndex, Phi-3.5, Mistral, llama.cpp, Web Speech API, PDF extraction, web scraping, university website, educational technology, AI education, machine learning education, NLP tutorials, RAG demos, voice AI, embedded AI, cybersecurity demos, finance ML, banking AI, student support AI`
 
 ---
 
