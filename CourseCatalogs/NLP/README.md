@@ -31,10 +31,18 @@ All demos run 100% in the browser using Transformers.js v3.
 |------|-------------|----------|
 | Voice Notes | Speech-to-text with localStorage | `TechUseCaseDemos/VoiceNotesApp001/` |
 
-### Information Extraction
-| Demo | Description | Location |
-|------|-------------|----------|
-| Classification | Multi-label text classification | `TechUseCaseDemos/Classification/` |
+## Information Extraction
+|| Demo | Description | Location |
+||------|-------------|----------|
+|| Classification | Multi-label text classification | `TechUseCaseDemos/Classification/` |
+
+## 🔍 RAG Solutions (Retrieval-Augmented Generation)
+
+### Browser-Based RAG Demos
+| Demo | Type | Description |
+|------|------|-------------|
+| [Standard RAG](TechUseCaseDemos/RAGSolutions/StandardRAG/) | Text-based | Keyword matching retrieval |
+| [Graph RAG](TechUseCaseDemos/RAGSolutions/GraphRAG/) | Graph-based | Knowledge graph traversal |
 
 ## Learning Path
 
