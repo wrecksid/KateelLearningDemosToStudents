@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AI Performance Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AI Performance Dashboard</h1>
+      <p class="subtitle">Monitor model metrics and KPIs</p>
+    </header>
+    <main>
+      <section class="metrics-section">
+        <h2>Real-time Metrics</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h3>Accuracy</h3>
+            <div class="value" id="accuracy">94.2%</div>
+          </div>
+          <div class="metric-card">
+            <h3>Precision</h3>
+            <div class="value" id="precision">92.8%</div>
+          </div>
+          <div class="metric-card">
+            <h3>Recall</h3>
+            <div class="value" id="recall">91.5%</div>
+          </div>
+          <div class="metric-card">
+            <h3>F1 Score</h3>
+            <div class="value" id="f1">92.1%</div>
+          </div>
+        </div>
+      </section>
+      <section class="latency-section">
+        <h2>Latency Distribution</h2>
+        <canvas id="latencyChart" height="200"></canvas>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
