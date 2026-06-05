@@ -118,6 +118,14 @@ This file is a curated index of the most useful demos in the repository.
 - `TechUseCaseDemos\PatternMining\demo002`
 - `TechUseCaseDemos\PatternMining\demo003`
 
+## Browser-Based Security Demos (IoT)
+
+### Linux Network Penetration
+- `TechUseCaseDemos\\IoT_Ethernet_PenTest_v86` - In-browser Linux VM for network security labs
+
+### Embedded Firmware Security
+- `TechUseCaseDemos\\Embedded_Firmware_Exploit_Wokwi` - Raspberry Pi Pico firmware exploitation in browser
+
 ## Mini Project
 
 - `ecomm001` for an end-to-end synthetic data, analysis, and dashboard style project
