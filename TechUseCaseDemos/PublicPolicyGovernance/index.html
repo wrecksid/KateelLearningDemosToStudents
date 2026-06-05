@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Policy Resource Allocation Lab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🏛️ Public Policy Resource Allocation Lab</h1>
+            <p class="subtitle">AI-driven policy simulation and impact analysis</p>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <button id="run-simulation" class="btn-primary">▶ Run Policy Simulation</button>
+                <button id="reset-btn" class="btn-secondary">⟲ Reset</button>
+            </div>
+
+            <div class="dashboard">
+                <div class="panel">
+                    <h3>📊 Budget Allocation</h3>
+                    <div class="budget-controls">
+                        <div class="budget-item">
+                            <label>Education: <span id="edu-value">40</span>%</label>
+                            <input type="range" id="education" min="0" max="100" value="40">
+                        </div>
+                        <div class="budget-item">
+                            <label>Healthcare: <span id="health-value">30</span>%</label>
+                            <input type="range" id="healthcare" min="0" max="100" value="30">
+                        </div>
+                        <div class="budget-item">
+                            <label>Infrastructure: <span id="infra-value">20</span>%</label>
+                            <input type="range" id="infrastructure" min="0" max="100" value="20">
+                        </div>
+                        <div class="budget-item">
+                            <label>Social Services: <span id="social-value">10</span>%</label>
+                            <input type="range" id="social" min="0" max="100" value="10">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>📈 Policy Impact Results</h3>
+                    <div id="results" class="results">
+                        <p>Set budget percentages and run simulation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lab-info">
+                <h3>Learning Objectives</h3>
+                <ul>
+                    <li>Understand trade-offs in public resource allocation</li>
+                    <li>Analyze policy impact using predictive models</li>
+                    <li>Practice ethical AI decision-making in governance</li>
+                    <li>Evaluate equity metrics across demographic groups</li>
+                </ul>
+
+                <details>
+                    <summary>📖 Scenario Details</summary>
+                    <p>You are the Chief Budget Officer for a mid-sized city with a $100M annual budget. Your task is to allocate resources across four key areas while maximizing social welfare and minimizing inequality. The simulation uses a simplified welfare function based on historical data and demographic projections.</p>
+                    <p><strong>Constraints:</strong> Total must equal 100%. Each sector has minimum funding requirements.</p>
+                </details>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

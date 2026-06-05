@@ -1,0 +1,196 @@
+/* Public Policy Resource Allocation Lab */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #1a2a1a 0%, #1a3a2a 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+header h1 {
+    margin: 0 0 8px 0;
+    font-size: 2rem;
+    color: #86efac;
+}
+
+.subtitle {
+    color: #888;
+    margin: 0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.control-panel {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #86efac, #22c55e);
+    color: #1a1a1a;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.btn-secondary {
+    background: #333;
+    color: #ccc;
+}
+
+.btn-secondary:hover {
+    background: #555;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panel h3 {
+    margin-top: 0;
+    color: #86efac;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.budget-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.budget-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.budget-item label {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.budget-item input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    outline: none;
+}
+
+.budget-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #86efac;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.results {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.results .metric {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.results .metric:last-child {
+    border-bottom: none;
+}
+
+.results .label {
+    color: #aaa;
+}
+
+.results .value {
+    font-weight: 600;
+    color: #86efac;
+}
+
+.results .warning {
+    color: #fbbf24;
+}
+
+.results .success {
+    color: #4ade80;
+}
+
+.lab-info {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.lab-info h3 {
+    margin-top: 0;
+    color: #86efac;
+}
+
+.lab-info ul {
+    margin: 16px 0;
+    padding-left: 20px;
+}
+
+.lab-info li {
+    margin: 8px 0;
+}
+
+.lab-info details {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+}
