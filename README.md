@@ -193,7 +193,7 @@ or Edge 113+ (WebGPU support required, enabled by default in modern versions).
 | AI/ML Financial Services | [CourseCatalogs/AI_ML_Financial_Services_Catalog.md](CourseCatalogs/AI_ML_Financial_Services_Catalog.md) | Banking, credit, fraud, wealth management |
 | Cyber Security | [CourseCatalogs/Cyber_Security_Catalog.md](CourseCatalogs/Cyber_Security_Catalog.md) | IoT security, threat detection, network security |
 | Management of AI Products | [CourseCatalogs/Management_of_AI_Products_Catalog.md](CourseCatalogs/Management_of_AI_Products_Catalog.md) | Product strategy, risk, governance |
-|| Public Policy & Governance | [CourseCatalogs/Public_Policy_Governance_Catalog.md](CourseCatalogs/Public_Policy_Governance_Catalog.md) | Resource allocation, AI compliance |
+| Public Policy & Governance | [CourseCatalogs/PublicPolicyGovernance/README.md](CourseCatalogs/PublicPolicyGovernance/README.md) | Resource allocation, AI compliance |
 
 ---
 
