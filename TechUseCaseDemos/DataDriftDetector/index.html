@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Data Drift Detector</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Data Drift Detector</h1>
+      <p class="subtitle">Monitor input data distribution changes</p>
+    </header>
+    <main>
+      <section class="controls">
+        <h2>Simulation Controls</h2>
+        <button id="startBtn">Start Drift Simulation</button>
+        <button id="resetBtn">Reset</button>
+      </section>
+      <section class="charts">
+        <div class="chart-container">
+          <h3>Reference Distribution</h3>
+          <canvas id="refChart" height="150"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3>Current Distribution</h3>
+          <canvas id="curChart" height="150"></canvas>
+        </div>
+      </section>
+      <section class="alert">
+        <div id="alertBox">Drift Score: 0.00</div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
