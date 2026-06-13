@@ -99,7 +99,7 @@ def plot_results(prices, signal, results):
     axes[2].set_ylabel("Equity")
     axes[2].grid(True)
     plt.tight_layout()
-    plt.savefig("/tmp/hft_demo_results.png", dpi=120)
+    plt.savefig("hft_demo_results.png", dpi=120)
     plt.close()
 
 

@@ -34,5 +34,5 @@ if __name__ == "__main__":
         plt.plot(s.index, s.values, label="Actual")
         plt.plot(fc.index, fc.values, label="MA Forecast", alpha=0.8)
         plt.legend(); plt.tight_layout()
-        plt.savefig("/tmp/forecast001.png", dpi=120); plt.close()
-    print("Forecast demo 001 complete. Plot saved to /tmp/forecast001.png")
+        plt.savefig("forecast001.png", dpi=120); plt.close()
+    print("Forecast demo 001 complete. Plot saved to forecast001.png")

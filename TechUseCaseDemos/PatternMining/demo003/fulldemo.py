@@ -145,7 +145,7 @@ def preprocess_for_prefixspan(df, verbose=True):
                 sequences.append(current_seq)
             current_seq = []
             current_holder = row['CardHolderName']
-        current_seq.append((row['Item'],))
+        current_seq.append(str(row['Item']))
     if current_seq:
         sequences.append(current_seq)
     if verbose:
@@ -159,19 +159,33 @@ def run_prefixspan(sequences, minsup=0.001, maxlen=5, verbose=True):
         if verbose:
             print("prefixspan not installed, skipping PrefixSpan demo")
         return None
+
     if verbose:
         print("\nRunning PrefixSpan...")
+
     try:
         ps = PrefixSpan(sequences)
+
         min_support_count = max(1, int(len(sequences) * minsup))
-        patterns = ps.frequent(min_support_count)
-        patterns = [(pat, sup) for pat, sup in patterns if len(pat) <= maxlen]
+
+        raw_patterns = ps.frequent(min_support_count)
+
+        patterns = []
+
+        for support, pattern in raw_patterns:
+            if len(pattern) <= maxlen:
+                patterns.append((pattern, support))
+
         if verbose:
             print(f"PrefixSpan found {len(patterns)} patterns")
-            for pat, sup in patterns[:5]:
-                pat_str = ' -> '.join(['{' + ','.join(itemset) + '}' for itemset in pat])
-                print(f"Pattern: {pat_str} Support: {sup}")
+
+            for pattern, support in patterns[:5]:
+                print(
+                    f"Pattern: {' -> '.join(map(str, pattern))} | Support: {support}"
+                )
+
         return patterns
+
     except Exception as e:
         print(f"PrefixSpan error: {e}", file=sys.stderr)
         return None
@@ -199,25 +213,26 @@ def run_spam(sequences, minsup, verbose=True):
 
 def write_spmf_input(sequences, filepath):
     """
-    Write sequences to SPMF format for external SPMF tools.
-    Each line is one sequence: <transaction> -1 <transaction> -1 ... -2
-    Returns mapping dict (item_str -> int) for translating results back.
+    Write sequences to SPMF format.
     """
     mapping = {}
     next_id = 1
+
     with open(filepath, 'w') as f:
         for seq in sequences:
-            for itemset in seq:
-                ids = []
-                for item in itemset:
-                    key = str(item)
-                    if key not in mapping:
-                        mapping[key] = next_id
-                        next_id += 1
-                    ids.append(str(mapping[key]))
-                items_str = ' '.join(ids)
-                f.write(items_str + ' -1 ')
-            f.write('-2\n')
+
+            for item in seq:
+
+                key = str(item)
+
+                if key not in mapping:
+                    mapping[key] = next_id
+                    next_id += 1
+
+                f.write(f"{mapping[key]} -1 ")
+
+            f.write("-2\n")
+
     return mapping
 
 def run_spmf_algorithm(algorithm_name, input_file, output_file, minsup_percent, spmf_jar_path='spmf.jar', verbose=True):

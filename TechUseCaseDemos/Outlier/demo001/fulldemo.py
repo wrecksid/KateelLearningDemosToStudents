@@ -41,8 +41,8 @@ def demo():
     plt.scatter(inliers["x"], inliers["y"], c="blue", s=10, label="inlier", alpha=0.6)
     plt.scatter(outliers["x"], outliers["y"], c="red", s=40, label="outlier")
     plt.legend(); plt.tight_layout()
-    plt.savefig("/tmp/outlier_demo.png", dpi=120); plt.close()
-    print("Outlier demo complete. Plot -> /tmp/outlier_demo.png")
+    plt.savefig("outlier_demo.png", dpi=120); plt.close()
+    print("Outlier demo complete. Plot -> outlier_demo.png")
 
 if __name__ == "__main__":
     demo()

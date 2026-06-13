@@ -1,5 +1,6 @@
 // AI Performance Dashboard - Monitor model metrics and KPIs
-const ctx = document.getElementById('latencyChart');
+const canvas = document.getElementById('latencyChart');
+const ctx = canvas.getContext('2d');
 
 // Simple bar chart using canvas
 function drawChart() {
